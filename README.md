@@ -75,6 +75,8 @@ The profile section is still incomplete, although the basic idea is as same as o
 PS - I'm not creative with UI, much to do.
 
 ## Messaging
+One of the very basic thing that every upcoming developer needs is to be able to communicate freely with other developers. Communication is a key skill for any work, but as a developer it is very important to work as a team. There are many team based communication applications such as Slack, Discord, etc. Although it is almost always invite only groups. Build your communication here then move on to big leagues.
+
 <img src="https://user-images.githubusercontent.com/57195260/111071385-e6df8c80-84fb-11eb-8796-1903d52bbcb7.png" width="400"/>
 
 ## Search
