@@ -84,3 +84,16 @@ One of the very basic thing that every upcoming developer needs is to be able to
 Just search 😅
 
 <img src="https://user-images.githubusercontent.com/57195260/111071622-0925da00-84fd-11eb-95ca-a75c70fbe07f.png" width="400"/>
+
+
+## Libraries
+
+<ul>
+  <li><a href="https://github.com/firebase/FirebaseUI-Android/tree/master/firestore">FirestoreUI</a></li>
+  <li><a href="https://github.com/mmin18/RealtimeBlurView">RealtimeBlurVIew</a></li>
+  <li><a href="https://github.com/facebook/fresco">Fresco</a></li>
+  <li><a href="https://github.com/EverythingMe/overscroll-decor">EverythingMe Overscroll Decor</a></li>
+  <li><a href="https://developer.android.com/topic/libraries/architecture">Architecture Components</a></li>
+  <li><a href="https://github.com/square/okhttp">OkHTTP (Not Really)</a></li>
+</ul>
+
