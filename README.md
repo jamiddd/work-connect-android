@@ -34,9 +34,11 @@ Up until now developers had to showcase their talents in Youtube and other websi
   </tr>
   <tr>
     <td>Creating a simple project post</td>
-    <td>Project fragment screen. Where people can see your project in detail. Here you can link all your websites where you have created the actual project. Users can request to join your project. Basically, once they join and know your websites, they can visit and collaborate there.</td>
+    <td>Project fragment screen</td>
   </tr>
 </table>
+
+Here people can see your project in detail. Here you can link all your websites where you have created the actual project. Users can request to join your project. Basically, once they join and know your websites, they can visit and collaborate there.
 
 
 
