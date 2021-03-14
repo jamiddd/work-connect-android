@@ -33,12 +33,14 @@ Up until now developers had to showcase their talents in Youtube and other websi
 ## Projects
 <table>
   <tr>
-    <td style="width:50%"><img src="https://user-images.githubusercontent.com/57195260/111068806-4768cc80-84f0-11eb-9fd6-957ee0903fe6.png"/></td>
-    <td style="width:50%"><img src="https://user-images.githubusercontent.com/57195260/111068817-52236180-84f0-11eb-8351-b1d14c8ea835.png"/></td>
+    <td><img src="https://user-images.githubusercontent.com/57195260/111068806-4768cc80-84f0-11eb-9fd6-957ee0903fe6.png"/></td>
+    <td><img src="https://user-images.githubusercontent.com/57195260/111068817-52236180-84f0-11eb-8351-b1d14c8ea835.png"/></td>
+    <td><img src="https://user-images.githubusercontent.com/57195260/111071501-771dd180-84fc-11eb-8180-aa183f81bb1d.png"/></td>
   </tr>
   <tr>
     <td>Creating a simple project post</td>
     <td>Project fragment screen</td>
+    <td>Another example</td>
   </tr>
 </table>
 
