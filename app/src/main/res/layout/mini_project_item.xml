@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/postRoot"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        app:cardElevation="0dp"
+        app:rippleColor="#1B000000"
+        app:strokeColor="@color/grey"
+        app:strokeWidth="1dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+
+            <TextView
+                android:id="@+id/projectTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="12dp"
+                android:text="The title of the Blog that is too long"
+                android:textAppearance="@style/Theme.TabLayoutText"
+                android:textColor="@color/black"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toTopOf="@+id/projectAdminImg"
+                app:layout_constraintEnd_toStartOf="@+id/projectSaveBtn"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.0" />
+
+            <com.facebook.drawee.view.SimpleDraweeView
+                android:id="@+id/projectAdminImg"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                app:layout_constraintBottom_toTopOf="@id/projectThumb"
+                app:layout_constraintStart_toStartOf="@+id/projectTitle"
+                app:layout_constraintTop_toBottomOf="@+id/projectTitle"
+                app:placeholderImage="@drawable/ic_user"
+                app:roundAsCircle="true" />
+
+            <TextView
+                android:id="@+id/projectAdminName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                app:layout_constraintBottom_toBottomOf="@+id/projectAdminImg"
+                app:layout_constraintStart_toEndOf="@+id/projectAdminImg"
+                app:layout_constraintTop_toTopOf="@+id/projectAdminImg" />
+
+            <com.facebook.drawee.view.SimpleDraweeView
+                android:id="@+id/projectThumb"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:visibility="gone"
+                app:layout_constraintBottom_toTopOf="@+id/projectMiniContent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/projectAdminImg"
+                app:placeholderImage="@color/darkerGrey"
+                app:viewAspectRatio="1.66" />
+
+            <TextView
+                android:id="@+id/projectMiniContent"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="4dp"
+                android:maxLines="5"
+                android:text="@string/large_text"
+                android:textColor="@color/black"
+                app:layout_constraintBottom_toTopOf="@+id/projectLikeBtn"
+                app:layout_constraintEnd_toStartOf="@+id/projectBlogImage"
+                app:layout_constraintHorizontal_chainStyle="packed"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/projectThumb" />
+
+            <Button
+                android:id="@+id/projectAdminFollowBtn"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/title_semi"
+                android:minWidth="60dp"
+                android:minHeight="36dp"
+                android:text="Follow"
+                android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                app:layout_constraintBottom_toBottomOf="@+id/projectAdminName"
+                app:layout_constraintStart_toEndOf="@+id/projectAdminName"
+                app:layout_constraintTop_toTopOf="@+id/projectAdminName" />
+
+            <Button
+                android:id="@+id/projectSaveBtn"
+                style="@style/Theme.Button.IconOnly"
+                android:layout_width="48dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="12dp"
+                app:icon="@drawable/bookmark_selector"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/projectTitle"
+                app:layout_constraintTop_toTopOf="@+id/projectTitle"
+                tools:text=" " />
+
+            <Button
+                android:id="@+id/projectLikeBtn"
+                style="@style/Theme.Button.IconOnly"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                app:icon="@drawable/thumb_up_selector"
+                app:iconSize="20dp"
+                app:layout_constraintBottom_toTopOf="@+id/projectMetaText"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/projectMiniContent" />
+
+            <Button
+                android:id="@+id/projectDislikeBtn"
+                style="@style/Theme.Button.IconOnly"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                app:icon="@drawable/thumb_down_selector"
+                app:iconSize="20dp"
+                app:layout_constraintBottom_toBottomOf="@+id/projectLikeBtn"
+                app:layout_constraintStart_toEndOf="@+id/projectLikeBtn"
+                app:layout_constraintTop_toTopOf="@+id/projectLikeBtn" />
+
+            <Button
+                android:id="@+id/projectOptionsBtn"
+                style="@style/Theme.Button.IconOnly"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:icon="@drawable/ic_baseline_more_horiz_24"
+                app:iconTint="@color/black"
+                app:layout_constraintBottom_toBottomOf="@+id/projectDislikeBtn"
+                app:layout_constraintEnd_toEndOf="@+id/projectSaveBtn"
+                app:layout_constraintTop_toTopOf="@+id/projectDislikeBtn"
+                app:rippleColor="#59D6D4D4"
+                tools:text=" " />
+
+            <TextView
+                android:id="@+id/projectMetaText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="12dp"
+                android:text="a few moments ago ● Gumoria Pathar"
+                android:textSize="12sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/projectLikeBtn"
+                app:layout_constraintTop_toBottomOf="@+id/projectLikeBtn" />
+
+            <ProgressBar
+                android:id="@+id/miniProjectProgressBar"
+                style="?android:attr/progressBarStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:indeterminate="true"
+                android:indeterminateTint="@color/blue_500"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="@+id/projectThumb"
+                app:layout_constraintEnd_toEndOf="@+id/projectThumb"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/projectThumb" />
+
+            <com.facebook.drawee.view.SimpleDraweeView
+                android:id="@+id/projectBlogImage"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="@+id/projectMiniContent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/projectMiniContent"
+                app:layout_constraintTop_toTopOf="@+id/projectMiniContent"
+                app:placeholderImage="@color/grey"
+                app:viewAspectRatio="1.333"
+                tools:visibility="visible" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+</layout>

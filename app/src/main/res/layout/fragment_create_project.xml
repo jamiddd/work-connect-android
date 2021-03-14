@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/createProjectRoot"
+        android:layout_width="match_parent"
+
+        android:layout_height="match_parent"
+        tools:context=".home.CreateProjectFragment">
+
+        <ScrollView
+            android:id="@+id/scrollView3"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+
+                <EditText
+                    android:id="@+id/projectTitleText"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="12dp"
+                    android:background="@drawable/grey_rounded_rect_edittext"
+                    android:ems="10"
+                    android:hint="Title of the Project ..."
+                    android:inputType="textPersonName"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    app:layout_constraintBottom_toTopOf="@+id/projectAdminPhoto"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_bias="0.0"
+                    app:layout_constraintVertical_chainStyle="packed" />
+
+                <com.facebook.drawee.view.SimpleDraweeView
+                    android:id="@+id/projectAdminPhoto"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintBottom_toTopOf="@+id/projectThumnailImg"
+                    app:layout_constraintEnd_toStartOf="@+id/projectAdminNameAndTime"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintHorizontal_chainStyle="packed"
+                    app:layout_constraintStart_toStartOf="@+id/projectTitleText"
+                    app:layout_constraintTop_toBottomOf="@+id/projectTitleText"
+                    app:placeholderImage="@drawable/ic_user"
+                    app:roundAsCircle="true" />
+
+                <TextView
+                    android:id="@+id/projectAdminNameAndTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="4dp"
+                    android:text=" Jamid Deka • 12:34 pm •"
+                    app:layout_constraintBottom_toBottomOf="@+id/projectAdminPhoto"
+                    app:layout_constraintEnd_toStartOf="@+id/projectLocation"
+                    app:layout_constraintStart_toEndOf="@+id/projectAdminPhoto"
+                    app:layout_constraintTop_toTopOf="@+id/projectAdminPhoto" />
+
+                <com.facebook.drawee.view.SimpleDraweeView
+                    android:id="@+id/projectThumnailImg"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="12dp"
+                    app:layout_constraintBottom_toTopOf="@+id/projectContentText"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/projectAdminPhoto"
+                    app:placeholderImage="@color/darkerGrey"
+                    app:roundedCornerRadius="8dp"
+                    app:viewAspectRatio="1.333" />
+
+                <EditText
+                    android:id="@+id/projectContentText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="12dp"
+                    android:layout_marginBottom="12dp"
+                    android:background="@drawable/grey_rounded_rect_edittext"
+                    android:ems="10"
+                    android:gravity="start|top"
+                    android:hint="Write something here ..."
+                    android:inputType="textMultiLine|text"
+                    android:minHeight="100dp"
+                    android:paddingStart="12dp"
+                    android:paddingTop="8dp"
+                    android:paddingEnd="12dp"
+                    android:paddingBottom="8dp"
+                    app:layout_constraintBottom_toTopOf="@id/tagsGroup"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/projectThumnailImg" />
+
+                <Button
+                    android:id="@+id/addProjectImageBtn"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Add Image"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                    android:textColor="@color/white"
+                    app:cornerRadius="8dp"
+                    app:layout_constraintBottom_toBottomOf="@+id/projectThumnailImg"
+                    app:layout_constraintEnd_toEndOf="@+id/projectThumnailImg"
+                    app:layout_constraintStart_toStartOf="@+id/projectThumnailImg"
+                    app:layout_constraintTop_toTopOf="@+id/projectThumnailImg"
+                    app:strokeColor="@color/white"
+                    app:strokeWidth="1dp"
+                    tools:visibility="visible" />
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/tagsGroup"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/projectContentText"
+                    app:layout_constraintVertical_bias="0.0" />
+
+                <TextView
+                    android:id="@+id/projectLocation"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:clickable="true"
+                    android:ellipsize="end"
+                    android:focusable="true"
+                    android:maxLines="1"
+                    android:singleLine="true"
+                    android:textColor="@color/purple_700"
+                    app:layout_constraintBottom_toBottomOf="@+id/projectAdminNameAndTime"
+                    app:layout_constraintEnd_toEndOf="@+id/projectTitleText"
+                    app:layout_constraintStart_toEndOf="@+id/projectAdminNameAndTime"
+                    app:layout_constraintTop_toTopOf="@+id/projectAdminNameAndTime" />
+
+                <Button
+                    android:id="@+id/removeProjectImgBtn"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Remove"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                    android:textColor="@color/white"
+                    android:visibility="gone"
+                    app:cornerRadius="8dp"
+                    app:layout_constraintBottom_toBottomOf="@+id/projectThumnailImg"
+                    app:layout_constraintEnd_toEndOf="@+id/projectThumnailImg"
+                    app:layout_constraintStart_toStartOf="@+id/projectThumnailImg"
+                    app:layout_constraintTop_toTopOf="@+id/projectThumnailImg"
+                    app:strokeColor="@color/white"
+                    app:strokeWidth="1dp" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </ScrollView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardView3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bottom_transparent_view"
+            android:fitsSystemWindows="true"
+            app:cardBackgroundColor="@color/transparent"
+            app:cardElevation="20dp"
+            app:cardMaxElevation="20dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <com.github.mmin18.widget.RealtimeBlurView
+                android:id="@+id/bottomCardBlur"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                app:realtimeBlurRadius="40dp"
+                app:realtimeDownsampleFactor="5" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp">
+
+                <Button
+                    android:id="@+id/addProjectLocationBtn"
+                    style="@style/Theme.Button.IconOnly"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:icon="@drawable/ic_baseline_add_location_alt_24" />
+
+                <Button
+                    android:id="@+id/addProjectTagBtn"
+                    style="@style/Theme.Button.IconOnly"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:icon="@drawable/ic_baseline_label_24" />
+
+                <Button
+                    android:id="@+id/addProjectLinkBtn"
+                    style="@style/Theme.Button.IconOnly"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:icon="@drawable/ic_baseline_insert_link_24" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

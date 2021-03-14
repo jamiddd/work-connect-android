@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white"
+        android:fitsSystemWindows="true"
+        tools:context=".BlogFragment">
+
+        <ScrollView
+            android:id="@+id/blogScroller"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:fillViewport="true"
+            android:fitsSystemWindows="true"
+            android:paddingTop="90dp"
+            android:paddingBottom="100dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <LinearLayout
+                android:id="@+id/blogItemContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+        </ScrollView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/blogData"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:focusable="true"
+            app:behavior_hideable="false"
+            app:behavior_peekHeight="0dp"
+            app:cardElevation="20dp"
+            app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+            <include
+                android:id="@+id/blogMetadata"
+                layout="@layout/post_meta_layout" />
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.github.mmin18.widget.RealtimeBlurView
+            android:id="@+id/blog_bottom_blur"
+            android:layout_width="match_parent"
+            android:layout_gravity="bottom"
+            android:fitsSystemWindows="true"
+            android:layout_height="wrap_content"
+            android:elevation="21dp"
+            app:realtimeDownsampleFactor="5"
+            app:realtimeBlurRadius="10dp" />
+
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+</layout>

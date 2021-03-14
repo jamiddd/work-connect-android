@@ -1,0 +1,42 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    match /interests/{dcoument=**} {
+    	allow read, write;
+    }
+    
+    match /popular_interests/{dcoument=**} {
+    	allow read, write;
+    }
+    
+    match /users/{document=**} {
+    	allow read, write : if request.auth != null;
+    }
+    
+    match /chat_channels/{document=**} {
+    	allow read, write : if request.auth != null;
+    }
+    
+    match /comment_channels/{document=**} {
+    	allow read, write : if request.auth != null;
+    }
+    
+    match /posts/{document=**} {
+      allow read, write;
+    }
+    
+    match /users/notifications/{document=**} {
+    	allow read, write : if request.auth != null
+    }
+    
+    match /userMinimals/{document=**} {
+    	allow read, write;
+    }
+    
+    match /chatChannels/{document=**} {
+    	allow read, write : if request.auth != null;
+    }
+    
+  }
+}

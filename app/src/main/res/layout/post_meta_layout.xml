@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/post_meta_root"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white">
+
+        <com.facebook.drawee.view.SimpleDraweeView
+            android:id="@+id/adminPhoto"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp"
+            app:layout_constraintBottom_toTopOf="@+id/guideline"
+            app:layout_constraintEnd_toStartOf="@+id/authorName"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.0"
+            app:placeholderImage="@color/darkerGrey"
+            app:roundAsCircle="true" />
+
+        <TextView
+            android:id="@+id/authorName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="Jamid Deka"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            android:textColor="@color/black"
+            app:layout_constraintBottom_toBottomOf="@+id/adminPhoto"
+            app:layout_constraintEnd_toStartOf="@+id/adminFollowBtn"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/adminPhoto"
+            app:layout_constraintTop_toTopOf="@+id/adminPhoto" />
+
+        <Button
+            android:id="@+id/adminFollowBtn"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="60dp"
+            android:text="Follow"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            app:layout_constraintBottom_toBottomOf="@+id/authorName"
+            app:layout_constraintEnd_toStartOf="@+id/postMetaJoinBtn"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/authorName"
+            app:layout_constraintTop_toTopOf="@+id/authorName" />
+
+        <Button
+            android:id="@+id/postMetaLikeBtn"
+            style="@style/Theme.Button.IconOnly"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            app:icon="@drawable/thumb_up_selector"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/adminPhoto"
+            app:layout_constraintTop_toBottomOf="@+id/divider7" />
+
+        <Button
+            android:id="@+id/postMetaDislikeBtn"
+            style="@style/Theme.Button.IconOnly"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:icon="@drawable/thumb_down_selector"
+            app:layout_constraintBottom_toBottomOf="@+id/postMetaLikeBtn"
+            app:layout_constraintStart_toEndOf="@+id/postMetaLikeBtn"
+            app:layout_constraintTop_toTopOf="@+id/postMetaLikeBtn" />
+
+        <TextView
+            android:id="@+id/postMetaText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="@+id/postMetaDislikeBtn"
+            app:layout_constraintEnd_toEndOf="@+id/postMetaJoinBtn"
+            app:layout_constraintTop_toTopOf="@+id/postMetaDislikeBtn"
+            app:layout_constraintVertical_bias="0.481" />
+
+        <View
+            android:id="@+id/divider7"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            app:layout_constraintBottom_toTopOf="@+id/postMetaLikeBtn"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/guideline"
+            app:layout_constraintVertical_bias="0.0"
+            app:layout_constraintVertical_chainStyle="packed" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_begin="64dp" />
+
+        <Button
+            android:id="@+id/postMetaSaveBtn"
+            style="@style/Theme.Button.IconOnly"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:icon="@drawable/bookmark_selector"
+            app:layout_constraintBottom_toBottomOf="@+id/postMetaDislikeBtn"
+            app:layout_constraintStart_toEndOf="@+id/postMetaDislikeBtn"
+            app:layout_constraintTop_toTopOf="@+id/postMetaDislikeBtn" />
+
+        <Button
+            android:id="@+id/postMetaJoinBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:enabled="false"
+            android:fontFamily="@font/title_semi"
+            android:text="Join"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            app:cornerRadius="20dp"
+            app:icon="@drawable/ic_baseline_add_24"
+            app:layout_constraintBottom_toBottomOf="@+id/adminFollowBtn"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/adminFollowBtn" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

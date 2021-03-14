@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/project_detail_navigation"
+    app:startDestination="@id/projectDetailFragment">
+
+    <fragment
+        android:id="@+id/projectDetailFragment"
+        android:name="com.jamid.workconnect.message.ProjectDetailFragment"
+        android:label="ProjectDetailFragment"
+        tools:layout="@layout/fragment_project_detail"/>
+    <fragment
+        android:id="@+id/mediaFragment"
+        android:name="com.jamid.workconnect.message.MediaFragment"
+        android:label="MediaFragment"
+        tools:layout="@layout/fragment_media" />
+    <fragment
+        android:id="@+id/projectGuidelinesFragment"
+        android:name="com.jamid.workconnect.message.ProjectGuidelinesFragment"
+        android:label="ProjectGuidelinesFragment"
+        tools:layout="@layout/fragment_project_guidelines" />
+
+    <fragment
+        android:id="@+id/projectFragment"
+        android:name="com.jamid.workconnect.ProjectFragment"
+        android:label="ProjectFragment"
+        tools:layout="@layout/fragment_project" />
+    <fragment
+        android:id="@+id/blogFragment"
+        android:name="com.jamid.workconnect.BlogFragment"
+        android:label="BlogFragment"
+        tools:layout="@layout/fragment_blog" />
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.jamid.workconnect.profile.ProfileFragment"
+        android:label="ProfileFragment"
+        tools:layout="@layout/fragment_profile" />
+</navigation>

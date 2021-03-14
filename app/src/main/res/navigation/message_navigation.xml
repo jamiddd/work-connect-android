@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/message_navigation"
+    app:startDestination="@id/messageFragment">
+
+    <fragment
+        android:id="@+id/messageFragment"
+        android:name="com.jamid.workconnect.message.MessageFragment"
+        android:label=" "
+        tools:layout="@layout/fragment_message" />
+    <fragment
+        android:id="@+id/chatFragment"
+        android:name="com.jamid.workconnect.message.ChatFragment"
+        android:label=" "
+        tools:layout="@layout/fragment_chat" />
+    <dialog
+        android:id="@+id/imageCropFragment"
+        android:name="com.jamid.workconnect.ImageCropFragment"
+        android:label="ImageCropFragment"
+        tools:layout="@layout/fragment_image_crop" />
+    <fragment
+        android:id="@+id/imageViewFragment"
+        android:name="com.jamid.workconnect.ImageViewFragment"
+        android:label="ImageViewFragment"
+        tools:layout="@layout/fragment_image_view" />
+    <dialog
+        android:id="@+id/projectDetailFragment"
+        android:name="com.jamid.workconnect.message.ProjectDetailFragment"
+        android:label="ProjectDetailFragment"
+        tools:layout="@layout/fragment_project_detail" />
+    <dialog
+        android:id="@+id/userFragment"
+        android:name="com.jamid.workconnect.UserFragment"
+        android:label="UserFragment"
+        tools:layout="@layout/fragment_user" />
+    <dialog
+        android:id="@+id/projectGuidelinesFragment"
+        android:name="com.jamid.workconnect.message.ProjectGuidelinesFragment"
+        android:label="ProjectGuidelinesFragment"
+        tools:layout="@layout/fragment_project_guidelines" />
+    <dialog
+        android:id="@+id/followingsFragment"
+        android:name="com.jamid.workconnect.profile.FollowingsFragment"
+        android:label="FollowingsFragment"
+        tools:layout="@layout/fragment_followings" />
+
+    <dialog
+        android:id="@+id/followersFragment"
+        android:name="com.jamid.workconnect.profile.FollowersFragment"
+        android:label="FollowersFragment"
+        tools:layout="@layout/fragment_followers" />
+
+    <dialog
+        android:id="@+id/mediaFragment"
+        android:name="com.jamid.workconnect.message.MediaFragment"
+        android:label="MediaFragment"
+        tools:layout="@layout/fragment_media" />
+
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.jamid.workconnect.profile.ProfileFragment"
+        android:label="ProfileFragment"
+        tools:layout="@layout/fragment_profile" />
+
+    <fragment
+        android:id="@+id/projectFragment"
+        android:name="com.jamid.workconnect.ProjectFragment"
+        android:label="ProjectFragment"
+        tools:layout="@layout/fragment_project" />
+
+    <fragment
+        android:id="@+id/blogFragment"
+        android:name="com.jamid.workconnect.BlogFragment"
+        android:label="BlogFragment"
+        tools:layout="@layout/fragment_blog" />
+
+    <fragment
+        android:id="@+id/editFragment"
+        android:name="com.jamid.workconnect.EditFragment"
+        android:label="EditFragment"
+        tools:layout="@layout/fragment_edit" />
+
+</navigation>
