@@ -26,7 +26,7 @@ The main objective of this platform is to boost developer's profile so that it h
 
 ### This is not DEV clone and do not compare, before reading it.
 
-Blogging is essential. I have learnt a great deal of things in the internet through many sources. Documentation is always great, but if not for the effort of experienced programmers who spent their time to educate the ones who do not have access to that knowledge, there will be chaos everywhere (Really mean it). The idea of blogging started a long back, but the idea of blogging certain specific tech related stuff, really flourished with the app Medium. They gave a platform to people who wanted to share knowledge to everyone. Blogging in this app only differs by the idea of having people of same interest in constant touch within the app. Basically like a DEV but with more active approach, such as posting your work for people to see and collaborate <i>specifically</i>.
+Blogging is essential. I have learnt a great deal of things in the internet through many sources. Documentation is always great, but if not for the effort of experienced programmers who spent their time to educate the ones who do not have access to that knowledge, there will be chaos everywhere (Really mean it). The idea of blogging started long back, but the idea of blogging certain specific tech related stuff, really flourished with the app Medium. They gave a platform to people who wanted to share knowledge to everyone. Blogging in this app only differs by the idea of having people of same interest in constant touch within the app. Basically like DEV but with more active approach, such as posting your work for people to see and collaborate <i>specifically</i>.
 
 
 <table>
