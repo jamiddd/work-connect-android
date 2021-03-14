@@ -9,3 +9,8 @@ Up until now developers had to showcase their talents in Youtube and other websi
 <img src="https://user-images.githubusercontent.com/57195260/111067098-84c95c00-84e8-11eb-8add-a2e01c5933da.png" data-canonical-src="https://gyazo.com/eb5c5741b6a9a16c692170a41a49c858.png" width="500" height="999" />
 Homescreen features the Projects and Blogs of people that you have followed, or have interest in.
 
+
+<img src="https://user-images.githubusercontent.com/57195260/111067482-7a0fc680-84ea-11eb-972c-b45ef7b95b13.png" data-canonical-src="https://gyazo.com/eb5c5741b6a9a16c692170a41a49c858.png" width="500" height="999" />
+Explore currently most searched projects, blogs and people.
+
+
