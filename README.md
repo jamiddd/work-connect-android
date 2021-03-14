@@ -44,6 +44,10 @@ Blogging is essential. I have learnt a great deal of things in the internet thro
 
 
 ## Projects
+
+Projects in this app basically mean your work that you have been doing on your own and you wish for people to collaborate, granted you're not trying to hire people to do your work. Hiring freelancers or other people is cool and all, but what about collaborating with other people in projects that can learn in the process. Who knows you might learn something new too.
+Collaborating in projects exposes you to other people with same interest, who wants to learn while doing rather than endlessly circling in <b>Tutorial hell</b> and having <b>Imposter Syndrome</b>. It is easier to collaborate in Github which is meant for collaboration but for an entry level developer, usually it's kind of not easy because the people who are already in the project, are sometimes more experienced (not always) and they require people who are already experienced with what they are doing. The idea of this app is to learn by doing projects with people who are also entry level, but doesn't restrict to the thought that only entry level developers can use it.
+
 <table>
   <tr>
     <td><img src="https://user-images.githubusercontent.com/57195260/111068806-4768cc80-84f0-11eb-9fd6-957ee0903fe6.png"/></td>
@@ -56,8 +60,7 @@ Blogging is essential. I have learnt a great deal of things in the internet thro
     <td>Another example</td>
   </tr>
 </table>
-
-Here people can see your project in detail. Here you can link all your websites where you have created the actual project. Users can request to join your project. Basically, once they join and know your websites, they can visit and collaborate there.
+One can link all their websites where you have created the actual project. Users can request to join your project. Basically, once they join and know your websites, they can visit and collaborate there.
 
 ## Profile
 <table>
