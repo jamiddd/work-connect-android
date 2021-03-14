@@ -11,7 +11,7 @@ Up until now developers had to showcase their talents in Youtube and other websi
 
 ## Objective
 
-The main objective of this platform is to boost developer's profile so that it helps the developer get more experience and exposure. Experience in working on real projects and exposure to other passionate people in the same industry. In India there is also the problem of experience, without experience entry level developer gets hard time getting jobs because company usually requires 1 year or 2 year experience with insane requirements. Although every smart person outsell themselves, but the fact that the company requires such capabilities, is evident that without experience even in high school level to college level, there is no possibility of good job oppurtunities.
+The main objective of this platform is to boost developer's profile so that it helps the developer get more experience and exposure. Experience in working on real projects and exposure to other passionate people in the same industry. In India there is also the problem of experience, without experience entry level developer gets hard time getting jobs because company usually requires 1 year or 2 year experience with insane requirements. Although every smart person outsell themselves, the fact that the company requires such capabilities, is evident that without experience even in high school level to college level, there is no possibility of good job oppurtunities.
 
 
 ## Main Application UI
