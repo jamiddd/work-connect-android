@@ -9,6 +9,10 @@ Up until now developers had to showcase their talents in Youtube and other websi
 
 ## If anybody is interested in collaborating please do.
 
+## Objective
+
+The main objective of this platform is to boost developer's profile so that it helps the developer get more experience and exposure. Experience in working on real projects and exposure to other passionate people in the same industry. In India there is also the problem of experience, without experience entry level developer gets hard time getting jobs because company usually requires 1 year or 2 year experience with insane requirements. Although every smart person outsell themselves, but the fact that the company requires such capabilities, is evident that without experience even in high school level to college level, there is no possibility of good job oppurtunities.
+
 <table>
   <tr><td><img src="https://user-images.githubusercontent.com/57195260/111067098-84c95c00-84e8-11eb-8add-a2e01c5933da.png"/></td><td><img src="https://user-images.githubusercontent.com/57195260/111067482-7a0fc680-84ea-11eb-972c-b45ef7b95b13.png"/></td><td><img src="https://user-images.githubusercontent.com/57195260/111067836-053d8c00-84ec-11eb-9c68-e629e6ab9387.png"/></td></tr>
   <tr><td>Homescreen features the Projects and Blogs of people that you have followed, or have interest in.</td><td>Explore currently most searched projects, blogs and people.</td><td>Messaging within the collaborations.</td></tr>
