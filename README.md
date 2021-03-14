@@ -9,5 +9,5 @@ Up until now developers had to showcase their talents in Youtube and other websi
 
 ![home](https://user-images.githubusercontent.com/57195260/111066869-43847c80-84e7-11eb-8f9f-ef69e91502fe.png)
 
-
+Homescreen features the Projects and Blogs of people that you have followed, or have interest in.
 
