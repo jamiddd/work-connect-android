@@ -58,6 +58,5 @@ PS - I'm not creative with UI, much to do.
 ## Messaging
 <img src="https://user-images.githubusercontent.com/57195260/111071385-e6df8c80-84fb-11eb-8796-1903d52bbcb7.png" width="400"/>
 
-
-
-
+## Search
+<img src="https://user-images.githubusercontent.com/57195260/111071622-0925da00-84fd-11eb-95ca-a75c70fbe07f.png" width="400"/>
