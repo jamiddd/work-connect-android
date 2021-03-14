@@ -84,3 +84,17 @@ One of the very basic thing that every upcoming developer needs is to be able to
 Just search 😅
 
 <img src="https://user-images.githubusercontent.com/57195260/111071622-0925da00-84fd-11eb-95ca-a75c70fbe07f.png" width="400"/>
+
+
+## Libraries
+
+<ul>
+  <li>FirestoreUI</li>
+  <li>RealtimeBlurVIew</li>
+  <li>Fresco</li>
+  <li>EverythingMe Overscroller</li>
+  <li>Architecture Components</li>
+  <li>Navigation</li>
+  <li>OkHTTP (Not Really)</li>
+</ul>
+
