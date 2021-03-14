@@ -40,5 +40,11 @@ Up until now developers had to showcase their talents in Youtube and other websi
 
 Here people can see your project in detail. Here you can link all your websites where you have created the actual project. Users can request to join your project. Basically, once they join and know your websites, they can visit and collaborate there.
 
+## Profile
+<img src="https://user-images.githubusercontent.com/57195260/111069216-1093b600-84f2-11eb-9fd6-4b107d38b052.png" width="400" />
+
+PS - I'm not creative with UI, much to do.
+
+
 
 
