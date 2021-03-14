@@ -89,12 +89,11 @@ Just search 😅
 ## Libraries
 
 <ul>
-  <li>FirestoreUI</li>
-  <li>RealtimeBlurVIew</li>
-  <li>Fresco</li>
-  <li>EverythingMe Overscroller</li>
-  <li>Architecture Components</li>
-  <li>Navigation</li>
-  <li>OkHTTP (Not Really)</li>
+  <li><a href="https://github.com/firebase/FirebaseUI-Android/tree/master/firestore">FirestoreUI</a></li>
+  <li><a href="https://github.com/mmin18/RealtimeBlurView">RealtimeBlurVIew</a></li>
+  <li><a href="https://github.com/facebook/fresco">Fresco</a></li>
+  <li><a href="https://github.com/EverythingMe/overscroll-decor">EverythingMe Overscroll Decor</a></li>
+  <li><a href="https://developer.android.com/topic/libraries/architecture">Architecture Components</a></li>
+  <li><a href="https://github.com/square/okhttp">OkHTTP (Not Really)</a></li>
 </ul>
 
