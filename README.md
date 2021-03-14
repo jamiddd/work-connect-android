@@ -20,10 +20,12 @@ Up until now developers had to showcase their talents in Youtube and other websi
   <tr>
     <td><img src="https://user-images.githubusercontent.com/57195260/111068517-0fad5500-84ef-11eb-9b54-71c77ffc2917.png"/></td>
     <td><img src="https://user-images.githubusercontent.com/57195260/111068587-674bc080-84ef-11eb-90b8-44f0c221fc0b.png"/></td>
+    <td><img src="https://user-images.githubusercontent.com/57195260/111070656-b0ecd900-84f8-11eb-9598-f2611c75164c.png"></td>
   </tr>
   <tr>
     <td>The Blog Editor</td>
     <td>Blog fragment screen</td>
+    <td>Ability to add code in the blog</td>
   </tr>
 </table>
 
