@@ -63,6 +63,9 @@ Collaborating in projects exposes you to other people with same interest, who wa
 One can link all their websites where you have created the actual project. Users can request to join your project. Basically, once they join and know your websites, they can visit and collaborate there.
 
 ## Profile
+
+The profile section is still incomplete, although the basic idea is as same as other social apps, which is to promote your work when someone visits your profile.
+
 <table>
   <tr>
      <td><img src="https://user-images.githubusercontent.com/57195260/111069216-1093b600-84f2-11eb-9fd6-4b107d38b052.png"></td>
