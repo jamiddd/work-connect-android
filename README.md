@@ -21,9 +21,14 @@ The main objective of this platform is to boost developer's profile so that it h
   <tr><td>Homescreen features the Projects and Blogs of people that you have followed, or have interest in.</td><td>Explore currently most searched projects, blogs and people.</td><td>Messaging within the collaborations.</td></tr>
 </table>
 
-<video width="400" height="800" controls>
-  <source src="https://user-images.githubusercontent.com/57195260/111115124-310f4f00-858a-11eb-9510-7049aebdca68.mp4" type="video/mp4">
-</video>
+<table>
+  <tr>
+     <td><img src="https://user-images.githubusercontent.com/57195260/111117187-328e4680-858d-11eb-9843-fe0b4cd1d2be.gif"/></td>
+     <td><img src="https://user-images.githubusercontent.com/57195260/111117211-3de17200-858d-11eb-8e72-6e0e2e655e17.gif"/></td>
+     <td><img src="https://user-images.githubusercontent.com/57195260/111117252-4afe6100-858d-11eb-839f-573408d846af.gif"/></td>
+     <td><img src="https://user-images.githubusercontent.com/57195260/111117282-55b8f600-858d-11eb-9122-29a47567013f.gif"/></td>
+  </tr>
+</table>
 
 ## Blogging
 
