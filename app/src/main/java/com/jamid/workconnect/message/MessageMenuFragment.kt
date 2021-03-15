@@ -12,6 +12,7 @@ import com.jamid.workconnect.MainActivity
 import com.jamid.workconnect.MainViewModel
 import com.jamid.workconnect.R
 import com.jamid.workconnect.databinding.FragmentMessageMenuBinding
+import com.jamid.workconnect.interfaces.ChatMenuClickListener
 
 class MessageMenuFragment : Fragment(R.layout.fragment_message_menu) {
 
@@ -29,25 +30,26 @@ class MessageMenuFragment : Fragment(R.layout.fragment_message_menu) {
             activity.bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
         }
 
-//        val chatMenuClickListener = parentFragment as ChatMenuClickListener
+        val chatMenuClickListener = activity as ChatMenuClickListener
 
         binding.cameraSelect.isClickable = true
         binding.cameraSelect.setOnClickListener {
-//            chatMenuClickListener.onCameraSelect()
-//            dismiss()
+            chatMenuClickListener.onCameraSelect()
+            activity.bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
         }
 
         binding.gallerySelect.setOnClickListener {
-//            chatMenuClickListener.onImageSelect()
+            chatMenuClickListener.onImageSelect()
+            activity.bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
         }
 
         binding.documentSelect.setOnClickListener {
-//            chatMenuClickListener.onDocumentSelect()
-//            dismiss()
+            chatMenuClickListener.onDocumentSelect()
+            activity.bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
         }
 
         binding.dismissOptions.setOnClickListener {
-//            dismiss()
+            activity.bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
         }
 
         viewModel.windowInsets.observe(viewLifecycleOwner) { (top, bottom) ->

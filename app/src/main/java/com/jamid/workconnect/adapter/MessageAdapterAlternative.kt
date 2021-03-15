@@ -5,19 +5,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ProgressBar
-import android.widget.Toast
-import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
-import com.jamid.workconnect.IMAGE
 import com.jamid.workconnect.MessageComparator
 import com.jamid.workconnect.R
-import com.jamid.workconnect.TEXT
-import com.jamid.workconnect.databinding.ChatBalloonLeftBinding
-import com.jamid.workconnect.databinding.ChatBalloonRightBinding
 import com.jamid.workconnect.interfaces.GenericLoadingStateListener
 import com.jamid.workconnect.interfaces.MessageItemClickListener
 import com.jamid.workconnect.model.ChatChannelContributor
@@ -159,7 +153,7 @@ class MessageViewHolderAlternative(val view: View, val viewType: Int, val users:
     fun bind(message: SimpleMessage) {
         val isCurrentUserMessage = message.senderId == uid
         if (isCurrentUserMessage) {
-            val binding = DataBindingUtil.bind<ChatBalloonRightBinding>(view)!!
+            /*val binding = DataBindingUtil.bind<ChatBalloonRightBinding>(view)!!
             when {
                 viewType == 0 && message.type == IMAGE -> {
                     binding.imgMsgRight.visibility = View.VISIBLE
@@ -186,9 +180,9 @@ class MessageViewHolderAlternative(val view: View, val viewType: Int, val users:
                     "Something went wrong",
                     Toast.LENGTH_SHORT
                 ).show()
-            }
+            }*/
         } else {
-            val binding = DataBindingUtil.bind<ChatBalloonLeftBinding>(view)!!
+            /*val binding = DataBindingUtil.bind<ChatBalloonLeftBinding>(view)!!
             val user = users.find {
                 it.id == message.senderId
             }!!
@@ -220,7 +214,7 @@ class MessageViewHolderAlternative(val view: View, val viewType: Int, val users:
                     "Something went wrong",
                     Toast.LENGTH_SHORT
                 ).show()
-            }
+            }*/
         }
     }
 }

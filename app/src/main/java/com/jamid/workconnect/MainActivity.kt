@@ -28,6 +28,7 @@ import androidx.navigation.NavController
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.transition.AutoTransition
 import androidx.transition.TransitionManager
+import com.facebook.drawee.view.SimpleDraweeView
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -48,6 +49,7 @@ import com.jamid.workconnect.home.TagFragment
 import com.jamid.workconnect.interfaces.*
 import com.jamid.workconnect.message.ChatChannelFragment
 import com.jamid.workconnect.message.MessageFragment
+import com.jamid.workconnect.message.MessageMenuFragment
 import com.jamid.workconnect.message.ProjectDetailContainer
 import com.jamid.workconnect.model.*
 import com.jamid.workconnect.profile.BlogsFragment
@@ -65,7 +67,9 @@ class MainActivity : AppCompatActivity(),
     PostItemClickListener,
     GenericLoadingStateListener,
     SearchItemClickListener,
-    UserItemClickListener {
+    UserItemClickListener,
+    ChatMenuClickListener,
+    MessageItemClickListener {
 
     private var currentNavController: LiveData<NavController>? = null
     private val viewModel: MainViewModel by viewModels()
@@ -532,6 +536,16 @@ class MainActivity : AppCompatActivity(),
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
     }
 
+    fun invokeMessageMenu() {
+        val fragment = MessageMenuFragment.newInstance()
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.dynamicViewHolder, fragment, PostMenuFragment.TAG)
+            .commit()
+
+        currentBottomFragment = fragment
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+    }
+
     fun invokeCreateOption() {
         val menu = CreateOptionFragment.newInstance()
         supportFragmentManager.beginTransaction()
@@ -852,6 +866,31 @@ class MainActivity : AppCompatActivity(),
         private const val REQUEST_GET_IMAGE = 112
         private const val REQUEST_GET_LOCATION = 113
         private const val REQUEST_FINE_LOCATION = 114
+    }
+
+    override fun onImageSelect() {
+        selectImage()
+    }
+
+    override fun onCameraSelect() {
+
+    }
+
+    override fun onDocumentSelect() {
+
+    }
+
+    override fun onImageClick(
+        view: SimpleDraweeView,
+        actualWidth: Int,
+        actualHeight: Int,
+        message: SimpleMessage
+    ) {
+
+    }
+
+    override fun onTextClick(content: String) {
+
     }
 
 }

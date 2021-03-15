@@ -51,3 +51,13 @@ const val INTERESTS = "interests"
 
 // post related
 const val ADMIN = "admin"
+
+
+const val OTHER_USER_AT_START = 0
+const val OTHER_USER_AT_START_IMAGE = 4
+const val OTHER_USER_AT_END = 2
+const val OTHER_USER_AT_END_IMAGE = 6
+const val CURRENT_USER_AT_START = 1
+const val CURRENT_USER_AT_START_IMAGE = 5
+const val CURRENT_USER_AT_END = 3
+const val CURRENT_USER_AT_END_IMAGE = 7

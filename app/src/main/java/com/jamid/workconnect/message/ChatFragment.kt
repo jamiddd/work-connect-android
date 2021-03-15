@@ -7,7 +7,6 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
-import android.net.Uri
 import android.os.Bundle
 import android.transition.TransitionManager
 import android.util.Log
@@ -30,15 +29,16 @@ import com.firebase.ui.common.ChangeEventType.*
 import com.github.mmin18.widget.RealtimeBlurView
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.transition.platform.MaterialArcMotion
 import com.google.android.material.transition.platform.MaterialContainerTransform
 import com.google.android.material.transition.platform.MaterialSharedAxis
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.jamid.workconnect.*
+import com.jamid.workconnect.adapter.FirebaseChatAdapter
 import com.jamid.workconnect.adapter.SimpleMessageAdapter
 import com.jamid.workconnect.databinding.FragmentChatBinding
 import com.jamid.workconnect.interfaces.ChatMenuClickListener
@@ -66,10 +66,10 @@ class ChatFragment : Fragment(R.layout.fragment_chat), GenericLoadingStateListen
     private var currentBufferedMessageId: String = ""
     private var currentBufferedDocReference: DocumentReference? = null
     private var totalItemCount = 0
+    private lateinit var firebaseChatAdapter: FirebaseChatAdapter
 //    private var mActivePointerId: Int = 0
     private lateinit var mDetector: GestureDetectorCompat
     private lateinit var currentContributor: ChatChannelContributor
-    private var currentList = mutableListOf<SimpleMessage>()
     private var onBackPressedCallback: OnBackPressedCallback? = null
     private lateinit var activity: MainActivity
 
@@ -89,18 +89,6 @@ class ChatFragment : Fragment(R.layout.fragment_chat), GenericLoadingStateListen
         return when (item.itemId) {
             R.id.project_info_item -> {
                 activity.projectDetailFragment(chatChannel, currentContributor)
-                /*val bundle = Bundle().apply {
-                    putParcelable(ARG_CHAT_CHANNEL, chatChannel)
-                    putParcelable(ARG_CURRENT_CONTRIBUTOR, currentContributor)
-                }
-                findNavController().navigate(R.id.projectDetailFragment, bundle)*/
-
-                /*val fragment = ProjectDetailFragment.newInstance(chatChannel, currentContributor)
-                requireActivity().supportFragmentManager.beginTransaction().add(android.R.id.content, fragment, ProjectDetailFragment.TAG)
-                    .setCustomAnimations(R.anim.slide_in_right, R.anim.slide_in_left, R.anim.slide_in_left, R.anim.slide_out_right)
-                    .addToBackStack(ProjectDetailFragment.TAG)
-                    .commit()*/
-
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -113,6 +101,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat), GenericLoadingStateListen
         chatChannel = arguments?.getParcelable(ARG_CHAT_CHANNEL) ?: return
 
         activity = requireActivity() as MainActivity
+        val uid = Firebase.auth.currentUser?.uid.toString()
 
         val bnv = activity.findViewById<BottomNavigationView>(R.id.bottomNav)
         val blur = activity.findViewById<RealtimeBlurView>(R.id.bottom_blur)
@@ -154,6 +143,8 @@ class ChatFragment : Fragment(R.layout.fragment_chat), GenericLoadingStateListen
                         }
                     }
 
+
+
                 viewModel.chatMessages(chatChannel.chatChannelId).observe(viewLifecycleOwner) { list ->
                     simpleMessageAdapter.submitList(list)
                 }
@@ -162,31 +153,8 @@ class ChatFragment : Fragment(R.layout.fragment_chat), GenericLoadingStateListen
 
         viewModel.windowInsets.observe(viewLifecycleOwner) { insets ->
             if (insets != null) {
-
-                /*val params1 = binding.bottomMessageLayout.layoutParams as ConstraintLayout.LayoutParams
-                params1.height = ConstraintLayout.LayoutParams.WRAP_CONTENT
-                params1.width = ConstraintLayout.LayoutParams.MATCH_PARENT
-
-                params1.bottomToBottom = binding.chatFragmentRoot.id
-                params1.startToStart = binding.chatFragmentRoot.id
-                params1.endToEnd = binding.chatFragmentRoot.id
-
-                binding.bottomMessageLayout.layoutParams = params1*/
                 binding.bottomMessageLayout.setPadding(0, 0, 0, insets.second + convertDpToPx(8))
-
-
-               /* val params2 = binding.messageBottomBlur.layoutParams as ConstraintLayout.LayoutParams
-                params2.height = ConstraintLayout.LayoutParams
-                params2.width = ConstraintLayout.LayoutParams.MATCH_PARENT
-
-                params2.bottomToBottom = binding.chatFragmentRoot.id
-                params2.startToStart = binding.chatFragmentRoot.id
-                params2.endToEnd = binding.chatFragmentRoot.id
-
-                binding.messageBottomBlur.layoutParams = params2*/
-
                 binding.messagesRecycler.setPadding(0, insets.first + convertDpToPx(64), 0, insets.second + convertDpToPx(64))
-
             }
         }
 
@@ -220,18 +188,12 @@ class ChatFragment : Fragment(R.layout.fragment_chat), GenericLoadingStateListen
                 MESSAGES).document()
             val messageId = messageRef.id
             val msg = binding.messageText.text.toString()
-            viewModel.sendMessage(messageRef, messageId, msg, chatChannel.chatChannelId, "Text")
+            viewModel.sendMessage(messageRef, messageId, msg, chatChannel.chatChannelId, TEXT)
             binding.messageText.text.clear()
         }
 
         binding.addImgMsgBtn.setOnClickListener {
-            val frag = MessageMenuFragment.newInstance()
-            activity.supportFragmentManager.beginTransaction()
-                .replace(R.id.dynamicViewHolder, frag, "MessageMenu")
-                .commit()
-
-            activity.currentBottomFragment = frag
-            activity.bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+            activity.invokeMessageMenu()
         }
 
         var layoutHeight = 0
@@ -277,7 +239,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat), GenericLoadingStateListen
             }
         }
     }
-    private fun removeTempView() {
+    /*private fun removeTempView() {
         binding.placeholderMsg.root.visibility = View.GONE
         val s: String? = null
         binding.placeholderMsg.imgMsgRight.setImageURI(s)
@@ -290,7 +252,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat), GenericLoadingStateListen
         binding.placeholderMsg.imgMsgRight.visibility = View.VISIBLE
         binding.placeholderMsg.imgMsgRight.setColorFilter(ContextCompat.getColor(requireContext(), R.color.semiTransparentDark))
         binding.placeholderMsg.imgMsgUploadProgress.visibility = View.VISIBLE
-    }
+    }*/
     private fun selectImage() {
         val intent = Intent().apply {
             type = "image/*"

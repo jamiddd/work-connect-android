@@ -2,12 +2,13 @@ package com.jamid.workconnect.adapter
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.transition.TransitionManager
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.databinding.DataBindingUtil
+import android.widget.ImageView
+import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.paging.PagedList
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -16,12 +17,8 @@ import com.facebook.drawee.view.SimpleDraweeView
 import com.facebook.imagepipeline.request.ImageRequest
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
-import com.jamid.workconnect.IMAGE
-import com.jamid.workconnect.MessageComparator
-import com.jamid.workconnect.R
+import com.jamid.workconnect.*
 import com.jamid.workconnect.data.ContributorAndChannels
-import com.jamid.workconnect.databinding.ChatBalloonLeftBinding
-import com.jamid.workconnect.databinding.ChatBalloonRightBinding
 import com.jamid.workconnect.interfaces.GenericLoadingStateListener
 import com.jamid.workconnect.interfaces.MessageItemClickListener
 import com.jamid.workconnect.model.SimpleMessage
@@ -30,11 +27,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
-
-private const val OTHER_USER_AT_START = 0
-private const val OTHER_USER_AT_END = 2
-private const val CURRENT_USER_AT_START = 1
-private const val CURRENT_USER_AT_END = 3
 
 class SimpleMessageAdapter(
     private val users: List<ContributorAndChannels>,
@@ -50,7 +42,9 @@ class SimpleMessageAdapter(
         currentList: PagedList<SimpleMessage>?
     ) {
         super.onCurrentListChanged(previousList, currentList)
-        genericLoadingStateListener.onLoadingMore()
+        currentList?.forEach {
+            Log.d("SimpleMessage", it.toString())
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SimpleMessageViewHolder {
@@ -65,10 +59,30 @@ class SimpleMessageAdapter(
                     users
                 )
             }
+            OTHER_USER_AT_START_IMAGE, OTHER_USER_AT_END_IMAGE -> {
+                SimpleMessageViewHolder(
+                    LayoutInflater.from(parent.context)
+                        .inflate(R.layout.chat_balloon_image_left, parent, false),
+                    viewType,
+                    messageItemClickListener,
+                    scope,
+                    users
+                )
+            }
             CURRENT_USER_AT_START, CURRENT_USER_AT_END -> {
                 SimpleMessageViewHolder(
                     LayoutInflater.from(parent.context)
                         .inflate(R.layout.chat_balloon_right, parent, false),
+                    viewType,
+                    messageItemClickListener,
+                    scope,
+                    users
+                )
+            }
+            CURRENT_USER_AT_END_IMAGE, CURRENT_USER_AT_START_IMAGE -> {
+                SimpleMessageViewHolder(
+                    LayoutInflater.from(parent.context)
+                        .inflate(R.layout.chat_balloon_image_right, parent, false),
                     viewType,
                     messageItemClickListener,
                     scope,
@@ -101,28 +115,57 @@ class SimpleMessageAdapter(
         when {
             firstMessageFromBottom && !isOnlyMessage -> {
                 return if (isCurrentUserMessage)
-                    CURRENT_USER_AT_END
-                else {
-                    /*val topMessage = getItem(position + 1)!!
-                    val isSameTopSender = topMessage.senderId == currentMessage.senderId
-                    if (isSameTopSender) {
-
+                    if (currentMessage.type == IMAGE) {
+                        CURRENT_USER_AT_END_IMAGE
                     } else {
-                        OTHER_USER_AT_START
-                    }*/
-                    OTHER_USER_AT_END
+                        CURRENT_USER_AT_END
+                    }
+                else {
+                    if (currentMessage.type == IMAGE) {
+                        OTHER_USER_AT_END_IMAGE
+                    } else {
+                        OTHER_USER_AT_END
+                    }
                 }
             }
             isOnlyMessage -> {
-                return if (isCurrentUserMessage) CURRENT_USER_AT_END else OTHER_USER_AT_END
+                return if (isCurrentUserMessage) {
+                    if (currentMessage.type == IMAGE) {
+                        CURRENT_USER_AT_END_IMAGE
+                    } else {
+                        CURRENT_USER_AT_END
+                    }
+                } else {
+                    if (currentMessage.type == IMAGE) {
+                        OTHER_USER_AT_END_IMAGE
+                    } else {
+                        OTHER_USER_AT_END
+                    }
+                }
             }
             lastMessageFromBottom -> {
                 val bottomMessage = getItem(position - 1)!!
                 val isSamePreviousSender = bottomMessage.senderId == currentMessage.senderId
                 return if (isCurrentUserMessage) {
-                    if (isSamePreviousSender) CURRENT_USER_AT_START else CURRENT_USER_AT_END
+                    if (isSamePreviousSender) {
+                        if (currentMessage.type == IMAGE) {
+                            CURRENT_USER_AT_START_IMAGE
+                        } else {
+                            CURRENT_USER_AT_START
+                        }
+                    } else {
+                        if (currentMessage.type == IMAGE) {
+                            CURRENT_USER_AT_END_IMAGE
+                        } else {
+                            CURRENT_USER_AT_END
+                        }
+                    }
                 } else {
-                    OTHER_USER_AT_START
+                    if (currentMessage.type == IMAGE) {
+                        OTHER_USER_AT_START_IMAGE
+                    } else {
+                        OTHER_USER_AT_START
+                    }
                 }
             }
             else -> {
@@ -133,40 +176,63 @@ class SimpleMessageAdapter(
                 if (isCurrentUserMessage) {
                     return when {
                         isSameTopSender && isSameBottomSender -> {
-                            if (position == 6) {
-                                Log.d("SimpleMessageAdapter", "6 " + getItem(position - 2)!!.content)
+                            if (currentMessage.type == IMAGE) {
+                                CURRENT_USER_AT_START_IMAGE
+                            } else {
+                                CURRENT_USER_AT_START
                             }
-                            CURRENT_USER_AT_START
                         }
                         isSameTopSender && !isSameBottomSender -> {
-                            if (position == 6) {
-                                Log.d("SimpleMessageAdapter", "6")
+                            if (currentMessage.type == IMAGE) {
+                                CURRENT_USER_AT_END_IMAGE
+                            } else {
+                                CURRENT_USER_AT_END
                             }
-                            CURRENT_USER_AT_END
                         }
                         !isSameTopSender && isSameBottomSender -> {
-                            CURRENT_USER_AT_START
+                            if (currentMessage.type == IMAGE) {
+                                CURRENT_USER_AT_START_IMAGE
+                            } else {
+                                CURRENT_USER_AT_START
+                            }
                         }
                         else -> {
-                            if (position == 6) {
-                                Log.d("SimpleMessageAdapter", "6")
+                            if (currentMessage.type == IMAGE) {
+                                CURRENT_USER_AT_END_IMAGE
+                            } else {
+                                CURRENT_USER_AT_END
                             }
-                            CURRENT_USER_AT_END
                         }
                     }
                 } else {
                     return when {
                         isSameTopSender && isSameBottomSender -> {
-                            OTHER_USER_AT_START
+                            if (currentMessage.type == IMAGE) {
+                                OTHER_USER_AT_START_IMAGE
+                            } else {
+                                OTHER_USER_AT_START
+                            }
                         }
                         isSameTopSender && !isSameBottomSender -> {
-                            OTHER_USER_AT_END
+                            if (currentMessage.type == IMAGE) {
+                                OTHER_USER_AT_END_IMAGE
+                            } else {
+                                OTHER_USER_AT_END
+                            }
                         }
                         !isSameTopSender && isSameBottomSender -> {
-                            OTHER_USER_AT_START
+                            if (currentMessage.type == IMAGE) {
+                                OTHER_USER_AT_START_IMAGE
+                            } else {
+                                OTHER_USER_AT_START
+                            }
                         }
                         else -> {
-                            OTHER_USER_AT_END
+                            if (currentMessage.type == IMAGE) {
+                                OTHER_USER_AT_END_IMAGE
+                            } else {
+                                OTHER_USER_AT_END
+                            }
                         }
                     }
                 }
@@ -191,98 +257,116 @@ class SimpleMessageViewHolder(
             val context = view.context
             val isCurrentUserMessage = simpleMessage.senderId == uid
             if (isCurrentUserMessage) {
-                val binding = DataBindingUtil.bind<ChatBalloonRightBinding>(view)!!
+                val parent1 = view.findViewById<ConstraintLayout>(R.id.chatRightParent)
+                val parent2 = view.findViewById<ConstraintLayout>(R.id.chatImgRightParent)
 
-                binding.currentUserMessageTime.text = SimpleDateFormat(
+                val time1 = view.findViewById<TextView>(R.id.currentUserMessageTime)
+                val time2 = view.findViewById<TextView>(R.id.currentUserImgMsgTime)
+
+                time1?.text = SimpleDateFormat(
                     "hh:mm a",
                     Locale.UK
                 ).format(simpleMessage.createdAt)
 
+                time2?.text = SimpleDateFormat(
+                    "hh:mm a",
+                    Locale.UK
+                ).format(simpleMessage.createdAt)
+
+                val tail1 = view.findViewById<ImageView>(R.id.rightMsgTail)
+                val tail2 = view.findViewById<ImageView>(R.id.rightImgMsgTail)
+                val imgMsg = view.findViewById<SimpleDraweeView>(R.id.currentUserImgMsg)
+                val textMsg = view.findViewById<TextView>(R.id.currentUserMessage)
+
                 when (viewType) {
                     CURRENT_USER_AT_START -> {
-                        binding.rightMsgTail.visibility = View.GONE
-                        when (simpleMessage.type) {
-                            IMAGE -> {
-                                binding.imgMsgRight.visibility = View.VISIBLE
-                                binding.currentUserMessage.visibility = View.GONE
-                                initiateImageMessage(binding.imgMsgRight, context, simpleMessage)
-                            }
-                            else -> {
-                                binding.currentUserMessage.text = simpleMessage.content
-                                binding.currentUserMessage.visibility = View.VISIBLE
-                            }
-                        }
+                        tail1?.visibility = View.GONE
+                        textMsg.text = simpleMessage.content
+                        textMsg.visibility = View.VISIBLE
+                    }
+                    CURRENT_USER_AT_START_IMAGE -> {
+                        imgMsg.visibility = View.VISIBLE
+                        initiateImageMessage(imgMsg, context, parent2, time2, null, simpleMessage)
                     }
                     CURRENT_USER_AT_END -> {
-                        if (simpleMessage.type == IMAGE) {
-                            binding.imgMsgRight.visibility = View.VISIBLE
-                            binding.rightMsgContainer.visibility = View.GONE
-                            initiateImageMessage(binding.imgMsgRight, context, simpleMessage)
-                        } else {
-                            binding.currentUserMessage.text = simpleMessage.content
-                            binding.rightMsgContainer.visibility = View.VISIBLE
-                            binding.imgMsgRight.visibility = View.GONE
-                            binding.rightMsgTail.visibility = View.VISIBLE
-                        }
+                        textMsg.text = simpleMessage.content
+                        tail1.visibility = View.VISIBLE
+                    }
+                    CURRENT_USER_AT_END_IMAGE -> {
+                        imgMsg.visibility = View.VISIBLE
+                        tail2.visibility = View.GONE
+                        initiateImageMessage(imgMsg, context, parent2, time2, null, simpleMessage)
                     }
                 }
-                binding.currentUserMessage.setOnClickListener {
-                    binding.currentUserMessageTime.visibility = View.VISIBLE
-                    TransitionManager.beginDelayedTransition(binding.rightMsgContainer)
+
+                textMsg?.setOnClickListener {
+                    time1?.visibility = View.VISIBLE
                     scope.launch {
                         delay(4000)
-                        binding.currentUserMessageTime.visibility = View.GONE
-                        TransitionManager.beginDelayedTransition(binding.rightMsgContainer)
+                        time1?.visibility = View.GONE
                     }
                 }
             } else {
-                val binding = DataBindingUtil.bind<ChatBalloonLeftBinding>(view)!!
+
+                val parent1 = view.findViewById<ConstraintLayout>(R.id.chatLeftParent)
+                val parent2 = view.findViewById<ConstraintLayout>(R.id.chatImageLeftParent)
+
+                val time1 = view.findViewById<TextView>(R.id.otherUserMessageTime)
+                val time2 = view.findViewById<TextView>(R.id.otherUserImgMessageTime)
+
+                val tail1 = view.findViewById<ImageView>(R.id.leftMsgTail)
+                val tail2 = view.findViewById<ImageView>(R.id.leftImgMsgTail)
+                val imgMsg = view.findViewById<SimpleDraweeView>(R.id.otherUserImageMessage)
+                val textMsg = view.findViewById<TextView>(R.id.otherUserMessage)
+                val otherUserT = view.findViewById<SimpleDraweeView>(R.id.otherUserPhoto)
+                val otherUserI = view.findViewById<SimpleDraweeView>(R.id.otherUserImgMsgPhoto)
+
                 val user = users.find {
                     it.contributor.id == simpleMessage.senderId
                 }
-                Log.d("SIMP_ADA", users.toString())
-                binding.otherUserMessageTime.text = SimpleDateFormat(
+
+                time1?.text = SimpleDateFormat(
                     "hh:mm a",
                     Locale.UK
                 ).format(simpleMessage.createdAt) + " • Sent by ${user?.contributor?.name}"
+
+                time2?.text = SimpleDateFormat(
+                    "hh:mm a",
+                    Locale.UK
+                ).format(simpleMessage.createdAt) + " • Sent by ${user?.contributor?.name}"
+
+
                 when (viewType) {
                     OTHER_USER_AT_START -> {
-                        binding.otherUserPhoto.visibility = View.INVISIBLE
-                        if (simpleMessage.type == IMAGE) {
-                            binding.imgMsgLeft.visibility = View.VISIBLE
-                            binding.leftTextContent.visibility = View.GONE
-                            initiateImageMessage(binding.imgMsgLeft, context, simpleMessage, false)
-                        } else {
-                            binding.otherUserMessage.text = simpleMessage.content
-                            binding.leftTextContent.visibility = View.VISIBLE
-                            binding.leftMsgTail.visibility = View.GONE
-                            binding.imgMsgLeft.visibility = View.GONE
-                        }
+                        otherUserT.visibility = View.INVISIBLE
+                        textMsg.text = simpleMessage.content
+                        tail1.visibility = View.GONE
+                    }
+                    OTHER_USER_AT_START_IMAGE -> {
+                        otherUserI.visibility = View.INVISIBLE
+                        imgMsg.visibility = View.VISIBLE
+                        initiateImageMessage(imgMsg, context, parent2, time2, otherUserI, simpleMessage, false)
                     }
                     OTHER_USER_AT_END -> {
-                        binding.otherUserPhoto.setImageURI(user?.contributor?.photo)
-                        binding.otherUserPhoto.visibility = View.VISIBLE
-                        if (simpleMessage.type == IMAGE) {
-                            binding.leftTextContent.visibility = View.GONE
-                            binding.imgMsgLeft.visibility = View.VISIBLE
-                            initiateImageMessage(binding.imgMsgLeft, context, simpleMessage, false)
-                        } else {
-                            binding.leftTextContent.visibility = View.VISIBLE
-                            binding.leftMsgTail.visibility = View.VISIBLE
-                            binding.imgMsgLeft.visibility = View.GONE
-                            binding.otherUserMessage.text = simpleMessage.content
-                        }
+                        otherUserT.setImageURI(user?.contributor?.photo)
+                        otherUserT.visibility = View.VISIBLE
+                        tail1.visibility = View.VISIBLE
+                        textMsg.text = simpleMessage.content
+                    }
+                    OTHER_USER_AT_END_IMAGE -> {
+                        otherUserI.setImageURI(user?.contributor?.photo)
+                        otherUserI.visibility = View.VISIBLE
+                        tail2.visibility = View.VISIBLE
+                        imgMsg.visibility = View.VISIBLE
+                        initiateImageMessage(imgMsg, context, parent2, time2, otherUserI, simpleMessage, false)
                     }
                 }
 
-
-                binding.otherUserMessage.setOnClickListener {
-                    binding.otherUserMessageTime.visibility = View.VISIBLE
-                    TransitionManager.beginDelayedTransition(binding.leftMsgContainer)
+                textMsg?.setOnClickListener {
+                    time1?.visibility = View.VISIBLE
                     scope.launch {
                         delay(4000)
-                        binding.otherUserMessageTime.visibility = View.GONE
-                        TransitionManager.beginDelayedTransition(binding.leftMsgContainer)
+                        time1?.visibility = View.GONE
                     }
                 }
             }
@@ -292,10 +376,13 @@ class SimpleMessageViewHolder(
     private fun initiateImageMessage(
         v: SimpleDraweeView,
         context: Context,
+        parent: ConstraintLayout,
+        timeText: TextView,
+        userPhoto: SimpleDraweeView?,
         message: SimpleMessage,
         right: Boolean = true
     ) {
-        val controller = MessageImageControllerListener(v, context, right)
+        val controller = MessageImageControllerListener(v, parent, timeText, userPhoto, context, right)
         val imgRequest = ImageRequest.fromUri(message.content)
 
         val imgController = Fresco.newDraweeControllerBuilder()

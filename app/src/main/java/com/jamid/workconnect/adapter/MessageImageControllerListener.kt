@@ -2,14 +2,14 @@ package com.jamid.workconnect.adapter
 
 import android.content.Context
 import android.graphics.drawable.Animatable
-import android.util.Log
-import android.widget.LinearLayout
+import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import com.facebook.drawee.controller.BaseControllerListener
 import com.facebook.drawee.view.SimpleDraweeView
 import com.facebook.imagepipeline.image.ImageInfo
 import com.jamid.workconnect.convertDpToPx
 
-class MessageImageControllerListener(val v: SimpleDraweeView, val context: Context, private val right: Boolean): BaseControllerListener<ImageInfo>() {
+class MessageImageControllerListener(val v: SimpleDraweeView, val v1: ConstraintLayout, val v2: TextView, val v3: SimpleDraweeView?, val context: Context, private val right: Boolean): BaseControllerListener<ImageInfo>() {
 
     var measuredHeight = 0
     var measuredWidth = 0
@@ -24,72 +24,79 @@ class MessageImageControllerListener(val v: SimpleDraweeView, val context: Conte
 
         measuredWidth = width
         measuredHeight = height
+        v.translationY = convertDpToPx(2, context).toFloat()
 
         if (width >= height) {
-            val newParams = LinearLayout.LayoutParams(
+            val newParams = ConstraintLayout.LayoutParams(
                 convertDpToPx(200, context), convertDpToPx(150, context)
             )
 
-//            newParams.topToTop = v1.id
-//            newParams.endToEnd = v1.id
-            if (right) {
+            newParams.horizontalChainStyle = ConstraintLayout.LayoutParams.CHAIN_PACKED
 
-//                newParams.horizontalBias = 1f
+            if (right) {
+                newParams.horizontalBias = 1f
+
+                newParams.topToTop = v1.id
+                newParams.startToStart = v1.id
+                newParams.endToEnd = v1.id
+                newParams.bottomToTop = v2.id
+
                 newParams.setMargins(
                     convertDpToPx(0, context),
-                    convertDpToPx(0, context),
-                    convertDpToPx(10, context),
-                    convertDpToPx(0, context)
+                    convertDpToPx(4, context),
+                    convertDpToPx(16, context),
+                    convertDpToPx(4, context)
                 )
             } else {
-//                newParams.horizontalBias = 0f
+                newParams.topToTop = v1.id
+                newParams.endToEnd = v1.id
+                newParams.bottomToTop = v2.id
+                newParams.startToEnd = v3!!.id
+
                 newParams.setMargins(
-                    convertDpToPx(12, context),
+                    convertDpToPx(16, context),
+                    convertDpToPx(4, context),
                     convertDpToPx(0, context),
-                    convertDpToPx(0, context),
-                    convertDpToPx(0, context)
+                    convertDpToPx(4, context)
                 )
             }
-//            newParams.startToStart = v1.id
-//            newParams.verticalBias = 0f
-//            newParams.bottomToTop = v2.id
-//            newParams.verticalChainStyle = ConstraintLayout.LayoutParams.CHAIN_PACKED
 
             v.layoutParams = newParams
         } else {
-            // vertical
-
-            val newParams = LinearLayout.LayoutParams(
+            val newParams = ConstraintLayout.LayoutParams(
                 convertDpToPx(150, context), convertDpToPx(200, context)
             )
 
+            newParams.horizontalChainStyle = ConstraintLayout.LayoutParams.CHAIN_PACKED
+
             if (right) {
-                Log.d("IMAGECONTROLLER", "RIGHT")
-//                newParams.horizontalBias = 1f
-//
+                newParams.horizontalBias = 1f
+
+                newParams.topToTop = v1.id
+                newParams.startToStart = v1.id
+                newParams.endToEnd = v1.id
+                newParams.bottomToTop = v2.id
+
                 newParams.setMargins(
                     convertDpToPx(0, context),
-                    convertDpToPx(0, context),
-                    convertDpToPx(10, context),
-                    convertDpToPx(0, context)
+                    convertDpToPx(4, context),
+                    convertDpToPx(16, context),
+                    convertDpToPx(4, context)
                 )
             } else {
-                Log.d("IMAGECONTROLLER", "LEFT")
 
-//                newParams.horizontalBias = 0f
+                newParams.topToTop = v1.id
+                newParams.endToEnd = v1.id
+                newParams.bottomToTop = v2.id
+                newParams.startToEnd = v3!!.id
+
                 newParams.setMargins(
-                    convertDpToPx(12, context),
+                    convertDpToPx(16, context),
+                    convertDpToPx(4, context),
                     convertDpToPx(0, context),
-                    convertDpToPx(0, context),
-                    convertDpToPx(0, context)
+                    convertDpToPx(4, context)
                 )
             }
-//            newParams.startToStart = v1.id
-//            newParams.topToTop = v1.id
-//            newParams.endToEnd = v1.id
-//            newParams.verticalBias = 0f
-//            newParams.bottomToTop = v2.id
-//            newParams.verticalChainStyle = ConstraintLayout.LayoutParams.CHAIN_PACKED
 
             v.layoutParams = newParams
         }

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/chatRightParent"
+        android:id="@+id/chatImgRightParent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:animateLayoutChanges="true">
@@ -15,11 +15,11 @@
             android:layout_height="1dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintStart_toStartOf="@+id/currentUserMessage"
-            app:layout_constraintTop_toBottomOf="@+id/currentUserMessage" />
+            app:layout_constraintStart_toStartOf="@+id/currentUserImgMsg"
+            app:layout_constraintTop_toBottomOf="@+id/currentUserImgMsg" />
 
         <TextView
-            android:id="@+id/currentUserMessageTime"
+            android:id="@+id/currentUserImgMsgTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="4dp"
@@ -29,44 +29,40 @@
             android:textSize="10sp"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@+id/currentUserMessage"
-            app:layout_constraintTop_toBottomOf="@+id/currentUserMessage" />
+            app:layout_constraintEnd_toEndOf="@+id/currentUserImgMsg"
+            app:layout_constraintTop_toBottomOf="@+id/currentUserImgMsg" />
 
-        <TextView
-            android:id="@+id/currentUserMessage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+        <com.facebook.drawee.view.SimpleDraweeView
+            android:id="@+id/currentUserImgMsg"
+            android:layout_width="200dp"
+            android:layout_height="150dp"
+            android:layout_marginTop="4dp"
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="4dp"
-            android:background="@drawable/right_balloon"
-            android:paddingStart="16dp"
-            android:paddingTop="8dp"
-            android:paddingEnd="16dp"
-            android:paddingBottom="12dp"
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-            android:textColor="@color/white"
             android:translationY="2dp"
-            app:layout_constraintBottom_toTopOf="@+id/currentUserMessageTime"
+            app:layout_constraintBottom_toTopOf="@+id/currentUserImgMsgTime"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_chainStyle="packed"
-            app:layout_constraintWidth_max="280dp"
-            tools:text="G" />
+            app:placeholderImage="@color/grey"
+            app:roundedCornerRadius="16dp" />
 
         <ImageView
-            android:id="@+id/rightMsgTail"
+            android:id="@+id/rightImgMsgTail"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:rotation="4"
+            android:rotation="19"
+            android:visibility="invisible"
             app:layout_constraintBottom_toBottomOf="@+id/tailAnchor"
             app:layout_constraintEnd_toEndOf="@+id/tailAnchor"
-            app:layout_constraintHorizontal_bias="0.995"
-            app:layout_constraintStart_toStartOf="@+id/currentUserMessage"
-            app:layout_constraintTop_toTopOf="@+id/currentUserMessage"
+            app:layout_constraintHorizontal_bias="0.991"
+            app:layout_constraintStart_toStartOf="@+id/currentUserImgMsg"
+            app:layout_constraintTop_toTopOf="@+id/currentUserImgMsg"
             app:layout_constraintVertical_bias="1.0"
-            app:srcCompat="@drawable/ic_chat_tail_right" />
+            app:srcCompat="@drawable/ic_chat_tail_right"
+            app:tint="@color/grey" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

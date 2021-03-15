@@ -19,8 +19,10 @@
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/drawable/light_grey_rounded_rect.xml" value="0.8" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/drawable/right_balloon.xml" value="0.24212962962962964" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/activity_main.xml" value="0.4" />
-        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/chat_balloon_left.xml" value="0.8" />
-        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/chat_balloon_right.xml" value="0.6" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/chat_balloon_image_left.xml" value="2.4" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/chat_balloon_image_right.xml" value="0.4" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/chat_balloon_left.xml" value="0.4" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/chat_balloon_right.xml" value="0.8" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/chat_channel_layout.xml" value="0.4" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/creating_blog_progress_dialog.xml" value="0.22777777777777777" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_auth.xml" value="0.264" />

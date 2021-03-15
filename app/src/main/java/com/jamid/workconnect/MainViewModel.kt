@@ -157,7 +157,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun chatMessages(chatChannelId: String) = database.messageDao()
         .getLiveChatMessages(chatChannelId)
-        .toLiveData(50, boundaryCallback = MessageBoundaryCallback(chatChannelId, repo, viewModelScope))
+        /*toLiveData(50, boundaryCallback = MessageBoundaryCallback(chatChannelId, repo, viewModelScope))*/
+        .toLiveData(config, null, MessageBoundaryCallback(chatChannelId, repo, viewModelScope))
 
     fun createNewUser(interests: List<String>) {
         val currentUser = auth.currentUser
@@ -925,7 +926,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val message = SimpleMessage(messageId, chatChannelId, type, msg, currentUser.id, System.currentTimeMillis())
         db.runBatch {
             it.set(messagesRef, message)
-            it.set(mediaRef, media)
+            if (type != TEXT) {
+                it.set(mediaRef, media)
+            }
             val map = mapOf(
                 LAST_MESSAGE to message,
                 UPDATED_AT to System.currentTimeMillis()
