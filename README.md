@@ -50,8 +50,14 @@ Blogging is essential. I have learnt a great deal of things in the internet thro
 </table>
 
 ### Blog Editor Preview
-<img src="https://user-images.githubusercontent.com/57195260/111126052-47240c00-8598-11eb-9618-fc2fb4c9d731.gif">
-
+<table>
+  <tr>
+    <td><img src="https://user-images.githubusercontent.com/57195260/111129739-6f156e80-859c-11eb-8ea3-1c62c1371234.gif"/></td>
+    <td><img src="https://user-images.githubusercontent.com/57195260/111129744-70df3200-859c-11eb-84e0-16bdcab286fc.gif"/></td>
+    <td><img src="https://user-images.githubusercontent.com/57195260/111129759-7472b900-859c-11eb-9bb1-20aff71a4316.gif"></td>
+    <td><img src="https://user-images.githubusercontent.com/57195260/111129763-75a3e600-859c-11eb-9337-50546bc0c34e.gif"></td>
+  </tr>
+</table>
 
 ## Projects
 
