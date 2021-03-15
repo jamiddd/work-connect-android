@@ -41,15 +41,16 @@ Blogging is essential. I have learnt a great deal of things in the internet thro
     <td><img src="https://user-images.githubusercontent.com/57195260/111068517-0fad5500-84ef-11eb-9b54-71c77ffc2917.png"/></td>
     <td><img src="https://user-images.githubusercontent.com/57195260/111068587-674bc080-84ef-11eb-90b8-44f0c221fc0b.png"/></td>
     <td><img src="https://user-images.githubusercontent.com/57195260/111070656-b0ecd900-84f8-11eb-9598-f2611c75164c.png"></td>
-    <td><img src="https://user-images.githubusercontent.com/57195260/111124466-8f422f00-8596-11eb-9935-e48d56a08205.gif"></td>
   </tr>
   <tr>
     <td>The Blog Editor</td>
     <td>Blog fragment screen</td>
     <td>Ability to add code in the blog</td>
-    <td>Preview</td>
   </tr>
 </table>
+
+### Blog Editor Preview
+<img src="https://user-images.githubusercontent.com/57195260/111124466-8f422f00-8596-11eb-9935-e48d56a08205.gif">
 
 
 ## Projects
