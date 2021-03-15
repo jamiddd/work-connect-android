@@ -36,7 +36,6 @@ The main objective of this platform is to boost developer's profile so that it h
 
 Blogging is essential. I have learnt a great deal of things in the internet through many sources. Documentation is always great, but if not for the effort of experienced programmers who spent their time to educate the ones who do not have access to that knowledge, there will be chaos everywhere (Really mean it). The idea of blogging started long back, but the idea of blogging certain specific tech related stuff, really flourished with the app Medium. They gave a platform to people who wanted to share knowledge to everyone. Blogging in this app only differs by the idea of having people of same interest in constant touch within the app. Basically like DEV but with more active approach, such as posting your work for people to see and collaborate <i>specifically</i>.
 
-
 <table>
   <tr>
     <td><img src="https://user-images.githubusercontent.com/57195260/111068517-0fad5500-84ef-11eb-9b54-71c77ffc2917.png"/></td>
@@ -50,6 +49,15 @@ Blogging is essential. I have learnt a great deal of things in the internet thro
   </tr>
 </table>
 
+### Blog Editor Preview
+<table>
+  <tr>
+    <td><img src="https://user-images.githubusercontent.com/57195260/111129739-6f156e80-859c-11eb-8ea3-1c62c1371234.gif"/></td>
+    <td><img src="https://user-images.githubusercontent.com/57195260/111129744-70df3200-859c-11eb-84e0-16bdcab286fc.gif"/></td>
+    <td><img src="https://user-images.githubusercontent.com/57195260/111129759-7472b900-859c-11eb-9bb1-20aff71a4316.gif"></td>
+    <td><img src="https://user-images.githubusercontent.com/57195260/111129763-75a3e600-859c-11eb-9337-50546bc0c34e.gif"></td>
+  </tr>
+</table>
 
 ## Projects
 
