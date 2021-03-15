@@ -50,7 +50,7 @@ Blogging is essential. I have learnt a great deal of things in the internet thro
 </table>
 
 ### Blog Editor Preview
-<img src="https://user-images.githubusercontent.com/57195260/111124466-8f422f00-8596-11eb-9935-e48d56a08205.gif">
+<img src="https://user-images.githubusercontent.com/57195260/111126052-47240c00-8598-11eb-9618-fc2fb4c9d731.gif">
 
 
 ## Projects
