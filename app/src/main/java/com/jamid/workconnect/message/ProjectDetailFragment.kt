@@ -8,6 +8,8 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.transition.platform.MaterialSharedAxis
 import com.jamid.workconnect.MainActivity
 import com.jamid.workconnect.MainViewModel
@@ -35,6 +37,9 @@ class ProjectDetailFragment : Fragment(R.layout.fragment_project_detail) {
 
         binding = FragmentProjectDetailBinding.bind(view)
         val activity = requireActivity() as MainActivity
+        val toolbar = activity.findViewById<MaterialToolbar>(R.id.pdc_toolbar)
+        val appbar = activity.findViewById<AppBarLayout>(R.id.pdc_appbar)
+        toolbar.menu.clear()
         val viewModel: ProjectDetailViewModel by navGraphViewModels(R.id.project_detail_navigation)
 
         viewModel.currentPost.observe(viewLifecycleOwner) {
@@ -42,7 +47,6 @@ class ProjectDetailFragment : Fragment(R.layout.fragment_project_detail) {
                 binding.projectDetailContent.pdContent.text = it.content
             }
         }
-
 
         viewModel.currentChatChannel.observe(viewLifecycleOwner) { chatChannel ->
             if (chatChannel != null) {

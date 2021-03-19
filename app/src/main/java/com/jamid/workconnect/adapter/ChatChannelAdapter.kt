@@ -10,6 +10,8 @@ import com.firebase.ui.firestore.paging.FirestorePagingAdapter
 import com.firebase.ui.firestore.paging.FirestorePagingOptions
 import com.firebase.ui.firestore.paging.LoadingState
 import com.firebase.ui.firestore.paging.LoadingState.*
+import com.jamid.workconnect.DOCUMENT
+import com.jamid.workconnect.IMAGE
 import com.jamid.workconnect.R
 import com.jamid.workconnect.databinding.ChatChannelLayoutBinding
 import com.jamid.workconnect.interfaces.ChatChannelClickListener
@@ -17,7 +19,6 @@ import com.jamid.workconnect.interfaces.GenericLoadingStateListener
 import com.jamid.workconnect.model.ChatChannel
 import java.text.SimpleDateFormat
 import java.util.*
-import java.util.regex.Pattern
 
 class ChatChannelAdapter(
     options: FirestorePagingOptions<ChatChannel>,
@@ -43,12 +44,18 @@ class ChatChannelAdapter(
                 if (lastMessage != null) {
                     binding.chatChannelLastMsgContent.visibility = View.VISIBLE
                     val lastMsgText = lastMessage.content
-                    val pattern = "^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]"
-                    if (Pattern.compile(pattern).matcher(lastMsgText).matches()) {
-                        binding.chatChannelLastMsgContent.text = "Image"
-                        binding.chatChannelLastMsgContent.setTypeface(Typeface.SANS_SERIF, Typeface.ITALIC)
-                    } else {
-                        binding.chatChannelLastMsgContent.text = lastMsgText
+                    when (lastMessage.type) {
+                        IMAGE -> {
+                            binding.chatChannelLastMsgContent.text = IMAGE
+                            binding.chatChannelLastMsgContent.setTypeface(Typeface.SANS_SERIF, Typeface.ITALIC)
+                        }
+                        DOCUMENT -> {
+                            binding.chatChannelLastMsgContent.text = DOCUMENT
+                            binding.chatChannelLastMsgContent.setTypeface(Typeface.SANS_SERIF, Typeface.ITALIC)
+                        }
+                        else -> {
+                            binding.chatChannelLastMsgContent.text = lastMsgText
+                        }
                     }
                 }
             }

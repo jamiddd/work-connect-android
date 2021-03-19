@@ -154,7 +154,7 @@ class FirebaseChatAdapter(
 
             v.setOnClickListener {
                 if (controller.measuredWidth != 0) {
-                    messageItemClickListener.onImageClick(v, controller.measuredWidth, controller.measuredHeight, message)
+//                    messageItemClickListener.onImageClick(v, controller.measuredWidth, controller.measuredHeight, message)
                 }
             }
         }

@@ -84,9 +84,8 @@
                             android:layout_gravity="center"
                             android:layout_weight="1"
                             android:gravity="center"
-                            android:text="Project Detail"
                             android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
-                            android:visibility="gone" />
+                            android:visibility="visible" />
 
                         <!--<Button
                             android:id="@+id/pdc_primary"

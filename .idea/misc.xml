@@ -5,6 +5,7 @@
       <map>
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/drawable/bottom_sheet_background.xml" value="0.8" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/drawable/bottom_transparent_view.xml" value="0.24212962962962964" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/drawable/chat_doc_background.xml" value="0.24212962962962964" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/drawable/dark_grey_extra_rounded.xml" value="0.8" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/drawable/dark_grey_rounded_rect.xml" value="0.8" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/drawable/grey_extra_rounded_edittext.xml" value="0.8" />
@@ -19,7 +20,9 @@
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/drawable/light_grey_rounded_rect.xml" value="0.8" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/drawable/right_balloon.xml" value="0.24212962962962964" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/activity_main.xml" value="0.4" />
-        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/chat_balloon_image_left.xml" value="2.4" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/chat_balloon_doc_left.xml" value="0.562565720294427" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/chat_balloon_doc_right.xml" value="0.8" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/chat_balloon_image_left.xml" value="0.4" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/chat_balloon_image_right.xml" value="0.4" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/chat_balloon_left.xml" value="0.4" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/chat_balloon_right.xml" value="0.8" />
@@ -44,8 +47,9 @@
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_home.xml" value="0.42523768366465" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_image.xml" value="0.8" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_image_crop.xml" value="0.2" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_image_pager.xml" value="0.22777777777777777" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_image_select.xml" value="0.23333333333333334" />
-        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_image_view.xml" value="0.8" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_image_view.xml" value="0.2" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_interest.xml" value="0.264" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_location.xml" value="0.4" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_media.xml" value="0.22777777777777777" />
@@ -84,12 +88,14 @@
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/search_item_layout.xml" value="0.4" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/search_layout.xml" value="0.2" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/square_image_grid.xml" value="0.8" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/upload_document_fragment.xml" value="0.264" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/user_horizontal_layout.xml" value="0.6658959537572254" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/user_item.xml" value="0.536" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/user_section.xml" value="0.22777777777777777" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/menu/explore_menu.xml" value="0.18703703703703703" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/menu/image_select_deselect_menu.xml" value="0.14537037037037037" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/menu/project_guidelines_menu.xml" value="0.8" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/xml/file_paths.xml" value="0.22777777777777777" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/xml/search_scene.xml" value="0.22777777777777777" />
       </map>
     </option>
