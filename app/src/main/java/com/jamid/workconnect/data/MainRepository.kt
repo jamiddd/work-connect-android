@@ -61,4 +61,8 @@ class MainRepository(val db: WorkConnectDatabase) {
             simpleMediaDao.insertSimpleMedia(listOf(it))
         }
     }
+
+    suspend fun getContributor(userId: String): ChatChannelContributor? {
+        return chatChannelContributorDao.getContributor(userId)
+    }
 }

@@ -26,6 +26,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
+import androidx.navigation.NavOptions
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.transition.AutoTransition
 import androidx.transition.TransitionManager
@@ -49,10 +50,7 @@ import com.jamid.workconnect.home.CreateOptionFragment
 import com.jamid.workconnect.home.LocationFragment
 import com.jamid.workconnect.home.TagFragment
 import com.jamid.workconnect.interfaces.*
-import com.jamid.workconnect.message.ChatChannelFragment
-import com.jamid.workconnect.message.MessageFragment
-import com.jamid.workconnect.message.MessageMenuFragment
-import com.jamid.workconnect.message.ProjectDetailContainer
+import com.jamid.workconnect.message.*
 import com.jamid.workconnect.model.*
 import com.jamid.workconnect.profile.BlogsFragment
 import com.jamid.workconnect.profile.CollaborationsListFragment
@@ -75,7 +73,8 @@ class MainActivity : AppCompatActivity(),
     SearchItemClickListener,
     UserItemClickListener,
     ChatMenuClickListener,
-    MessageItemClickListener {
+    MessageItemClickListener,
+    ChatChannelClickListener {
 
     private var currentNavController: LiveData<NavController>? = null
     private val viewModel: MainViewModel by viewModels()
@@ -961,10 +960,11 @@ class MainActivity : AppCompatActivity(),
         startActivity(intent)
     }
 
-    override fun onDocumentClick(simpleMessage: SimpleMessage, name: String, size: Long) {
+    override fun onDocumentClick(simpleMessage: SimpleMessage, fullname: String, size: Long) {
         currentMessage = simpleMessage
-        currentFileName = name
+        currentFileName = fullname
         val externalDir = getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
+        val name = fullname.split('_').last()
 
         lifecycleScope.launch (Dispatchers.IO) {
             val med = viewModel.checkIfFileDownloaded(simpleMessage.messageId)
@@ -978,7 +978,7 @@ class MainActivity : AppCompatActivity(),
                 val file = File(externalDir, name)
 
                 if (file.createNewFile()) {
-                    val childRef = "${currentMessage!!.chatChannelId}/documents/messages/$currentFileName"
+                    val childRef = "${currentMessage!!.chatChannelId}/documents/messages/$fullname"
                     val objectRef = Firebase.storage.reference.child(childRef)
                     objectRef.getBytes(size + 1024).addOnSuccessListener {
                         val stream = FileOutputStream(file)
@@ -986,12 +986,11 @@ class MainActivity : AppCompatActivity(),
                         stream.flush()
                         stream.close()
 
-                        val uri = FileProvider.getUriForFile(this@MainActivity, "com.jamid.workconnect.fileprovider", file)
-                        val simpleMedia = SimpleMedia(currentMessage!!.messageId, currentMessage!!.type, currentMessage!!.content, currentMessage!!.createdAt, uri.toString())
+                        val simpleMedia = SimpleMedia(currentMessage!!.messageId, currentMessage!!.type, currentMessage!!.content, currentMessage!!.createdAt, name, size)
                         viewModel.insertSimpleMedia(simpleMedia)
                         openFile(file)
                     }.addOnFailureListener {
-                        viewModel.setCurrentError(it)
+                        viewModel.setCurrentError(Exception(childRef))
                     }
                 } else {
                     openFile(file)
@@ -1012,6 +1011,18 @@ class MainActivity : AppCompatActivity(),
         intent.setDataAndType(uri, mime)
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         startActivity(intent)
+    }
+
+    override fun onChatChannelClick(chatChannel: ChatChannel) {
+        val navOptions = NavOptions.Builder()
+            .setEnterAnim(R.anim.slide_in_right)
+            .setExitAnim(R.anim.slide_out_left)
+            .build()
+
+        val bundle = Bundle().apply {
+            putParcelable(ChatFragment.ARG_CHAT_CHANNEL, chatChannel)
+        }
+        currentNavController?.value?.navigate(R.id.chatFragment, bundle, navOptions)
     }
 
 }

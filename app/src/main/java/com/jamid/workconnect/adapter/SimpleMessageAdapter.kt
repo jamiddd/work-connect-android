@@ -503,11 +503,11 @@ class SimpleMessageViewHolder(
 
     private fun setupDoc(message: SimpleMessage, view: ViewGroup) {
 
-        val words = message.content.split("%2F")
         val currentUserDocName = view.findViewById<TextView>(R.id.currentUserDocName)
         val currentUserDocSize = view.findViewById<TextView>(R.id.currentUserDocSize)
         val otherUserDocName = view.findViewById<TextView>(R.id.otherUserDocName)
         val otherUserDocSize = view.findViewById<TextView>(R.id.otherUserDocSize)
+        val words = message.content.split("%2F")
         val fullName = words.last().split('?')[0]
         val name = fullName.split('_').last()
         currentUserDocName?.text = name
@@ -523,7 +523,7 @@ class SimpleMessageViewHolder(
             currentUserDocSize?.text = sizeText
 
             view.setOnClickListener { v ->
-                messageItemClickListener.onDocumentClick(message, name, it.sizeBytes)
+                messageItemClickListener.onDocumentClick(message, fullName, it.sizeBytes)
             }
 
         }.addOnFailureListener {

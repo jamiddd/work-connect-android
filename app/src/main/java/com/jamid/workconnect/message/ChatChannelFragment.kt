@@ -5,8 +5,6 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.navigation.NavOptions
-import androidx.navigation.fragment.findNavController
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -18,11 +16,10 @@ import com.google.firebase.ktx.Firebase
 import com.jamid.workconnect.*
 import com.jamid.workconnect.adapter.ChatChannelAdapter
 import com.jamid.workconnect.databinding.FragmentChatChannelBinding
-import com.jamid.workconnect.interfaces.ChatChannelClickListener
 import com.jamid.workconnect.model.ChatChannel
 import me.everything.android.ui.overscroll.OverScrollDecoratorHelper
 
-class ChatChannelFragment : Fragment(R.layout.fragment_chat_channel), ChatChannelClickListener {
+class ChatChannelFragment : Fragment(R.layout.fragment_chat_channel) {
 
     private lateinit var binding: FragmentChatChannelBinding
     private val viewModel: MainViewModel by activityViewModels()
@@ -31,8 +28,8 @@ class ChatChannelFragment : Fragment(R.layout.fragment_chat_channel), ChatChanne
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        exitTransition = MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ true)
-        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ false)
+        exitTransition = MaterialSharedAxis(MaterialSharedAxis.X, true)
+        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.X, false)
     }
 
     override fun onAttach(context: Context) {
@@ -47,14 +44,14 @@ class ChatChannelFragment : Fragment(R.layout.fragment_chat_channel), ChatChanne
             .whereArrayContains(CONTRIBUTORS_LIST, " ")
             .orderBy(UPDATED_AT, Query.Direction.DESCENDING)
 
-        var config = PagedList.Config.Builder().setPageSize(10).setPrefetchDistance(5).setEnablePlaceholders(false).build()
+        val config = PagedList.Config.Builder().setPageSize(10).setPrefetchDistance(5).setEnablePlaceholders(false).build()
         var options = FirestorePagingOptions.Builder<ChatChannel>()
             .setLifecycleOwner(viewLifecycleOwner)
             .setDiffCallback(ChatChannelComparator())
             .setQuery(query, config, ChatChannel::class.java)
             .build()
 
-        chatChannelAdapter = ChatChannelAdapter(options, activity, this)
+        chatChannelAdapter = ChatChannelAdapter(options, activity)
 
         viewModel.windowInsets.observe(viewLifecycleOwner) { (status, nav) ->
             binding.chatChannelRecycler.setPadding(0, status + convertDpToPx(56), 0, nav + convertDpToPx(64))
@@ -77,8 +74,6 @@ class ChatChannelFragment : Fragment(R.layout.fragment_chat_channel), ChatChanne
                 query = Firebase.firestore.collection(CHAT_CHANNELS)
                     .whereArrayContains(CONTRIBUTORS_LIST, it.id)
                     .orderBy(UPDATED_AT, Query.Direction.DESCENDING)
-
-                config = PagedList.Config.Builder().setPageSize(10).setPrefetchDistance(5).setEnablePlaceholders(false).build()
 
                 options = FirestorePagingOptions.Builder<ChatChannel>()
                     .setLifecycleOwner(viewLifecycleOwner)
@@ -106,17 +101,4 @@ class ChatChannelFragment : Fragment(R.layout.fragment_chat_channel), ChatChanne
         fun newInstance() = ChatChannelFragment()
     }
 
-    override fun onChatChannelClick(chatChannel: ChatChannel) {
-        val navOptions = NavOptions.Builder()
-            .setEnterAnim(R.anim.slide_in_right)
-            .setExitAnim(R.anim.slide_out_left)
-            .build()
-
-        val bundle = Bundle().apply {
-            putParcelable(ChatFragment.ARG_CHAT_CHANNEL, chatChannel)
-        }
-        findNavController().navigate(R.id.chatFragment, bundle, navOptions)
-
-
-    }
 }

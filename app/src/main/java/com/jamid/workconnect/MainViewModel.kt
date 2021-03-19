@@ -1117,6 +1117,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         repo.insertSimpleMedia(simpleMedia)
     }
 
+    suspend fun getContributor(userId: String): ChatChannelContributor? {
+        return repo.getContributor(userId)
+    }
+
     companion object {
         const val TAG = "MainViewModel"
     }

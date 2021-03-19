@@ -10,5 +10,5 @@ import kotlinx.parcelize.Parcelize
 @IgnoreExtraProperties
 @Parcelize
 @Entity(tableName="simple_media")
-data class SimpleMedia(@PrimaryKey val id: String, val type: String, val mediaLocation: String, val createdAt: Long, @Exclude @set: Exclude @get: Exclude var onDiskLocation: String? = null) :
+data class SimpleMedia(@PrimaryKey val id: String, val type: String, val mediaLocation: String, val createdAt: Long, @Exclude @set: Exclude @get: Exclude var onDiskLocation: String? = null, @Exclude @set: Exclude @get: Exclude var size: Long = 0) :
     Parcelable { constructor(): this("", "", "", 0)}

@@ -41,14 +41,13 @@ class MediaFragment : Fragment(R.layout.fragment_media) {
                 binding.mediaViewPager.adapter = MediaPager(it.chatChannelId, activity)
 
                 val mediaTabs = activity.findViewById<TabLayout>(R.id.mediaTabs)
-
                 TabLayoutMediator(mediaTabs, binding.mediaViewPager) { tab, pos ->
                     when (pos) {
                         0 -> tab.text = "Image"
                         1 -> tab.text = "Links"
                         2 -> tab.text = "Docs"
                     }
-                }
+                }.attach()
             }
         }
 
@@ -75,8 +74,8 @@ class MediaFragment : Fragment(R.layout.fragment_media) {
             return when (position) {
                 0 -> MediaImageFragment.newInstance(chatChannelId)
                 1 -> MediaLinksFragment.newInstance()
-                2 -> MediaDocumentFragment.newInstance()
-                else -> MediaDocumentFragment.newInstance()
+                2 -> MediaDocumentFragment.newInstance(chatChannelId)
+                else -> MediaDocumentFragment.newInstance(chatChannelId)
             }
         }
 

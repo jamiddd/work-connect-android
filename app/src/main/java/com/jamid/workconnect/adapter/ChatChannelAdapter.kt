@@ -1,6 +1,8 @@
 package com.jamid.workconnect.adapter
 
 import android.graphics.Typeface
+import android.text.SpannableString
+import android.text.style.StyleSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,21 +12,25 @@ import com.firebase.ui.firestore.paging.FirestorePagingAdapter
 import com.firebase.ui.firestore.paging.FirestorePagingOptions
 import com.firebase.ui.firestore.paging.LoadingState
 import com.firebase.ui.firestore.paging.LoadingState.*
-import com.jamid.workconnect.DOCUMENT
-import com.jamid.workconnect.IMAGE
-import com.jamid.workconnect.R
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+import com.jamid.workconnect.*
 import com.jamid.workconnect.databinding.ChatChannelLayoutBinding
 import com.jamid.workconnect.interfaces.ChatChannelClickListener
 import com.jamid.workconnect.interfaces.GenericLoadingStateListener
 import com.jamid.workconnect.model.ChatChannel
+import com.jamid.workconnect.model.UserMinimal
 import java.text.SimpleDateFormat
 import java.util.*
 
 class ChatChannelAdapter(
     options: FirestorePagingOptions<ChatChannel>,
-    private val genericLoadingStateListener: GenericLoadingStateListener,
-    private val chatChannelClickListener: ChatChannelClickListener
+    activity: MainActivity
 ) : FirestorePagingAdapter<ChatChannel, ChatChannelAdapter.ChatChannelViewHolder>(options) {
+
+    private val chatChannelClickListener = activity as ChatChannelClickListener
+    private val genericLoadingStateListener = activity as GenericLoadingStateListener
 
     inner class ChatChannelViewHolder(val binding: ChatChannelLayoutBinding): RecyclerView.ViewHolder(binding.root) {
         fun bind(chatChannel: ChatChannel?) {
@@ -43,20 +49,42 @@ class ChatChannelAdapter(
                 val lastMessage = chatChannel.lastMessage
                 if (lastMessage != null) {
                     binding.chatChannelLastMsgContent.visibility = View.VISIBLE
-                    val lastMsgText = lastMessage.content
-                    when (lastMessage.type) {
-                        IMAGE -> {
-                            binding.chatChannelLastMsgContent.text = IMAGE
-                            binding.chatChannelLastMsgContent.setTypeface(Typeface.SANS_SERIF, Typeface.ITALIC)
+
+                    Firebase.firestore.collection(USER_MINIMALS).document(lastMessage.senderId)
+                        .get()
+                        .addOnSuccessListener {
+                            if (it != null && it.exists()) {
+                                val user = it.toObject(UserMinimal::class.java)
+                                if (user != null) {
+                                    val name = if (user.id == Firebase.auth.currentUser?.uid) {
+                                        "You"
+                                    } else {
+                                        user.name
+                                    }
+                                    val lastMsgText = lastMessage.content
+                                    when (lastMessage.type) {
+                                        IMAGE -> {
+                                            val spannableString = SpannableString("$name: $IMAGE")
+                                            spannableString.setSpan(StyleSpan(Typeface.BOLD), 0, name.length, SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE)
+                                            binding.chatChannelLastMsgContent.text = spannableString
+                                        }
+                                        DOCUMENT -> {
+                                            val spannableString = SpannableString("$name: $DOCUMENT")
+                                            spannableString.setSpan(StyleSpan(Typeface.BOLD), 0, name.length, SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE)
+                                            binding.chatChannelLastMsgContent.text = spannableString
+                                        }
+                                        else -> {
+                                            val spannableString = SpannableString("$name: $lastMsgText")
+                                            spannableString.setSpan(StyleSpan(Typeface.BOLD), 0, name.length, SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE)
+                                            binding.chatChannelLastMsgContent.text = spannableString
+                                        }
+                                    }
+                                }
+                            }
+
+                        }.addOnFailureListener {
+
                         }
-                        DOCUMENT -> {
-                            binding.chatChannelLastMsgContent.text = DOCUMENT
-                            binding.chatChannelLastMsgContent.setTypeface(Typeface.SANS_SERIF, Typeface.ITALIC)
-                        }
-                        else -> {
-                            binding.chatChannelLastMsgContent.text = lastMsgText
-                        }
-                    }
                 }
             }
         }
