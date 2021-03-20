@@ -5,13 +5,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.addCallback
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.jamid.workconnect.*
@@ -20,23 +23,18 @@ import com.jamid.workconnect.databinding.UserHorizontalLayoutBinding
 import com.jamid.workconnect.model.User
 import com.jamid.workconnect.model.UserMinimal
 
-class FollowersFragment : BaseBottomSheetFragment() {
+class FollowersFragment : Fragment(R.layout.fragment_followers) {
 
     private val viewModel: MainViewModel by activityViewModels()
     private lateinit var binding: FragmentFollowersBinding
     private val db = Firebase.firestore
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_followers, container, false)
-        // Inflate the layout for this fragment
-        return binding.root
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        binding = FragmentFollowersBinding.bind(view)
+        val activity = requireActivity() as MainActivity
+
         val followersAdapter = FollowersAdapter()
         val user = arguments?.getParcelable<User>("user")
         if (user != null) {
@@ -53,8 +51,22 @@ class FollowersFragment : BaseBottomSheetFragment() {
 
         binding.followersToolbar.setNavigationOnClickListener {
             hideKeyboard()
-            findNavController().navigateUp()
+            activity.bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
         }
+
+        activity.onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+            activity.bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+        }
+
+        val height = getWindowHeight()
+        val params = binding.root.layoutParams as ViewGroup.LayoutParams
+        params.height = height
+        params.width = ViewGroup.LayoutParams.MATCH_PARENT
+        binding.root.layoutParams = params
+
+        /*viewModel.windowInsets.observe(viewLifecycleOwner) { (top, bottom) ->
+
+        }*/
 
     }
 
@@ -106,6 +118,10 @@ class FollowersFragment : BaseBottomSheetFragment() {
     companion object {
 
         @JvmStatic
-        fun newInstance() = FollowersFragment()
+        fun newInstance(user: User) = FollowersFragment().apply {
+            arguments = Bundle().apply {
+                putParcelable("user", user)
+            }
+        }
     }
 }

@@ -34,7 +34,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.create_blog -> {
-                activity.invokeCreateOption()
+                val fragment = CreateOptionFragment.newInstance()
+                activity.showBottomSheet(fragment, CreateOptionFragment.TAG)
                 true
             }
             else -> super.onOptionsItemSelected(item)

@@ -365,7 +365,8 @@ class EditorFragment : Fragment() {
 
         binding.imageTypeBtn.setOnClickListener {
             hideKeyboard()
-            activity.invokeImageSelectOptions()
+            val fragment = ImageSelectFragment.newInstance()
+            activity.showBottomSheet(fragment, ImageSelectFragment.TAG)
         }
 
         binding.imageTypeBtn.setOnLongClickListener {
@@ -409,7 +410,8 @@ class EditorFragment : Fragment() {
         }
 
         binding.tagBtn.setOnClickListener {
-            activity.invokeTagFragment()
+            val fragment = TagFragment.newInstance()
+            activity.showBottomSheet(fragment, TagFragment.TAG)
         }
     }
 

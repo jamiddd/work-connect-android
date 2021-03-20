@@ -235,7 +235,8 @@ true
 
           val clickableSpan1 = object: ClickableSpan() {
               override fun onClick(widget: View) {
-                  findNavController().navigate(R.id.followersFragment, bundle)
+                  val fragment = FollowersFragment.newInstance(user)
+                  activity.showBottomSheet(fragment, "FollowersFragment")
               }
 
               override fun updateDrawState(ds: TextPaint) {

@@ -172,7 +172,8 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
 
         binding.userChangeImg.isClickable = true
         binding.userChangeImg.setOnClickListener {
-            activity.invokeImageSelectOptions()
+            val fragment = ImageSelectFragment.newInstance()
+            activity.showBottomSheet(fragment, ImageSelectFragment.TAG)
         }
 
         binding.addInterestLayoutBtn.setOnClickListener {

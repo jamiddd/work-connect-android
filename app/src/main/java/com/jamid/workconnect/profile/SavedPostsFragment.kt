@@ -483,7 +483,8 @@ class SavedPostsFragment : Fragment(), PostItemClickListener, PostMenuClickListe
     }
 
     override fun onOptionClick(post: Post) {
-        activity.invokePostMenu(post)
+        val fragment = PostMenuFragment.newInstance(post)
+        activity.showBottomSheet(fragment, PostMenuFragment.TAG)
     }
 
     override fun onCollaborateClick(post: Post) {

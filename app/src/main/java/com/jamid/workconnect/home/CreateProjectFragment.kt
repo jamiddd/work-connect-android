@@ -98,7 +98,8 @@ class CreateProjectFragment : Fragment(), ImageSelectMenuListener {
         val activity = requireActivity() as MainActivity
 
         binding.addProjectImageBtn.setOnClickListener {
-            activity.invokeImageSelectOptions()
+            val fragment = ImageSelectFragment.newInstance()
+            activity.showBottomSheet(fragment, ImageSelectFragment.TAG)
         }
 
         requireActivity().onBackPressedDispatcher.addCallback(this) {
@@ -220,7 +221,8 @@ class CreateProjectFragment : Fragment(), ImageSelectMenuListener {
         binding.projectThumnailImg.isLongClickable = true
 
         binding.projectThumnailImg.setOnClickListener {
-            activity.invokeImageSelectOptions()
+            val fragment = ImageSelectFragment.newInstance()
+            activity.showBottomSheet(fragment, ImageSelectFragment.TAG)
         }
 
         binding.projectThumnailImg.setOnLongClickListener {
@@ -228,7 +230,8 @@ class CreateProjectFragment : Fragment(), ImageSelectMenuListener {
                 binding.projectThumnailImg.setColorFilter(ContextCompat.getColor(requireContext(), R.color.semiTransparentDark))
                 binding.removeProjectImgBtn.visibility = View.VISIBLE
             } else {
-                activity.invokeImageSelectOptions()
+                val fragment = ImageSelectFragment.newInstance()
+                activity.showBottomSheet(fragment, ImageSelectFragment.TAG)
             }
             true
         }
@@ -276,7 +279,8 @@ class CreateProjectFragment : Fragment(), ImageSelectMenuListener {
         }
 
         binding.addProjectTagBtn.setOnClickListener {
-            activity.invokeTagFragment()
+            val fragment = TagFragment.newInstance()
+            activity.showBottomSheet(fragment, TagFragment.TAG)
         }
 
         /*binding.projectContentText.setOnFocusChangeListener { v, hasFocus ->

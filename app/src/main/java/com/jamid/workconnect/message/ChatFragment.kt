@@ -186,7 +186,8 @@ class ChatFragment : Fragment(R.layout.fragment_chat), Animator.AnimatorListener
         }
 
         binding.addImgMsgBtn.setOnClickListener {
-            activity.invokeMessageMenu()
+            val fragment = MessageMenuFragment.newInstance()
+            activity.showBottomSheet(fragment, "MessageMenuFragment")
         }
 
         var layoutHeight = 0
@@ -226,7 +227,8 @@ class ChatFragment : Fragment(R.layout.fragment_chat), Animator.AnimatorListener
 
         viewModel.currentDocUri.observe(viewLifecycleOwner) {
             if (it != null) {
-                activity.invokeUploadDocFragment(chatChannel)
+                val fragment = UploadDocumentFragment.newInstance(chatChannel)
+                activity.showBottomSheet(fragment, UploadDocumentFragment.TAG)
             }
         }
 

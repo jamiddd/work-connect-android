@@ -14,6 +14,7 @@ import android.os.*
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.activity.addCallback
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -46,16 +47,11 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 import com.jamid.workconnect.auth.AuthFragment
 import com.jamid.workconnect.databinding.ActivityMainBinding
-import com.jamid.workconnect.home.CreateOptionFragment
 import com.jamid.workconnect.home.LocationFragment
-import com.jamid.workconnect.home.TagFragment
 import com.jamid.workconnect.interfaces.*
 import com.jamid.workconnect.message.*
 import com.jamid.workconnect.model.*
-import com.jamid.workconnect.profile.BlogsFragment
-import com.jamid.workconnect.profile.CollaborationsListFragment
-import com.jamid.workconnect.profile.ProfileFragment
-import com.jamid.workconnect.profile.ProjectListFragment
+import com.jamid.workconnect.profile.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import me.everything.android.ui.overscroll.OverScrollDecoratorHelper
@@ -140,6 +136,10 @@ class MainActivity : AppCompatActivity(),
                 } else if (newState == BottomSheetBehavior.STATE_HIDDEN) {
                     currentBottomFragment?.let { supportFragmentManager.beginTransaction().remove(it) }
                     mainBinding.scrimForBottomSheet.isClickable = false
+
+                    onBackPressedDispatcher.addCallback() {
+                        currentNavController?.value?.navigateUp()
+                    }
 
                     if (hasPendingTransition) {
                         currentNavController?.value?.navigate(currentFragmentId)
@@ -470,47 +470,16 @@ class MainActivity : AppCompatActivity(),
         MaterialAlertDialogBuilder(this).setTitle("Sign in or Register")
             .setMessage("You are not signed in. To create a blog, you must have an account.")
             .setPositiveButton("Sign In"){ _, _ ->
-                invokeSignIn()
+                val fragment = AuthFragment.newInstance()
+                showBottomSheet(fragment, AuthFragment.TAG)
             }.setNegativeButton("Cancel") { d, _ ->
                 d.dismiss()
             }.show()
     }
 
-
-    fun invokeSignIn() {
-        val fragment = AuthFragment.newInstance()
+    fun showBottomSheet(fragment: Fragment, tag: String? = null) {
         supportFragmentManager.beginTransaction()
-            .replace(R.id.dynamicViewHolder, fragment, AuthFragment.TAG)
-            .commit()
-
-        currentBottomFragment = fragment
-        bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-    }
-
-    fun invokeImageSelectOptions() {
-        val fragment = ImageSelectFragment.newInstance()
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.dynamicViewHolder, fragment, ImageSelectFragment.TAG)
-            .commit()
-
-        currentBottomFragment = fragment
-        bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-    }
-
-    private fun invokeCropFragment(x: Int = 1, y: Int = 1, width: Int = 400, height: Int = 300, shape: String = "OVAL") {
-        val fragment = ImageCropFragment.newInstance(x, y, width, height, shape)
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.dynamicViewHolder, fragment, ImageCropFragment.TAG)
-            .commit()
-
-        currentBottomFragment = fragment
-        bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-    }
-
-    private fun postInvokeLocationFragment() {
-        val fragment = LocationFragment.newInstance()
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.dynamicViewHolder, fragment, LocationFragment.TAG)
+            .replace(R.id.dynamicViewHolder, fragment, tag)
             .commit()
 
         currentBottomFragment = fragment
@@ -519,61 +488,14 @@ class MainActivity : AppCompatActivity(),
 
     fun invokeLocationFragment() {
         getLocation({
-            postInvokeLocationFragment()
+            val fragment = LocationFragment.newInstance()
+            showBottomSheet(fragment, LocationFragment.TAG)
         }, {
             //
         })
     }
 
-    fun invokeTagFragment() {
-        val fragment = TagFragment.newInstance()
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.dynamicViewHolder, fragment, TagFragment.TAG)
-            .commit()
 
-        currentBottomFragment = fragment
-        bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-    }
-
-    fun invokePostMenu(post: Post) {
-        val fragment = PostMenuFragment.newInstance(post)
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.dynamicViewHolder, fragment, PostMenuFragment.TAG)
-            .commit()
-
-        currentBottomFragment = fragment
-        bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-    }
-
-    fun invokeMessageMenu() {
-        val fragment = MessageMenuFragment.newInstance()
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.dynamicViewHolder, fragment, PostMenuFragment.TAG)
-            .commit()
-
-        currentBottomFragment = fragment
-        bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-    }
-
-    fun invokeCreateOption() {
-        val menu = CreateOptionFragment.newInstance()
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.dynamicViewHolder, menu, CreateOptionFragment.TAG)
-            .commit()
-
-        currentBottomFragment = menu
-        bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-    }
-
-    fun invokeUploadDocFragment(chatChannel: ChatChannel) {
-        val fragment = UploadDocumentFragment.newInstance(chatChannel)
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.dynamicViewHolder, fragment, UploadDocumentFragment.TAG)
-            .commit()
-
-        currentBottomFragment = fragment
-        bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-    }
 
     fun projectDetailFragment(chatChannel: ChatChannel, currentContributor: ChatChannelContributor) {
         val fragment = ProjectDetailContainer.newInstance(chatChannel, currentContributor)
@@ -614,7 +536,8 @@ class MainActivity : AppCompatActivity(),
                 REQUEST_GET_IMAGE -> {
                     val image = data?.data
                     viewModel.setCurrentImage(image)
-                    invokeCropFragment(4, 3, 400, 300, "RECTANGLE")
+                    val fragment = ImageCropFragment.newInstance(4, 3, 400, 300, "RECTANGLE")
+                    showBottomSheet(fragment, ImageCropFragment.TAG)
                 }
                 REQUEST_GET_DOCUMENT -> {
                     val doc = data?.data
@@ -745,7 +668,8 @@ class MainActivity : AppCompatActivity(),
             REQUEST_FINE_LOCATION -> {
                 if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
                     getLocation({
-                        postInvokeLocationFragment()
+                        val fragment = LocationFragment.newInstance()
+                        showBottomSheet(fragment, LocationFragment.TAG)
                     }, {
 
                     })
@@ -849,7 +773,8 @@ class MainActivity : AppCompatActivity(),
         if (auth.currentUser != null) {
             viewModel.onFollowPressed(post.uid, prev)
         } else {
-            invokeSignIn()
+            val fragment = AuthFragment.newInstance()
+            showBottomSheet(fragment, AuthFragment.TAG)
         }
     }
 
@@ -864,7 +789,8 @@ class MainActivity : AppCompatActivity(),
     }
 
     override fun onOptionClick(post: Post) {
-        invokePostMenu(post)
+        val fragment = PostMenuFragment.newInstance(post)
+        showBottomSheet(fragment, PostMenuFragment.TAG)
     }
 
     override fun onSearchItemClick(id: String, type: String?) {
@@ -1024,5 +950,7 @@ class MainActivity : AppCompatActivity(),
         }
         currentNavController?.value?.navigate(R.id.chatFragment, bundle, navOptions)
     }
+
+
 
 }

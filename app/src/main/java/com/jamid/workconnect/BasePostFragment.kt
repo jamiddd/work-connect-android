@@ -21,6 +21,7 @@ import com.google.android.material.card.MaterialCardView
 import com.google.android.material.transition.platform.MaterialSharedAxis
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import com.jamid.workconnect.auth.AuthFragment
 import com.jamid.workconnect.databinding.PostMetaLayoutBinding
 import com.jamid.workconnect.model.Post
 
@@ -162,7 +163,8 @@ abstract class BasePostFragment(@LayoutRes layout: Int): Fragment(layout) {
                     }
                 }
             } else {
-                activity.invokeSignIn()
+                val fragment = AuthFragment.newInstance()
+                activity.showBottomSheet(fragment, AuthFragment.TAG)
             }
         }
     }
@@ -188,7 +190,8 @@ abstract class BasePostFragment(@LayoutRes layout: Int): Fragment(layout) {
                     }
                 }
             } else {
-                activity.invokeSignIn()
+                val fragment = AuthFragment.newInstance()
+                activity.showBottomSheet(fragment, AuthFragment.TAG)
             }
         }
     }
@@ -206,7 +209,8 @@ abstract class BasePostFragment(@LayoutRes layout: Int): Fragment(layout) {
                     viewModel.onSavePressed(post, false)
                 }
             } else {
-                activity.invokeSignIn()
+                val fragment = AuthFragment.newInstance()
+                activity.showBottomSheet(fragment, AuthFragment.TAG)
             }
         }
     }
@@ -224,7 +228,8 @@ abstract class BasePostFragment(@LayoutRes layout: Int): Fragment(layout) {
                     viewModel.onFollowPressed(post.uid, false)
                 }
             } else {
-                activity.invokeSignIn()
+                val fragment = AuthFragment.newInstance()
+                activity.showBottomSheet(fragment, AuthFragment.TAG)
             }
         }
     }
