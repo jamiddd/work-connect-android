@@ -1,8 +1,6 @@
 package com.jamid.workconnect.adapter
 
-import android.graphics.Typeface
 import android.text.SpannableString
-import android.text.style.StyleSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -65,17 +63,17 @@ class ChatChannelAdapter(
                                     when (lastMessage.type) {
                                         IMAGE -> {
                                             val spannableString = SpannableString("$name: $IMAGE")
-                                            spannableString.setSpan(StyleSpan(Typeface.BOLD), 0, name.length, SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE)
+//                                            spannableString.setSpan(StyleSpan(Typeface.BOLD), 0, name.length, SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE)
                                             binding.chatChannelLastMsgContent.text = spannableString
                                         }
                                         DOCUMENT -> {
                                             val spannableString = SpannableString("$name: $DOCUMENT")
-                                            spannableString.setSpan(StyleSpan(Typeface.BOLD), 0, name.length, SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE)
+//                                            spannableString.setSpan(StyleSpan(Typeface.BOLD), 0, name.length, SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE)
                                             binding.chatChannelLastMsgContent.text = spannableString
                                         }
                                         else -> {
                                             val spannableString = SpannableString("$name: $lastMsgText")
-                                            spannableString.setSpan(StyleSpan(Typeface.BOLD), 0, name.length, SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE)
+//                                            spannableString.setSpan(StyleSpan(Typeface.BOLD), 0, name.length, SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE)
                                             binding.chatChannelLastMsgContent.text = spannableString
                                         }
                                     }

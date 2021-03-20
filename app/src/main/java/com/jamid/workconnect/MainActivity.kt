@@ -137,7 +137,7 @@ class MainActivity : AppCompatActivity(),
                     currentBottomFragment?.let { supportFragmentManager.beginTransaction().remove(it) }
                     mainBinding.scrimForBottomSheet.isClickable = false
 
-                    onBackPressedDispatcher.addCallback() {
+                    onBackPressedDispatcher.addCallback {
                         currentNavController?.value?.navigateUp()
                     }
 

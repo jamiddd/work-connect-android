@@ -37,7 +37,7 @@
             android:ellipsize="end"
             android:maxLines="1"
             android:singleLine="true"
-            android:textAppearance="@style/Theme.TabLayoutText"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
             android:textColor="@color/black"
             app:layout_constraintBottom_toTopOf="@+id/chatChannelLastMsgContent"
             app:layout_constraintEnd_toEndOf="parent"
