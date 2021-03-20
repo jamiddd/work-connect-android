@@ -18,26 +18,5 @@
             android:longClickable="true"
             app:actualImageScaleType="fitCenter" />
 
-        <com.google.android.material.appbar.AppBarLayout
-            android:id="@+id/fullscreenAppBar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/white"
-            android:visibility="gone">
-
-            <com.google.android.material.appbar.CollapsingToolbarLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                app:layout_scrollFlags="scroll|exitUntilCollapsed"
-                app:toolbarId="@+id/fullscreenToolbar">
-
-                <com.google.android.material.appbar.MaterialToolbar
-                    android:id="@+id/fullscreenToolbar"
-                    android:layout_width="match_parent"
-                    android:layout_height="?attr/actionBarSize"
-                    app:navigationIcon="@drawable/ic_round_arrow_back_24" />
-            </com.google.android.material.appbar.CollapsingToolbarLayout>
-        </com.google.android.material.appbar.AppBarLayout>
-
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>

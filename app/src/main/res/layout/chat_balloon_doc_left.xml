@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/chatDocLeftParent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:animateLayoutChanges="true">
+
+        <View
+            android:id="@+id/tailAnchor"
+            android:layout_width="60dp"
+            android:layout_height="1dp"
+            app:layout_constraintEnd_toEndOf="@+id/otherUserDocMessage"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/otherUserDocMsgPhoto"
+            app:layout_constraintTop_toBottomOf="@+id/otherUserDocMessage" />
+
+        <com.facebook.drawee.view.SimpleDraweeView
+            android:id="@+id/otherUserDocMsgPhoto"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="4dp"
+            app:layout_constraintBottom_toBottomOf="@+id/otherUserDocMessage"
+            app:layout_constraintEnd_toStartOf="@+id/otherUserDocMessage"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/otherUserDocMessage"
+            app:layout_constraintVertical_bias="1.0"
+            app:placeholderImage="@drawable/ic_user"
+            app:roundAsCircle="true"
+            tools:visibility="visible" />
+
+        <TextView
+            android:id="@+id/otherUserDocMessageTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:text="12:23 PM Sent by Jamid Deka"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
+            android:textColor="@color/darkerGrey"
+            android:textSize="10sp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/otherUserDocMessage"
+            app:layout_constraintTop_toBottomOf="@+id/otherUserDocMessage"
+            tools:visibility="visible" />
+
+        <ImageView
+            android:id="@+id/leftDocMsgTail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:rotation="-14"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="@+id/tailAnchor"
+            app:layout_constraintEnd_toEndOf="@+id/tailAnchor"
+            app:layout_constraintHorizontal_bias="0.60"
+            app:layout_constraintStart_toStartOf="@+id/tailAnchor"
+            app:layout_constraintTop_toTopOf="@+id/otherUserDocMessage"
+            app:layout_constraintVertical_bias="1.0"
+            app:srcCompat="@drawable/ic_chat_tail" />
+
+        <LinearLayout
+            android:id="@+id/otherUserDocMessage"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginBottom="4dp"
+            android:padding="16dp"
+            android:orientation="vertical"
+            android:translationY="2dp"
+            android:background="@drawable/chat_doc_background"
+            app:layout_constraintBottom_toTopOf="@+id/otherUserDocMessageTime"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/otherUserDocMsgPhoto"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_chainStyle="packed"
+            tools:visibility="visible">
+
+            <ImageView
+                android:id="@+id/imageView3"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                app:srcCompat="@drawable/ic_document" />
+
+            <TextView
+                android:id="@+id/otherUserDocName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:gravity="center"
+                android:text="Document" />
+
+            <TextView
+                android:id="@+id/otherUserDocSize"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Size"
+                android:textSize="12sp" />
+
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

@@ -34,23 +34,21 @@ import com.google.android.material.transition.platform.MaterialContainerTransfor
 import com.google.android.material.transition.platform.MaterialSharedAxis
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.jamid.workconnect.*
-import com.jamid.workconnect.adapter.FirebaseChatAdapter
 import com.jamid.workconnect.adapter.SimpleMessageAdapter
 import com.jamid.workconnect.databinding.FragmentChatBinding
 import com.jamid.workconnect.interfaces.ChatMenuClickListener
-import com.jamid.workconnect.interfaces.GenericLoadingStateListener
-import com.jamid.workconnect.interfaces.MessageItemClickListener
 import com.jamid.workconnect.model.ChatChannel
 import com.jamid.workconnect.model.ChatChannelContributor
 import com.jamid.workconnect.model.Result
 import com.jamid.workconnect.model.SimpleMessage
 import me.everything.android.ui.overscroll.OverScrollDecoratorHelper
 
-class ChatFragment : Fragment(R.layout.fragment_chat), GenericLoadingStateListener, MessageItemClickListener, Animator.AnimatorListener, GestureDetector.OnGestureListener, ChatMenuClickListener {
+class ChatFragment : Fragment(R.layout.fragment_chat), Animator.AnimatorListener, GestureDetector.OnGestureListener, ChatMenuClickListener {
 
     private lateinit var binding: FragmentChatBinding
     private lateinit var simpleMessageAdapter: SimpleMessageAdapter
@@ -65,19 +63,17 @@ class ChatFragment : Fragment(R.layout.fragment_chat), GenericLoadingStateListen
     private var tempUploadingImage: View? = null
     private var currentBufferedMessageId: String = ""
     private var currentBufferedDocReference: DocumentReference? = null
-    private var totalItemCount = 0
-    private lateinit var firebaseChatAdapter: FirebaseChatAdapter
-//    private var mActivePointerId: Int = 0
     private lateinit var mDetector: GestureDetectorCompat
     private lateinit var currentContributor: ChatChannelContributor
     private var onBackPressedCallback: OnBackPressedCallback? = null
     private lateinit var activity: MainActivity
+    private lateinit var listenerRegistration: ListenerRegistration
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
-        enterTransition = MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ true)
-        returnTransition = MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ false)
+        enterTransition = MaterialSharedAxis(MaterialSharedAxis.X, true)
+        returnTransition = MaterialSharedAxis(MaterialSharedAxis.X, false)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -111,7 +107,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat), GenericLoadingStateListen
 
         viewModel.channelContributors(chatChannel).observe(viewLifecycleOwner) {
             if (it != null && it.isNotEmpty()) {
-                simpleMessageAdapter = SimpleMessageAdapter(it, this, lifecycleScope, this)
+                simpleMessageAdapter = SimpleMessageAdapter(it, lifecycleScope, activity)
                 for (user in it) {
                     if (user.contributor.id == viewModel.user.value?.id) {
                         currentContributor = user.contributor
@@ -127,7 +123,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat), GenericLoadingStateListen
 
                 OverScrollDecoratorHelper.setUpOverScroll(binding.messagesRecycler, OverScrollDecoratorHelper.ORIENTATION_VERTICAL)
 
-                Firebase.firestore.collection(CHAT_CHANNELS).document(chatChannel.chatChannelId)
+                listenerRegistration = Firebase.firestore.collection(CHAT_CHANNELS).document(chatChannel.chatChannelId)
                     .collection(MESSAGES)
                     .orderBy(CREATED_AT, Query.Direction.DESCENDING)
                     .limit(it.size.toLong())
@@ -144,10 +140,10 @@ class ChatFragment : Fragment(R.layout.fragment_chat), GenericLoadingStateListen
                     }
 
 
-
                 viewModel.chatMessages(chatChannel.chatChannelId).observe(viewLifecycleOwner) { list ->
                     simpleMessageAdapter.submitList(list)
                 }
+
             }
         }
 
@@ -166,8 +162,9 @@ class ChatFragment : Fragment(R.layout.fragment_chat), GenericLoadingStateListen
         activity.mainBinding.primaryTitle.text = chatChannel.postTitle
         activity.mainBinding.primaryToolbar.setNavigationOnClickListener {
             hideKeyboard()
-            if (isImageMode) {
-                revertImageMode()
+            val fragment = activity.supportFragmentManager.findFragmentByTag(ImageViewFragment.TAG)
+            if (fragment?.isVisible == true) {
+                activity.supportFragmentManager.beginTransaction().remove(fragment).commit()
             } else {
                 findNavController().navigateUp()
             }
@@ -175,11 +172,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat), GenericLoadingStateListen
 
         onBackPressedCallback = activity.onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
             hideKeyboard()
-            if (isImageMode) {
-                revertImageMode()
-            } else {
-                findNavController().navigateUp()
-            }
+            findNavController().navigateUp()
         }
 
         binding.sendMsgBtn.setOnClickListener {
@@ -230,6 +223,38 @@ class ChatFragment : Fragment(R.layout.fragment_chat), GenericLoadingStateListen
 
             viewModel.setImageMessageUploadResult(null)
         }
+
+        viewModel.currentDocUri.observe(viewLifecycleOwner) {
+            if (it != null) {
+                activity.invokeUploadDocFragment(chatChannel)
+            }
+        }
+
+        // onUpload
+        /*Log.d("ChatFragmentDoc", it.toString())
+        val file = File(it.path)
+
+        if (file.exists()) {
+            Toast.makeText(requireContext(), file.name + file.extension, Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(requireContext(), "File doesn't exists.", Toast.LENGTH_SHORT)
+                .show()
+        }*/
+        /*val ref = Firebase.storage.reference.child("test")
+
+        ref.putFile(it)
+            .addOnSuccessListener {
+                ref.downloadUrl.addOnSuccessListener { downloadUri ->
+                    val downloadUrl = downloadUri.toString()
+                    Toast.makeText(requireContext(), downloadUrl, Toast.LENGTH_SHORT).show()
+                }.addOnFailureListener {
+                    Toast.makeText(
+                        requireContext(),
+                        "Something went wrong.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }*/
 
         viewModel.currentCroppedImageUri.observe(viewLifecycleOwner) {
             if (it != null) {
@@ -293,36 +318,17 @@ class ChatFragment : Fragment(R.layout.fragment_chat), GenericLoadingStateListen
         }
     }
 
-    override fun onInitial() {
-
-    }
-
-    override fun onLoadingMore() {
-//        binding.messagesRecycler.smoothScrollToPosition(0)
-    }
-
-    override fun onLoaded() {
-
-    }
-
-    override fun onFinished() {
-
-    }
-
-    override fun onError() {
-
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
+        listenerRegistration.remove()
         onBackPressedCallback?.remove()
         hideKeyboard()
     }
 
-    override fun onImageClick(view: SimpleDraweeView, actualWidth: Int, actualHeight: Int, message: SimpleMessage) {
+   /* override fun onImageClick(view: SimpleDraweeView, actualWidth: Int, actualHeight: Int, message: SimpleMessage) {
         isImageMode = true
         createImageView(view, actualWidth, actualHeight, message.content)
-    }
+    }*/
 
     @SuppressLint("ClickableViewAccessibility")
     private fun createImageView(sv: SimpleDraweeView, actualWidth: Int, actualHeight: Int, img: String) {
@@ -490,9 +496,9 @@ class ChatFragment : Fragment(R.layout.fragment_chat), GenericLoadingStateListen
 
     }
 
-    override fun onTextClick(content: String) {
+   /* override fun onTextClick(content: String) {
         //
-    }
+    }*/
 
     override fun onAnimationStart(animation: Animator?) {
         Log.d("ChatFragment", "Animation has started")

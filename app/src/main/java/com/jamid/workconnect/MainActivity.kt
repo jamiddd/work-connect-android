@@ -9,9 +9,8 @@ import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.location.Location
 import android.location.LocationManager
-import android.os.Build
-import android.os.Bundle
-import android.os.Looper
+import android.net.Uri
+import android.os.*
 import android.util.Log
 import android.view.View
 import android.widget.Toast
@@ -20,11 +19,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.core.widget.doAfterTextChanged
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
+import androidx.navigation.NavOptions
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.transition.AutoTransition
 import androidx.transition.TransitionManager
@@ -41,22 +43,24 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
 import com.jamid.workconnect.auth.AuthFragment
 import com.jamid.workconnect.databinding.ActivityMainBinding
 import com.jamid.workconnect.home.CreateOptionFragment
 import com.jamid.workconnect.home.LocationFragment
 import com.jamid.workconnect.home.TagFragment
 import com.jamid.workconnect.interfaces.*
-import com.jamid.workconnect.message.ChatChannelFragment
-import com.jamid.workconnect.message.MessageFragment
-import com.jamid.workconnect.message.MessageMenuFragment
-import com.jamid.workconnect.message.ProjectDetailContainer
+import com.jamid.workconnect.message.*
 import com.jamid.workconnect.model.*
 import com.jamid.workconnect.profile.BlogsFragment
 import com.jamid.workconnect.profile.CollaborationsListFragment
 import com.jamid.workconnect.profile.ProfileFragment
 import com.jamid.workconnect.profile.ProjectListFragment
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import me.everything.android.ui.overscroll.OverScrollDecoratorHelper
+import java.io.File
+import java.io.FileOutputStream
 
 
 class MainActivity : AppCompatActivity(),
@@ -69,7 +73,8 @@ class MainActivity : AppCompatActivity(),
     SearchItemClickListener,
     UserItemClickListener,
     ChatMenuClickListener,
-    MessageItemClickListener {
+    MessageItemClickListener,
+    ChatChannelClickListener {
 
     private var currentNavController: LiveData<NavController>? = null
     private val viewModel: MainViewModel by viewModels()
@@ -83,6 +88,11 @@ class MainActivity : AppCompatActivity(),
     private var hasPendingTransition = false
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     private lateinit var geocoder: Geocoder
+
+
+    var currentImagePosition = 0
+    var currentMessage: SimpleMessage? = null
+    var currentFileName: String? = null
 
     private val mLocationCallback: LocationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
@@ -266,7 +276,6 @@ class MainActivity : AppCompatActivity(),
                     }
                 }
             }
-
         }
     }
 
@@ -556,6 +565,16 @@ class MainActivity : AppCompatActivity(),
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
     }
 
+    fun invokeUploadDocFragment(chatChannel: ChatChannel) {
+        val fragment = UploadDocumentFragment.newInstance(chatChannel)
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.dynamicViewHolder, fragment, UploadDocumentFragment.TAG)
+            .commit()
+
+        currentBottomFragment = fragment
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+    }
+
     fun projectDetailFragment(chatChannel: ChatChannel, currentContributor: ChatChannelContributor) {
         val fragment = ProjectDetailContainer.newInstance(chatChannel, currentContributor)
         supportFragmentManager.beginTransaction()
@@ -596,6 +615,28 @@ class MainActivity : AppCompatActivity(),
                     val image = data?.data
                     viewModel.setCurrentImage(image)
                     invokeCropFragment(4, 3, 400, 300, "RECTANGLE")
+                }
+                REQUEST_GET_DOCUMENT -> {
+                    val doc = data?.data
+                    viewModel.setCurrentDoc(doc)
+                }
+                CREATE_NEW_DOC -> {
+                    /*val uri = data?.data
+                    val childRef = "${currentMessage!!.chatChannelId}/documents/messages/$currentFileName"
+                    val httpsReference = Firebase.storage.reference.child(childRef)
+                    if (uri != null) {
+
+                        val localFile = File.createTempFile("sample1", "pdf")
+
+                        httpsReference.getFile(localFile)
+                            .addOnSuccessListener {
+                                val simpleMedia = SimpleMedia(currentMessage!!.messageId, currentMessage!!.type, currentMessage!!.content, currentMessage!!.createdAt, currentFileName)
+                                viewModel.insertSimpleMedia(simpleMedia)
+                                startDocumentIntent(Uri.fromFile(localFile))
+                            }.addOnFailureListener {
+                                viewModel.setCurrentError(it)
+                            }
+                    }*/
                 }
             }
         } else {
@@ -866,6 +907,8 @@ class MainActivity : AppCompatActivity(),
         private const val REQUEST_GET_IMAGE = 112
         private const val REQUEST_GET_LOCATION = 113
         private const val REQUEST_FINE_LOCATION = 114
+        private const val REQUEST_GET_DOCUMENT = 115
+        private const val CREATE_NEW_DOC = 116
     }
 
     override fun onImageSelect() {
@@ -877,20 +920,109 @@ class MainActivity : AppCompatActivity(),
     }
 
     override fun onDocumentSelect() {
-
+        val intent = Intent(Intent.ACTION_GET_CONTENT)
+        intent.type = "*/*"
+        startActivityForResult(intent, REQUEST_GET_DOCUMENT)
     }
 
     override fun onImageClick(
         view: SimpleDraweeView,
+       /* view: SimpleDraweeView,
         actualWidth: Int,
-        actualHeight: Int,
+        actualHeight: Int,*/
         message: SimpleMessage
     ) {
 
+        view.transitionName = message.messageId
+        /*val bundle = Bundle().apply {
+            putParcelable("ARG_MESSAGE", message)
+        }*/
+
+
+//        currentNavController?.value?.navigate(R.id.imageViewFragment, bundle)
+        val fragment = ImageViewFragment.newInstance(message)
+//        fragment.sharedElementEnterTransition = MaterialContainerTransform()
+        supportFragmentManager.beginTransaction()
+            .addSharedElement(view, message.messageId)
+            .add(R.id.navHostFragment, fragment, ImageViewFragment.TAG)
+            .addToBackStack(ImageViewFragment.TAG)
+            .commit()
     }
 
     override fun onTextClick(content: String) {
 
+    }
+
+    private fun startDocumentIntent(uri: Uri) {
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.setDataAndType(uri, "application/pdf")
+        intent.flags = Intent.FLAG_ACTIVITY_NO_HISTORY
+        startActivity(intent)
+    }
+
+    override fun onDocumentClick(simpleMessage: SimpleMessage, fullname: String, size: Long) {
+        currentMessage = simpleMessage
+        currentFileName = fullname
+        val externalDir = getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
+        val name = fullname.split('_').last()
+
+        lifecycleScope.launch (Dispatchers.IO) {
+            val med = viewModel.checkIfFileDownloaded(simpleMessage.messageId)
+            if (med != null) {
+                val n = med.onDiskLocation
+                if (n != null) {
+                    val file = File(externalDir, n)
+                    openFile(file)
+                }
+            } else {
+                val file = File(externalDir, name)
+
+                if (file.createNewFile()) {
+                    val childRef = "${currentMessage!!.chatChannelId}/documents/messages/$fullname"
+                    val objectRef = Firebase.storage.reference.child(childRef)
+                    objectRef.getBytes(size + 1024).addOnSuccessListener {
+                        val stream = FileOutputStream(file)
+                        stream.write(it)
+                        stream.flush()
+                        stream.close()
+
+                        val simpleMedia = SimpleMedia(currentMessage!!.messageId, currentMessage!!.type, currentMessage!!.content, currentMessage!!.createdAt, name, size)
+                        viewModel.insertSimpleMedia(simpleMedia)
+                        openFile(file)
+                    }.addOnFailureListener {
+                        viewModel.setCurrentError(Exception(childRef))
+                    }
+                } else {
+                    openFile(file)
+                }
+            }
+        }
+
+    }
+
+    private fun openFile(file: File) {
+        // Get URI and MIME type of file
+        val uri = FileProvider.getUriForFile(this, "com.jamid.workconnect.fileprovider", file)
+        val mime = contentResolver.getType(uri)
+
+        // Open file with user selected app
+        val intent = Intent()
+        intent.action = Intent.ACTION_VIEW
+        intent.setDataAndType(uri, mime)
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        startActivity(intent)
+    }
+
+    override fun onChatChannelClick(chatChannel: ChatChannel) {
+        val navOptions = NavOptions.Builder()
+            .setEnterAnim(R.anim.slide_in_right)
+            .setExitAnim(R.anim.slide_out_left)
+            .build()
+
+        val bundle = Bundle().apply {
+            putParcelable(ChatFragment.ARG_CHAT_CHANNEL, chatChannel)
+        }
+        currentNavController?.value?.navigate(R.id.chatFragment, bundle, navOptions)
     }
 
 }

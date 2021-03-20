@@ -3,6 +3,7 @@ package com.jamid.workconnect.data
 import androidx.lifecycle.LiveData
 import com.jamid.workconnect.model.ChatChannel
 import com.jamid.workconnect.model.ChatChannelContributor
+import com.jamid.workconnect.model.SimpleMedia
 import com.jamid.workconnect.model.SimpleMessage
 
 class MainRepository(val db: WorkConnectDatabase) {
@@ -10,6 +11,7 @@ class MainRepository(val db: WorkConnectDatabase) {
     private val messageDao = db.messageDao()
     private val messageKeyDao = db.messageKeyDao()
     private val chatChannelContributorDao = db.chatChannelContributorDao()
+    private val simpleMediaDao = db.simpleMediaDao()
 
     fun getChatMessages(chatChannelId: String) : List<SimpleMessage> {
         return messageDao.getChatMessages(chatChannelId)
@@ -48,5 +50,19 @@ class MainRepository(val db: WorkConnectDatabase) {
 
     suspend fun clearChatChannelContributorsAndChannelIds() {
         chatChannelContributorDao.clearEverything()
+    }
+
+    suspend fun checkIfDownloaded(messageId: String): SimpleMedia? {
+        return simpleMediaDao.getSimpleMedia(messageId)
+    }
+
+    suspend fun insertSimpleMedia(simpleMedia: SimpleMedia?) {
+        simpleMedia?.let {
+            simpleMediaDao.insertSimpleMedia(listOf(it))
+        }
+    }
+
+    suspend fun getContributor(userId: String): ChatChannelContributor? {
+        return chatChannelContributorDao.getContributor(userId)
     }
 }

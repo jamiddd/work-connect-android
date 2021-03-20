@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/chatDocRightParent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:animateLayoutChanges="true">
+
+        <View
+            android:id="@+id/tailAnchor"
+            android:layout_width="40dp"
+            android:layout_height="1dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="@+id/currentUserDocMsg"
+            app:layout_constraintTop_toBottomOf="@+id/currentUserDocMsg" />
+
+        <TextView
+            android:id="@+id/currentUserDocMsgTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:text="12:52 PM"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
+            android:textColor="@color/darkerGrey"
+            android:textSize="10sp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/currentUserDocMsg"
+            app:layout_constraintTop_toBottomOf="@+id/currentUserDocMsg" />
+
+        <LinearLayout
+            android:id="@+id/currentUserDocMsg"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="4dp"
+            android:background="@drawable/chat_doc_background"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:translationY="2dp"
+            app:layout_constraintBottom_toTopOf="@+id/currentUserDocMsgTime"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_chainStyle="packed">
+
+            <ImageView
+                android:id="@+id/imageView3"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                app:srcCompat="@drawable/ic_document" />
+
+            <TextView
+                android:id="@+id/currentUserDocName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Document"
+                app:layout_constraintBottom_toTopOf="@+id/currentUserDocSize"
+                app:layout_constraintEnd_toEndOf="@+id/currentUserDocMsg"
+                app:layout_constraintStart_toStartOf="@+id/currentUserDocMsg"
+                app:layout_constraintTop_toTopOf="@+id/currentUserDocMsg"
+                app:layout_constraintVertical_bias="1.0"
+                app:layout_constraintVertical_chainStyle="packed" />
+
+            <TextView
+                android:id="@+id/currentUserDocSize"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Size"
+                android:textSize="12sp"
+                app:layout_constraintBottom_toBottomOf="@+id/currentUserDocMsg"
+                app:layout_constraintEnd_toEndOf="@+id/currentUserDocMsg"
+                app:layout_constraintStart_toStartOf="@+id/currentUserDocMsg"
+                app:layout_constraintTop_toBottomOf="@+id/currentUserDocName" />
+
+
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/rightDocMsgTail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:rotation="19"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="@+id/tailAnchor"
+            app:layout_constraintEnd_toEndOf="@+id/tailAnchor"
+            app:layout_constraintHorizontal_bias="0.991"
+            app:layout_constraintStart_toStartOf="@+id/currentUserDocMsg"
+            app:layout_constraintTop_toTopOf="@+id/currentUserDocMsg"
+            app:layout_constraintVertical_bias="1.0"
+            app:srcCompat="@drawable/ic_chat_tail_right"
+            app:tint="@color/grey" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

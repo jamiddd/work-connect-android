@@ -17,9 +17,9 @@ import com.facebook.drawee.view.SimpleDraweeView
 import com.facebook.imagepipeline.request.ImageRequest
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
 import com.jamid.workconnect.*
 import com.jamid.workconnect.data.ContributorAndChannels
-import com.jamid.workconnect.interfaces.GenericLoadingStateListener
 import com.jamid.workconnect.interfaces.MessageItemClickListener
 import com.jamid.workconnect.model.SimpleMessage
 import kotlinx.coroutines.CoroutineScope
@@ -30,12 +30,12 @@ import java.util.*
 
 class SimpleMessageAdapter(
     private val users: List<ContributorAndChannels>,
-    private val messageItemClickListener: MessageItemClickListener,
     private val scope: CoroutineScope,
-    private val genericLoadingStateListener: GenericLoadingStateListener
+    private val activity: MainActivity
 ) : PagedListAdapter<SimpleMessage, SimpleMessageViewHolder>(MessageComparator()) {
 
     val uid = Firebase.auth.currentUser?.uid ?: ""
+    private val messageItemClickListener = activity as MessageItemClickListener
 
     override fun onCurrentListChanged(
         previousList: PagedList<SimpleMessage>?,
@@ -54,7 +54,7 @@ class SimpleMessageAdapter(
                     LayoutInflater.from(parent.context)
                         .inflate(R.layout.chat_balloon_left, parent, false),
                     viewType,
-                    messageItemClickListener,
+                    activity,
                     scope,
                     users
                 )
@@ -64,7 +64,17 @@ class SimpleMessageAdapter(
                     LayoutInflater.from(parent.context)
                         .inflate(R.layout.chat_balloon_image_left, parent, false),
                     viewType,
-                    messageItemClickListener,
+                    activity,
+                    scope,
+                    users
+                )
+            }
+            OTHER_USER_AT_START_DOC, OTHER_USER_AT_END_DOC -> {
+                SimpleMessageViewHolder(
+                    LayoutInflater.from(parent.context)
+                        .inflate(R.layout.chat_balloon_doc_left, parent, false),
+                    viewType,
+                    activity,
                     scope,
                     users
                 )
@@ -74,7 +84,7 @@ class SimpleMessageAdapter(
                     LayoutInflater.from(parent.context)
                         .inflate(R.layout.chat_balloon_right, parent, false),
                     viewType,
-                    messageItemClickListener,
+                    activity,
                     scope,
                     users
                 )
@@ -84,7 +94,17 @@ class SimpleMessageAdapter(
                     LayoutInflater.from(parent.context)
                         .inflate(R.layout.chat_balloon_image_right, parent, false),
                     viewType,
-                    messageItemClickListener,
+                    activity,
+                    scope,
+                    users
+                )
+            }
+            CURRENT_USER_AT_START_DOC, CURRENT_USER_AT_END_DOC -> {
+                SimpleMessageViewHolder(
+                    LayoutInflater.from(parent.context)
+                        .inflate(R.layout.chat_balloon_doc_right, parent, false),
+                    viewType,
+                    activity,
                     scope,
                     users
                 )
@@ -93,7 +113,7 @@ class SimpleMessageAdapter(
                 LayoutInflater.from(parent.context)
                     .inflate(R.layout.chat_balloon_left, parent, false),
                 viewType,
-                messageItemClickListener,
+                activity,
                 scope,
                 users
             )
@@ -115,31 +135,55 @@ class SimpleMessageAdapter(
         when {
             firstMessageFromBottom && !isOnlyMessage -> {
                 return if (isCurrentUserMessage)
-                    if (currentMessage.type == IMAGE) {
-                        CURRENT_USER_AT_END_IMAGE
-                    } else {
-                        CURRENT_USER_AT_END
+                    when (currentMessage.type) {
+                        IMAGE -> {
+                            CURRENT_USER_AT_END_IMAGE
+                        }
+                        DOCUMENT -> {
+                            CURRENT_USER_AT_END_DOC
+                        }
+                        else -> {
+                            CURRENT_USER_AT_END
+                        }
                     }
                 else {
-                    if (currentMessage.type == IMAGE) {
-                        OTHER_USER_AT_END_IMAGE
-                    } else {
-                        OTHER_USER_AT_END
+                    when (currentMessage.type) {
+                        IMAGE -> {
+                            OTHER_USER_AT_END_IMAGE
+                        }
+                        DOCUMENT -> {
+                            OTHER_USER_AT_END_DOC
+                        }
+                        else -> {
+                            OTHER_USER_AT_END
+                        }
                     }
                 }
             }
             isOnlyMessage -> {
                 return if (isCurrentUserMessage) {
-                    if (currentMessage.type == IMAGE) {
-                        CURRENT_USER_AT_END_IMAGE
-                    } else {
-                        CURRENT_USER_AT_END
+                    when (currentMessage.type) {
+                        IMAGE -> {
+                            CURRENT_USER_AT_END_IMAGE
+                        }
+                        DOCUMENT -> {
+                            CURRENT_USER_AT_END_DOC
+                        }
+                        else -> {
+                            CURRENT_USER_AT_END
+                        }
                     }
                 } else {
-                    if (currentMessage.type == IMAGE) {
-                        OTHER_USER_AT_END_IMAGE
-                    } else {
-                        OTHER_USER_AT_END
+                    when (currentMessage.type) {
+                        IMAGE -> {
+                            OTHER_USER_AT_END_IMAGE
+                        }
+                        DOCUMENT -> {
+                            OTHER_USER_AT_END_DOC
+                        }
+                        else -> {
+                            OTHER_USER_AT_END
+                        }
                     }
                 }
             }
@@ -148,23 +192,41 @@ class SimpleMessageAdapter(
                 val isSamePreviousSender = bottomMessage.senderId == currentMessage.senderId
                 return if (isCurrentUserMessage) {
                     if (isSamePreviousSender) {
-                        if (currentMessage.type == IMAGE) {
-                            CURRENT_USER_AT_START_IMAGE
-                        } else {
-                            CURRENT_USER_AT_START
+                        when (currentMessage.type) {
+                            IMAGE -> {
+                                CURRENT_USER_AT_START_IMAGE
+                            }
+                            DOCUMENT -> {
+                                CURRENT_USER_AT_START_DOC
+                            }
+                            else -> {
+                                CURRENT_USER_AT_START
+                            }
                         }
                     } else {
-                        if (currentMessage.type == IMAGE) {
-                            CURRENT_USER_AT_END_IMAGE
-                        } else {
-                            CURRENT_USER_AT_END
+                        when (currentMessage.type) {
+                            IMAGE -> {
+                                CURRENT_USER_AT_END_IMAGE
+                            }
+                            DOCUMENT -> {
+                                CURRENT_USER_AT_END_DOC
+                            }
+                            else -> {
+                                CURRENT_USER_AT_END
+                            }
                         }
                     }
                 } else {
-                    if (currentMessage.type == IMAGE) {
-                        OTHER_USER_AT_START_IMAGE
-                    } else {
-                        OTHER_USER_AT_START
+                    when (currentMessage.type) {
+                        IMAGE -> {
+                            OTHER_USER_AT_START_IMAGE
+                        }
+                        DOCUMENT -> {
+                            OTHER_USER_AT_START_DOC
+                        }
+                        else -> {
+                            OTHER_USER_AT_START
+                        }
                     }
                 }
             }
@@ -176,62 +238,110 @@ class SimpleMessageAdapter(
                 if (isCurrentUserMessage) {
                     return when {
                         isSameTopSender && isSameBottomSender -> {
-                            if (currentMessage.type == IMAGE) {
-                                CURRENT_USER_AT_START_IMAGE
-                            } else {
-                                CURRENT_USER_AT_START
+                            when (currentMessage.type) {
+                                IMAGE -> {
+                                    CURRENT_USER_AT_START_IMAGE
+                                }
+                                DOCUMENT -> {
+                                    CURRENT_USER_AT_START_DOC
+                                }
+                                else -> {
+                                    CURRENT_USER_AT_START
+                                }
                             }
                         }
                         isSameTopSender && !isSameBottomSender -> {
-                            if (currentMessage.type == IMAGE) {
-                                CURRENT_USER_AT_END_IMAGE
-                            } else {
-                                CURRENT_USER_AT_END
+                            when (currentMessage.type) {
+                                IMAGE -> {
+                                    CURRENT_USER_AT_END_IMAGE
+                                }
+                                DOCUMENT -> {
+                                    CURRENT_USER_AT_END_DOC
+                                }
+                                else -> {
+                                    CURRENT_USER_AT_END
+                                }
                             }
                         }
                         !isSameTopSender && isSameBottomSender -> {
-                            if (currentMessage.type == IMAGE) {
-                                CURRENT_USER_AT_START_IMAGE
-                            } else {
-                                CURRENT_USER_AT_START
+                            when (currentMessage.type) {
+                                IMAGE -> {
+                                    CURRENT_USER_AT_START_IMAGE
+                                }
+                                DOCUMENT -> {
+                                    CURRENT_USER_AT_START_DOC
+                                }
+                                else -> {
+                                    CURRENT_USER_AT_START
+                                }
                             }
                         }
                         else -> {
-                            if (currentMessage.type == IMAGE) {
-                                CURRENT_USER_AT_END_IMAGE
-                            } else {
-                                CURRENT_USER_AT_END
+                            when (currentMessage.type) {
+                                IMAGE -> {
+                                    CURRENT_USER_AT_END_IMAGE
+                                }
+                                DOCUMENT -> {
+                                    CURRENT_USER_AT_END_DOC
+                                }
+                                else -> {
+                                    CURRENT_USER_AT_END
+                                }
                             }
                         }
                     }
                 } else {
                     return when {
                         isSameTopSender && isSameBottomSender -> {
-                            if (currentMessage.type == IMAGE) {
-                                OTHER_USER_AT_START_IMAGE
-                            } else {
-                                OTHER_USER_AT_START
+                            when (currentMessage.type) {
+                                IMAGE -> {
+                                    OTHER_USER_AT_START_IMAGE
+                                }
+                                DOCUMENT -> {
+                                    OTHER_USER_AT_START_DOC
+                                }
+                                else -> {
+                                    OTHER_USER_AT_START
+                                }
                             }
                         }
                         isSameTopSender && !isSameBottomSender -> {
-                            if (currentMessage.type == IMAGE) {
-                                OTHER_USER_AT_END_IMAGE
-                            } else {
-                                OTHER_USER_AT_END
+                            when (currentMessage.type) {
+                                IMAGE -> {
+                                    OTHER_USER_AT_END_IMAGE
+                                }
+                                DOCUMENT -> {
+                                    OTHER_USER_AT_END_DOC
+                                }
+                                else -> {
+                                    OTHER_USER_AT_END
+                                }
                             }
                         }
                         !isSameTopSender && isSameBottomSender -> {
-                            if (currentMessage.type == IMAGE) {
-                                OTHER_USER_AT_START_IMAGE
-                            } else {
-                                OTHER_USER_AT_START
+                            when (currentMessage.type) {
+                                IMAGE -> {
+                                    OTHER_USER_AT_START_IMAGE
+                                }
+                                DOCUMENT -> {
+                                    OTHER_USER_AT_START_DOC
+                                }
+                                else -> {
+                                    OTHER_USER_AT_START
+                                }
                             }
                         }
                         else -> {
-                            if (currentMessage.type == IMAGE) {
-                                OTHER_USER_AT_END_IMAGE
-                            } else {
-                                OTHER_USER_AT_END
+                            when (currentMessage.type) {
+                                IMAGE -> {
+                                    OTHER_USER_AT_END_IMAGE
+                                }
+                                DOCUMENT -> {
+                                    OTHER_USER_AT_END_DOC
+                                }
+                                else -> {
+                                    OTHER_USER_AT_END
+                                }
                             }
                         }
                     }
@@ -244,10 +354,12 @@ class SimpleMessageAdapter(
 class SimpleMessageViewHolder(
     val view: View,
     val viewType: Int,
-    private val messageItemClickListener: MessageItemClickListener,
+    val activity: MainActivity,
     private val scope: CoroutineScope,
     private val users: List<ContributorAndChannels>
 ) : RecyclerView.ViewHolder(view) {
+
+    private val messageItemClickListener = activity as MessageItemClickListener
 
     val uid = Firebase.auth.currentUser?.uid ?: " "
 
@@ -277,6 +389,7 @@ class SimpleMessageViewHolder(
                 val tail2 = view.findViewById<ImageView>(R.id.rightImgMsgTail)
                 val imgMsg = view.findViewById<SimpleDraweeView>(R.id.currentUserImgMsg)
                 val textMsg = view.findViewById<TextView>(R.id.currentUserMessage)
+                val docParent1 = view.findViewById<ConstraintLayout>(R.id.chatDocRightParent)
 
                 when (viewType) {
                     CURRENT_USER_AT_START -> {
@@ -288,6 +401,9 @@ class SimpleMessageViewHolder(
                         imgMsg.visibility = View.VISIBLE
                         initiateImageMessage(imgMsg, context, parent2, time2, null, simpleMessage)
                     }
+                    CURRENT_USER_AT_START_DOC -> {
+                        setupDoc(simpleMessage, docParent1)
+                    }
                     CURRENT_USER_AT_END -> {
                         textMsg.text = simpleMessage.content
                         tail1.visibility = View.VISIBLE
@@ -296,6 +412,9 @@ class SimpleMessageViewHolder(
                         imgMsg.visibility = View.VISIBLE
                         tail2.visibility = View.GONE
                         initiateImageMessage(imgMsg, context, parent2, time2, null, simpleMessage)
+                    }
+                    CURRENT_USER_AT_END_DOC -> {
+                        setupDoc(simpleMessage, docParent1)
                     }
                 }
 
@@ -306,6 +425,7 @@ class SimpleMessageViewHolder(
                         time1?.visibility = View.GONE
                     }
                 }
+
             } else {
 
                 val parent1 = view.findViewById<ConstraintLayout>(R.id.chatLeftParent)
@@ -321,6 +441,9 @@ class SimpleMessageViewHolder(
                 val otherUserT = view.findViewById<SimpleDraweeView>(R.id.otherUserPhoto)
                 val otherUserI = view.findViewById<SimpleDraweeView>(R.id.otherUserImgMsgPhoto)
 
+                val docName2 = view.findViewById<TextView>(R.id.otherUserDocName)
+                val docParent2 = view.findViewById<ConstraintLayout>(R.id.chatDocLeftParent)
+
                 val user = users.find {
                     it.contributor.id == simpleMessage.senderId
                 }
@@ -335,7 +458,6 @@ class SimpleMessageViewHolder(
                     Locale.UK
                 ).format(simpleMessage.createdAt) + " • Sent by ${user?.contributor?.name}"
 
-
                 when (viewType) {
                     OTHER_USER_AT_START -> {
                         otherUserT.visibility = View.INVISIBLE
@@ -346,6 +468,9 @@ class SimpleMessageViewHolder(
                         otherUserI.visibility = View.INVISIBLE
                         imgMsg.visibility = View.VISIBLE
                         initiateImageMessage(imgMsg, context, parent2, time2, otherUserI, simpleMessage, false)
+                    }
+                    OTHER_USER_AT_START_DOC -> {
+                        setupDoc(simpleMessage, docParent2)
                     }
                     OTHER_USER_AT_END -> {
                         otherUserT.setImageURI(user?.contributor?.photo)
@@ -360,6 +485,9 @@ class SimpleMessageViewHolder(
                         imgMsg.visibility = View.VISIBLE
                         initiateImageMessage(imgMsg, context, parent2, time2, otherUserI, simpleMessage, false)
                     }
+                    OTHER_USER_AT_END_DOC -> {
+                        setupDoc(simpleMessage, docParent2)
+                    }
                 }
 
                 textMsg?.setOnClickListener {
@@ -371,6 +499,37 @@ class SimpleMessageViewHolder(
                 }
             }
         }
+    }
+
+    private fun setupDoc(message: SimpleMessage, view: ViewGroup) {
+
+        val currentUserDocName = view.findViewById<TextView>(R.id.currentUserDocName)
+        val currentUserDocSize = view.findViewById<TextView>(R.id.currentUserDocSize)
+        val otherUserDocName = view.findViewById<TextView>(R.id.otherUserDocName)
+        val otherUserDocSize = view.findViewById<TextView>(R.id.otherUserDocSize)
+        val words = message.content.split("%2F")
+        val fullName = words.last().split('?')[0]
+        val name = fullName.split('_').last()
+        currentUserDocName?.text = name
+        otherUserDocName?.text = name
+
+        val childRef = "${message.chatChannelId}/documents/messages/$fullName"
+        val objectRef = Firebase.storage.reference.child(childRef)
+
+        objectRef.metadata.addOnSuccessListener {
+
+            val sizeText = (it.sizeBytes / 1024).toString() + " KB"
+            otherUserDocSize?.text = sizeText
+            currentUserDocSize?.text = sizeText
+
+            view.setOnClickListener { v ->
+                messageItemClickListener.onDocumentClick(message, fullName, it.sizeBytes)
+            }
+
+        }.addOnFailureListener {
+            Log.d("SimpleAdapter", it.localizedMessage.toString())
+        }
+
     }
 
     private fun initiateImageMessage(
@@ -394,7 +553,7 @@ class SimpleMessageViewHolder(
 
         v.setOnClickListener {
             if (controller.measuredWidth != 0) {
-                messageItemClickListener.onImageClick(v, controller.measuredWidth, controller.measuredHeight, message)
+                messageItemClickListener.onImageClick(v, /*controller.measuredWidth, controller.measuredHeight,*/ message)
             }
         }
     }

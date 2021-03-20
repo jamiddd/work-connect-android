@@ -9,16 +9,19 @@ import com.jamid.workconnect.Converters
 import com.jamid.workconnect.dao.ChatChannelContributorDao
 import com.jamid.workconnect.dao.MessageDao
 import com.jamid.workconnect.dao.MessageKeyDao
+import com.jamid.workconnect.dao.SimpleMediaDao
 import com.jamid.workconnect.model.ChatChannelContributor
+import com.jamid.workconnect.model.SimpleMedia
 import com.jamid.workconnect.model.SimpleMessage
 import kotlinx.coroutines.CoroutineScope
 
-@Database(entities = [SimpleMessage::class, MessageKey::class, ChatChannelContributor::class, ChannelIds::class], version = 9, exportSchema=false)
+@Database(entities = [SimpleMessage::class, MessageKey::class, ChatChannelContributor::class, ChannelIds::class, SimpleMedia::class], version = 10, exportSchema=false)
 @TypeConverters(Converters::class)
 abstract class WorkConnectDatabase: RoomDatabase() {
     abstract fun messageDao(): MessageDao
     abstract fun messageKeyDao(): MessageKeyDao
     abstract fun chatChannelContributorDao(): ChatChannelContributorDao
+    abstract fun simpleMediaDao(): SimpleMediaDao
 
     companion object {
         @Volatile private var instance: WorkConnectDatabase? = null

@@ -48,6 +48,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _currentImageUri = MutableLiveData<Uri>()
     val currentImageUri: LiveData<Uri> = _currentImageUri
 
+    private val _currentDocUri = MutableLiveData<Uri>()
+    val currentDocUri: LiveData<Uri> = _currentDocUri
+
     private val _currentCroppedImageUri = MutableLiveData<Uri>()
     val currentCroppedImageUri: LiveData<Uri> = _currentCroppedImageUri
 
@@ -942,6 +945,27 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun sendMessage(message: SimpleMessage, ref: DocumentReference) {
+        val mediaRef = db.collection(CHAT_CHANNELS).document(message.chatChannelId).collection(MEDIA).document(message.messageId)
+        val media = SimpleMedia(message.messageId, message.type, message.content, System.currentTimeMillis())
+
+        db.runBatch {
+            it.set(ref, message)
+            if (message.type != TEXT) {
+                it.set(mediaRef, media)
+            }
+            val map = mapOf(
+                LAST_MESSAGE to message,
+                UPDATED_AT to System.currentTimeMillis()
+            )
+            it.update(db.collection(CHAT_CHANNELS).document(message.chatChannelId), map)
+        }.addOnSuccessListener {
+            hasConversationsUpdated.postValue(true)
+        }.addOnFailureListener {
+            setCurrentError(it)
+        }
+    }
+
     private val _imgMessageUploadResult = MutableLiveData<Result<String>>()
     val imgMessageUploadResult: LiveData<Result<String>> = _imgMessageUploadResult
 
@@ -954,7 +978,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             val storageRef = storage.reference
             val randomName = "Image_" + SimpleDateFormat("yyyyMMdd_HHmmss", Locale.UK).format(Date())
 
-            val imageRef = storageRef.child("${currentUser.uid}/images/messages/$chatChannelId/$randomName.jpg")
+            val imageRef = storageRef.child("$chatChannelId/images/messages/$randomName.jpg")
             imageRef.putStream(stream)
                 .addOnSuccessListener { taskSnapshot ->
                     val data = taskSnapshot.bytesTransferred
@@ -1030,6 +1054,71 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun channelContributors(chatChannel: ChatChannel) = repo.channelContributors(chatChannel)
     fun insertContributors(contributors: List<ChatChannelContributor>) = viewModelScope.launch(Dispatchers.IO) {
         repo.insertContributors(contributors)
+    }
+
+    private val _guidelinesUpdateResult = MutableLiveData<Result<String>>()
+    val guidelinesUpdateResult: LiveData<Result<String>> = _guidelinesUpdateResult
+
+    fun updateGuidelines(postId: String, guidelines: String) {
+        val map = mapOf("guidelines" to guidelines)
+
+        db.collection(POSTS).document(postId)
+            .update(map)
+            .addOnSuccessListener {
+                _guidelinesUpdateResult.postValue(Result.Success(guidelines))
+            }.addOnFailureListener {
+                _guidelinesUpdateResult.postValue(Result.Error(it))
+            }
+    }
+
+
+    fun setGuidelinesUpdateResult(result: Result<String>?) {
+        _guidelinesUpdateResult.postValue(result)
+    }
+
+    fun setCurrentDoc(doc: Uri?) {
+        _currentDocUri.postValue(doc)
+    }
+
+    private val _docUploadResult = MutableLiveData<Result<SimpleMessage>>().apply {
+        value = null
+    }
+    val docUploadResult: LiveData<Result<SimpleMessage>> = _docUploadResult
+
+    fun uploadDoc(localPath: Uri, chatChannelId: String, messageId: String, name: String?) = viewModelScope.launch(Dispatchers.IO) {
+        val currentUser = auth.currentUser
+        val message = SimpleMessage(messageId, chatChannelId, "Document", localPath.toString(), currentUser!!.uid, System.currentTimeMillis())
+        repo.insertMessage(message)
+
+        val randomName = "Document_" + SimpleDateFormat("yyyyMMdd_HHmmss", Locale.UK).format(Date())
+        val docRef = storage.reference.child("$chatChannelId/documents/messages/${randomName}_$name")
+
+        docRef.putFile(localPath)
+            .addOnSuccessListener {
+                docRef.downloadUrl
+                    .addOnSuccessListener {
+                        message.content = it.toString()
+                        _currentDocUri.postValue(null)
+                        _docUploadResult.postValue(Result.Success(message))
+                    }.addOnFailureListener {
+                        _docUploadResult.postValue(Result.Error(it))
+                    }
+            }.addOnFailureListener {
+                _docUploadResult.postValue(Result.Error(it))
+            }
+
+    }
+
+    suspend fun checkIfFileDownloaded(messageId: String): SimpleMedia? {
+        return repo.checkIfDownloaded(messageId)
+    }
+
+    fun insertSimpleMedia(simpleMedia: SimpleMedia?) = viewModelScope.launch(Dispatchers.IO) {
+        repo.insertSimpleMedia(simpleMedia)
+    }
+
+    suspend fun getContributor(userId: String): ChatChannelContributor? {
+        return repo.getContributor(userId)
     }
 
     companion object {

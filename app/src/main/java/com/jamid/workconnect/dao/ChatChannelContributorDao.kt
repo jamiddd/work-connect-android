@@ -16,6 +16,8 @@ interface ChatChannelContributorDao {
     @Query("SELECT * FROM chat_user LEFT JOIN channel_ids ON chat_user.id = channel_ids.userId WHERE chatChannelId = :chatChannelId")
     fun getChatChannelContributors(chatChannelId: String): LiveData<List<ContributorAndChannels>>
 
+    @Query("SELECT * FROM chat_user WHERE id = :userId LIMIT 1")
+    suspend fun getContributor(userId: String): ChatChannelContributor?
 
     @Insert(onConflict=OnConflictStrategy.REPLACE)
     fun insertContributorChannel(channels: List<ChannelIds>)

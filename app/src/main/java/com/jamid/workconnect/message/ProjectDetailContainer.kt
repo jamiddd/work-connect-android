@@ -8,6 +8,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import com.google.android.material.appbar.AppBarLayout
@@ -23,6 +24,8 @@ import com.jamid.workconnect.model.ChatChannel
 import com.jamid.workconnect.model.ChatChannelContributor
 import com.jamid.workconnect.model.Post
 import com.jamid.workconnect.profile.ProfileFragment
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class ProjectDetailContainer : Fragment(R.layout.project_detail_container), UserItemClickListener, PostItemClickListener, PostsLoadStateListener {
 
@@ -47,7 +50,10 @@ class ProjectDetailContainer : Fragment(R.layout.project_detail_container), User
         viewModel.setCurrentChatChannel(chatChannel)
         viewModel.setCurrentContributor(contributor)
 
-        activity.mainBinding.primaryAppBar.hide()
+        lifecycleScope.launch {
+            delay(150)
+            activity.mainBinding.primaryAppBar.hide()
+        }
 
         viewModel.currentPost.observe(viewLifecycleOwner) {
             if (it == null) {
@@ -77,6 +83,7 @@ class ProjectDetailContainer : Fragment(R.layout.project_detail_container), User
         navController.addOnDestinationChangedListener { controller, destination, arguments ->
             when (destination.id) {
                 R.id.projectDetailFragment -> {
+                    binding.pdcTitle.text = ""
                     binding.pdcAppbar.visibility = View.VISIBLE
                     binding.mediaTabs.visibility = View.GONE
                     binding.pdcToolbar.setNavigationOnClickListener {
@@ -88,15 +95,16 @@ class ProjectDetailContainer : Fragment(R.layout.project_detail_container), User
                                 .remove(it)
                                 .commit()
                         }
-
                     }
                     binding.pdcAppbarImg.visibility = View.VISIBLE
                     (binding.pdcFragContainer.layoutParams as CoordinatorLayout.LayoutParams).behavior = AppBarLayout.ScrollingViewBehavior()
                 }
                 R.id.projectGuidelinesFragment -> {
+                    binding.pdcTitle.text = "Project Guidelines"
                     binding.mediaTabs.visibility = View.GONE
                     binding.pdcAppbarImg.visibility = View.GONE
                     binding.pdcToolbar.setNavigationOnClickListener {
+                        hideKeyboard()
                         controller.navigateUp()
                     }
                 }
@@ -117,6 +125,7 @@ class ProjectDetailContainer : Fragment(R.layout.project_detail_container), User
                     }
                 }
                 R.id.mediaFragment -> {
+                    binding.pdcTitle.text = "Media"
                     binding.pdcAppbarImg.visibility = View.GONE
                     binding.mediaTabs.visibility = View.VISIBLE
                     binding.pdcToolbar.setNavigationOnClickListener {

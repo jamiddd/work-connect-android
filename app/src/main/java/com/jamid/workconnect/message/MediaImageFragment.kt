@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.GridLayoutManager
@@ -19,21 +18,13 @@ import com.jamid.workconnect.*
 import com.jamid.workconnect.databinding.FragmentMediaImageBinding
 import com.jamid.workconnect.model.SimpleMedia
 
-class MediaImageFragment : Fragment() {
+class MediaImageFragment : Fragment(R.layout.fragment_media_image) {
 
     private lateinit var binding: FragmentMediaImageBinding
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_media_image, container, false)
-        // Inflate the layout for this fragment
-        return binding.root
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding = FragmentMediaImageBinding.bind(view)
 
         val chatChannelId = arguments?.getString("chatChannelId") ?: return
         val query = Firebase.firestore
