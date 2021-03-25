@@ -16,17 +16,20 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.jamid.workconnect.*
 import com.jamid.workconnect.databinding.FragmentMediaImageBinding
+import com.jamid.workconnect.interfaces.MessageItemClickListener
 import com.jamid.workconnect.model.SimpleMedia
+import com.jamid.workconnect.model.SimpleMessage
 
 class MediaImageFragment : Fragment(R.layout.fragment_media_image) {
 
     private lateinit var binding: FragmentMediaImageBinding
+    private lateinit var chatChannelId: String
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentMediaImageBinding.bind(view)
 
-        val chatChannelId = arguments?.getString("chatChannelId") ?: return
+        chatChannelId = arguments?.getString("chatChannelId") ?: return
         val query = Firebase.firestore
             .collection(CHAT_CHANNELS)
             .document(chatChannelId)
@@ -56,6 +59,9 @@ class MediaImageFragment : Fragment(R.layout.fragment_media_image) {
     }
 
     inner class GridImageAdapter(options: FirestorePagingOptions<SimpleMedia>): FirestorePagingAdapter<SimpleMedia, GridImageAdapter.GridImageViewHolder>(options){
+
+        private val messageItemClickListener = (requireActivity() as MainActivity) as MessageItemClickListener
+
         inner class GridImageViewHolder(val view: View): RecyclerView.ViewHolder(view) {
             fun bind(media: SimpleMedia?) {
                 if (media != null) {
@@ -63,6 +69,11 @@ class MediaImageFragment : Fragment(R.layout.fragment_media_image) {
                     val width = getWindowWidth() / 3
                     imageView.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, width)
                     imageView.setImageURI(media.mediaLocation)
+
+                    imageView.setOnClickListener {
+                        val message = SimpleMessage(media.id, chatChannelId, media.type, media.mediaLocation, "", media.createdAt)
+                        messageItemClickListener.onImageClick(imageView, message)
+                    }
                 }
             }
         }

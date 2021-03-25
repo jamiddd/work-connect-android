@@ -9,7 +9,6 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.paging.PagedList
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.facebook.drawee.backends.pipeline.Fresco
@@ -36,16 +35,6 @@ class SimpleMessageAdapter(
 
     val uid = Firebase.auth.currentUser?.uid ?: ""
     private val messageItemClickListener = activity as MessageItemClickListener
-
-    override fun onCurrentListChanged(
-        previousList: PagedList<SimpleMessage>?,
-        currentList: PagedList<SimpleMessage>?
-    ) {
-        super.onCurrentListChanged(previousList, currentList)
-        currentList?.forEach {
-            Log.d("SimpleMessage", it.toString())
-        }
-    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SimpleMessageViewHolder {
         return when (viewType) {

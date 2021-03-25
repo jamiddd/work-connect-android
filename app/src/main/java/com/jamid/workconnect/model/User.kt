@@ -22,7 +22,8 @@ data class User(
     var followings: List<String>,
     var activeRequests: List<String>,
     var chatChannels: List<String>,
-    val createdAt: Long
+    val createdAt: Long,
+    val registrationTokens: List<String>
 ): Parcelable {
-    constructor(): this("", "", "", "", null, null, emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), System.currentTimeMillis())
+    constructor(): this("", "", "", "", null, null, emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), System.currentTimeMillis(), emptyList())
 }

@@ -16,7 +16,7 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
 
     override fun onNewToken(p0: String) {
         super.onNewToken(p0)
-
+        Log.d(TAG, "Token = $p0")
     }
 
     override fun onMessageReceived(p0: RemoteMessage) {
@@ -43,7 +43,7 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
      */
     private fun sendRegistrationToServer(token: String?) {
         // TODO: Implement this method to send token to your app server.
-        Log.d(TAG, "sendRegistrationTokenToServer($token)")
+        Log.d(TAG, "Token - $token")
     }
 
     private fun sendNotification(messageBody: String) {

@@ -16,6 +16,7 @@ import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.storage.ktx.storage
 import com.jamid.workconnect.auth.SignInFormResult
 import com.jamid.workconnect.data.*
@@ -130,6 +131,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     init {
         val currentUser = auth.currentUser
         _firebaseUser.postValue(currentUser)
+
+        FirebaseMessaging.getInstance().token.addOnSuccessListener {
+            Log.d(TAG, "Token = $it")
+        }.addOnFailureListener {
+            Log.e(TAG, it.localizedMessage)
+        }
         /*if (currentUser != null) {
             db.collection(USERS).document(currentUser.uid)
                 .addSnapshotListener { value, error ->
@@ -180,12 +187,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             val user = if (usernameExists != null) {
                 if (usernameExists) {
                     val newUsername = username + System.currentTimeMillis().toString()
-                    User(uid, name!!, newUsername, email, null, photo, interests, emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), System.currentTimeMillis())
+                    User(uid, name!!, newUsername, email, null, photo, interests, emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), System.currentTimeMillis(), emptyList())
                 } else {
-                    User(uid, name!!, username, email, null, photo, interests, emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), System.currentTimeMillis())
+                    User(uid, name!!, username, email, null, photo, interests, emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), System.currentTimeMillis(), emptyList())
                 }
             } else {
-                User(uid, name!!, username, email, null, photo, interests, emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), System.currentTimeMillis())
+                User(uid, name!!, username, email, null, photo, interests, emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), System.currentTimeMillis(), emptyList())
             }
 
             db.collection(USERS).document(uid).set(user)
