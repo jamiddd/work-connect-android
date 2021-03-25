@@ -44,6 +44,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.storage.ktx.storage
 import com.jamid.workconnect.auth.AuthFragment
 import com.jamid.workconnect.databinding.ActivityMainBinding
@@ -215,6 +216,8 @@ class MainActivity : AppCompatActivity(),
 
         viewModel.firebaseUser.observe(this) {
             if (it != null) {
+
+
                 db.collection(USERS).document(it.uid)
                     .addSnapshotListener { v, e ->
                         if (e != null) {
@@ -238,6 +241,12 @@ class MainActivity : AppCompatActivity(),
 
         viewModel.user.observe(this) { user ->
             if (user != null) {
+                FirebaseMessaging.getInstance().token.addOnSuccessListener { token ->
+                    viewModel.sendRegistrationTokenToServer(token)
+                }.addOnFailureListener {
+                    Log.e(MainViewModel.TAG, it.localizedMessage)
+                }
+
                 mainBinding.userIcon.setImageURI(user.photo)
 
                 mainBinding.userIcon.setOnClickListener {

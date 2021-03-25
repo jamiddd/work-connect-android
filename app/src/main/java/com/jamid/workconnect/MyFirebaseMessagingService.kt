@@ -9,18 +9,34 @@ import android.media.RingtoneManager
 import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 
 class MyFirebaseMessagingService: FirebaseMessagingService() {
 
+    private val auth = Firebase.auth
+
     override fun onNewToken(p0: String) {
         super.onNewToken(p0)
-        Log.d(TAG, "Token = $p0")
+        if (auth.currentUser != null) {
+            if (application != null) {
+                val viewModel = MainViewModel(application)
+                viewModel.sendRegistrationTokenToServer(p0)
+            }
+        }
     }
 
-    override fun onMessageReceived(p0: RemoteMessage) {
-        super.onMessageReceived(p0)
+    override fun onMessageReceived(remoteMessage: RemoteMessage) {
+        super.onMessageReceived(remoteMessage)
+        if (remoteMessage.data.isNotEmpty()) {
+            Log.d(TAG, remoteMessage.data.toString())
+        }
+
+        remoteMessage.notification?.let {
+
+        }
     }
 
     /**
@@ -33,18 +49,6 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
         // [END dispatch_job]
     }*/
 
-    /**
-     * Persist token to third-party servers.
-     *
-     * Modify this method to associate the user's FCM registration token with any server-side account
-     * maintained by your application.
-     *
-     * @param token The new token.
-     */
-    private fun sendRegistrationToServer(token: String?) {
-        // TODO: Implement this method to send token to your app server.
-        Log.d(TAG, "Token - $token")
-    }
 
     private fun sendNotification(messageBody: String) {
         val intent = Intent(this, MainActivity::class.java)
@@ -72,7 +76,7 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
             notificationManager.createNotificationChannel(channel)
         }
 
-        notificationManager.notify(ID_NOTIFICATION /* ID of notification */, notificationBuilder.build())
+        notificationManager.notify(ID_NOTIFICATION, notificationBuilder.build())
     }
 
     companion object {

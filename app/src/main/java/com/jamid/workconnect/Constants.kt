@@ -49,6 +49,7 @@ const val USERNAME = "username"
 const val ABOUT = "about"
 const val PHOTO = "photo"
 const val INTERESTS = "interests"
+const val REGISTRATION_TOKENS = "registrationTokens"
 
 // post related
 const val ADMIN = "admin"

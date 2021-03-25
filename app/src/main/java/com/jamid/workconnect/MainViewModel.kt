@@ -132,27 +132,47 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val currentUser = auth.currentUser
         _firebaseUser.postValue(currentUser)
 
-        FirebaseMessaging.getInstance().token.addOnSuccessListener {
-            Log.d(TAG, "Token = $it")
+        FirebaseMessaging.getInstance().token.addOnSuccessListener { token ->
+            sendRegistrationTokenToServer(token)
         }.addOnFailureListener {
             Log.e(TAG, it.localizedMessage)
         }
-        /*if (currentUser != null) {
-            db.collection(USERS).document(currentUser.uid)
-                .addSnapshotListener { value, error ->
-                    if (error != null) {
-                        _networkErrors.postValue(error)
-                    }
-
-                    if (value != null && value.exists()) {
-                        val user = value.toObject(User::class.java)
-                        _user.postValue(user)
-                    }
-                }
-        }*/
 
         database = WorkConnectDatabase.getInstance(application.applicationContext, viewModelScope)
         repo = MainRepository(database)
+    }
+
+    fun sendRegistrationTokenToServer(token: String) {
+        val user = user.value
+        if (user != null) {
+
+            val uid = user.id
+
+            db.runBatch {
+                it.update(db.collection(USERS).document(uid), REGISTRATION_TOKENS, FieldValue.arrayUnion(token))
+
+                val tokens = mutableListOf<String>()
+                tokens.add(token)
+                tokens.addAll(user.registrationTokens)
+
+                val map = mapOf(
+                    NAME to user.name,
+                    USERNAME to user.username,
+                    PHOTO to user.photo,
+                    REGISTRATION_TOKENS to tokens
+                )
+
+                for (id in user.projectIds) {
+                    it.update(db.collection(POSTS).document(id), ADMIN, map)
+                }
+
+                for (id in user.chatChannels) {
+                    it.update(db.collection(CHAT_CHANNELS).document(id), REGISTRATION_TOKENS, FieldValue.arrayUnion(token))
+                }
+            }.addOnFailureListener {
+                Log.e(TAG, it.localizedMessage)
+            }
+        }
     }
 
     val config = PagedList.Config.Builder()
@@ -228,6 +248,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 }
         }
     }
+
+
 
     fun setCurrentUser(user: User?) {
         _user.postValue(user)
@@ -636,7 +658,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val map = mapOf(
             NAME to currentUser.name,
             USERNAME to currentUser.username,
-            PHOTO to currentUser.photo
+            PHOTO to currentUser.photo,
+            REGISTRATION_TOKENS to currentUser.registrationTokens
         )
 
         val ref = db.collection(POSTS).document()
@@ -692,16 +715,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     if (type == Project) {
                        it.update(db.collection(USERS).document(currentUser.id), PROJECT_IDS, FieldValue.arrayUnion(postId))
                        it.update(db.collection(USERS).document(currentUser.id), CHAT_CHANNELS, FieldValue.arrayUnion(chatChannelRefId))
-                       val chatChannel = ChatChannel(chatChannelRefId, postId, title, image, listOf(currentUser.id), now, now, null)
+                       val chatChannel = ChatChannel(chatChannelRefId, postId, title, image, listOf(currentUser.id), currentUser.registrationTokens, now, now, null)
                        it.set(chatChannelRef, chatChannel)
-                       val map1 = mapOf(
-                           ID to currentUser.id,
-                           NAME to currentUser.name,
-                           USERNAME to currentUser.username,
-                           PHOTO to currentUser.photo,
-                           ADMIN to true
+
+                       val chatChannelContributor = ChatChannelContributor(
+                            currentUser.id,
+                            currentUser.name,
+                            currentUser.username,
+                            currentUser.photo,
+                            true
                        )
-                       it.set(chatChannelRef.collection(CONTRIBUTORS).document(currentUser.id), map1)
+
+                       it.set(chatChannelRef.collection(CONTRIBUTORS).document(currentUser.id), chatChannelContributor)
                    } else {
                        it.update(db.collection(USERS).document(currentUser.id), BLOG_IDS, FieldValue.arrayUnion(postId))
                    }

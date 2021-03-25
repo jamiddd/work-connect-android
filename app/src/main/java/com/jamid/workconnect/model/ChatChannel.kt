@@ -10,9 +10,10 @@ data class ChatChannel(
     var postTitle: String,
     var postImage: String?,
     val contributorsList: List<String>,
+    val registrationTokens: List<String>,
     val createdAt: Long,
     var updatedAt: Long,
     var lastMessage: SimpleMessage?
 ): Parcelable {
-    constructor(): this("", "", "", "", emptyList(), 0, 0, null)
+    constructor(): this("", "", "", "", emptyList(), emptyList(), 0, 0, null)
 }
