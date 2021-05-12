@@ -1,33 +1,51 @@
 package com.jamid.workconnect.explore
 
-import android.content.Context
 import android.os.Bundle
 import android.view.View
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
+import android.widget.Toast
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.jamid.workconnect.*
-import com.jamid.workconnect.adapter.ExploreAdapter
+import com.jamid.workconnect.adapter.paging2.ExploreAdapter
 import com.jamid.workconnect.databinding.FragmentExploreHomeBinding
 import com.jamid.workconnect.model.Post
+import com.jamid.workconnect.model.Result
+import com.jamid.workconnect.model.User
 import com.jamid.workconnect.model.UserMinimal
-import me.everything.android.ui.overscroll.OverScrollDecoratorHelper
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
-class ExploreHomeFragment : Fragment(R.layout.fragment_explore_home) {
+class ExploreHomeFragment : InsetControlFragment(R.layout.fragment_explore_home) {
 
     private lateinit var binding: FragmentExploreHomeBinding
-    private val viewModel: MainViewModel by activityViewModels()
-    private lateinit var activity: MainActivity
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        activity = requireActivity() as MainActivity
-    }
+    private var job: Job? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         binding = FragmentExploreHomeBinding.bind(view)
+        setInsetView(binding.exploreRecycler, mapOf(INSET_TOP to 56, INSET_BOTTOM to 56))
+
+        binding.exploreRefresher.setProgressViewOffset(false, 0, viewModel.windowInsets.value!!.first + convertDpToPx(64))
+        binding.exploreRefresher.setSlingshotDistance(convertDpToPx(54))
+        binding.exploreRefresher.setColorSchemeColors(ContextCompat.getColor(activity, R.color.blue_500))
+
+        job = initAdapter()
+
+        binding.exploreRefresher.setOnRefreshListener {
+            job?.cancel()
+            job = initAdapter()
+            viewLifecycleOwner.lifecycleScope.launchWhenCreated {
+                delay(4000)
+                binding.exploreRefresher.isRefreshing = false
+            }
+        }
+
+    }
+
+    private fun initAdapter() = lifecycleScope.launch {
 
         val post1 = Post()
         post1.type = PROJECT
@@ -35,17 +53,38 @@ class ExploreHomeFragment : Fragment(R.layout.fragment_explore_home) {
         val post2 = Post()
         post2.type = BLOG
 
-        val exploreAdapter = ExploreAdapter(listOf(post1, post2, UserMinimal()), viewLifecycleOwner, viewModel, activity, activity)
+        val exploreAdapter = ExploreAdapter(listOf(post1, post2, UserMinimal()), activity)
 
         binding.exploreRecycler.apply {
             adapter = exploreAdapter
             layoutManager = LinearLayoutManager(activity)
         }
 
-        OverScrollDecoratorHelper.setUpOverScroll(binding.exploreRecycler, OverScrollDecoratorHelper.ORIENTATION_VERTICAL)
+//        setOverScrollView(binding.exploreRecycler)
 
-        viewModel.windowInsets.observe(viewLifecycleOwner) { (top, bottom) ->
-            binding.root.setPadding(0, top + convertDpToPx(64), 0, bottom + convertDpToPx(64))
+        viewModel.projects().observe(viewLifecycleOwner) {
+            if (!it.isNullOrEmpty()) {
+                exploreAdapter.projectsAdapterHorizontal?.submitList(it)
+            }
+        }
+
+        viewModel.blogs().observe(viewLifecycleOwner) {
+            if (!it.isNullOrEmpty()) {
+                exploreAdapter.blogsAdapterHorizontal?.submitList(it)
+            }
+        }
+
+        when (val usersSnapshotResult = viewModel.randomTopUsers()) {
+            is Result.Success -> {
+                val snapshot = usersSnapshotResult.data
+                val users = snapshot.toObjects(User::class.java)
+
+                exploreAdapter.userAdapter?.submitList(users)
+
+            }
+            is Result.Error -> {
+                Toast.makeText(activity, usersSnapshotResult.exception.localizedMessage, Toast.LENGTH_LONG).show()
+            }
         }
 
     }
@@ -56,4 +95,5 @@ class ExploreHomeFragment : Fragment(R.layout.fragment_explore_home) {
         fun newInstance() =
             ExploreHomeFragment()
     }
+
 }

@@ -1,51 +1,40 @@
 package com.jamid.workconnect.search
 
+import android.content.Context
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.paging.PagedList
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.firebase.ui.firestore.paging.FirestorePagingOptions
-import com.google.firebase.firestore.Query
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
-import com.jamid.workconnect.*
-import com.jamid.workconnect.adapter.SearchAdapter
+import com.jamid.workconnect.MainActivity
+import com.jamid.workconnect.MainViewModel
+import com.jamid.workconnect.R
+import com.jamid.workconnect.adapter.paging2.SearchAdapter
+import com.jamid.workconnect.convertDpToPx
 import com.jamid.workconnect.databinding.FragmentSearchPeopleBinding
-import com.jamid.workconnect.model.SearchResult
+import com.jamid.workconnect.model.User
+import me.everything.android.ui.overscroll.OverScrollDecoratorHelper
 
 class SearchPeopleFragment : Fragment(R.layout.fragment_search_people) {
 
     private lateinit var binding: FragmentSearchPeopleBinding
-    private lateinit var searchAdapter: SearchAdapter
+    private lateinit var searchAdapter: SearchAdapter<User>
     private val viewModel: MainViewModel by activityViewModels()
+    private lateinit var activity: MainActivity
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        activity = context as MainActivity
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val db = Firebase.firestore
         binding = FragmentSearchPeopleBinding.bind(view)
-        val activity = requireActivity() as MainActivity
 
-        val config = PagedList.Config.Builder()
-            .setPageSize(10)
-            .setEnablePlaceholders(false)
-            .setPrefetchDistance(5)
-            .build()
-
-        val initialQuery = db.collection(USERS_SEARCH)
-            .whereArrayContains(SUBSTRINGS, " ")
-            .orderBy(RANK, Query.Direction.DESCENDING)
-
-        val options = FirestorePagingOptions.Builder<SearchResult>()
-            .setQuery(initialQuery, config, SearchResult::class.java)
-            .setLifecycleOwner(viewLifecycleOwner)
-            .build()
-
-        searchAdapter = SearchAdapter(options, activity)
+        searchAdapter = SearchAdapter(User::class.java, activity)
 
         binding.userHorizRecycler.apply {
             adapter = searchAdapter
@@ -53,18 +42,15 @@ class SearchPeopleFragment : Fragment(R.layout.fragment_search_people) {
             layoutManager = LinearLayoutManager(activity)
         }
 
+        OverScrollDecoratorHelper.setUpOverScroll(binding.userHorizRecycler, OverScrollDecoratorHelper.ORIENTATION_VERTICAL)
+
         viewModel.currentQuery.observe(viewLifecycleOwner) {
             if (it != null) {
-                val query = db.collection(USERS_SEARCH)
-                    .whereArrayContains(SUBSTRINGS, it)
-                    .orderBy(RANK, Query.Direction.DESCENDING)
-
-                val newOptions = FirestorePagingOptions.Builder<SearchResult>()
-                    .setQuery(query, config, SearchResult::class.java)
-                    .setLifecycleOwner(viewLifecycleOwner)
-                    .build()
-
-                searchAdapter.updateOptions(newOptions)
+                viewModel.searchUsers(it).observe(viewLifecycleOwner) { users ->
+                    if (users.isNotEmpty()) {
+                        searchAdapter.submitList(users)
+                    }
+                }
             }
         }
 

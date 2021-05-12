@@ -2,42 +2,34 @@ package com.jamid.workconnect.search
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
-import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.google.android.material.tabs.TabLayoutMediator
 import com.jamid.workconnect.*
 import com.jamid.workconnect.databinding.FragmentSearchBinding
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import me.everything.android.ui.overscroll.OverScrollDecoratorHelper
 
-class SearchFragment : Fragment(R.layout.fragment_search) {
+class SearchFragment : SupportFragment(R.layout.fragment_search, TAG, false) {
 
     private lateinit var binding: FragmentSearchBinding
-    private val viewModel: MainViewModel by activityViewModels()
-    private lateinit var activity: MainActivity
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enterTransition = null
+        exitTransition = null
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        activity = requireActivity() as MainActivity
         binding = FragmentSearchBinding.bind(view)
 
-        binding.searchViewPager.adapter = SearchPagesAdapter(requireActivity())
+        binding.searchViewPager.adapter = SearchPagesAdapter(activity)
         binding.searchViewPager.offscreenPageLimit = 1
 
-        activity.mainBinding.cancelSearchBtn.setOnClickListener {
-            hideKeyboard()
-        }
-
-        lifecycleScope.launch {
-            delay(150)
-            activity.mainBinding.primaryTabs.visibility = View.VISIBLE
-            activity.mainBinding.primarySearchLayout.transitionToEnd()
-        }
+        OverScrollDecoratorHelper.setUpOverScroll((binding.searchViewPager[0] as RecyclerView), OverScrollDecoratorHelper.ORIENTATION_HORIZONTAL)
 
         viewModel.currentQuery.observe(viewLifecycleOwner) {
             if (it == null) {
@@ -49,7 +41,6 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
             }
         }
 
-
         TabLayoutMediator(activity.mainBinding.primaryTabs, binding.searchViewPager) { tabX, pos ->
             when (pos) {
                 0 -> tabX.text = PROJECTS
@@ -57,16 +48,6 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
                 2 -> tabX.text = PEOPLE
             }
         }.attach()
-
-        viewModel.windowInsets.observe(viewLifecycleOwner) { (top, bottom) ->
-            if (bottom < 200) {
-                findNavController().navigateUp()
-                activity.mainBinding.primarySearchLayout.setTransitionDuration(150)
-                activity.mainBinding.bottomNav.show(activity.mainBinding.bottomBlur)
-                activity.mainBinding.primarySearchBar.text.clear()
-                activity.mainBinding.primarySearchBar.clearFocus()
-            }
-        }
 
     }
 
@@ -89,6 +70,8 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
     }
 
     companion object {
+
+        const val TAG = "SearchFragment"
 
         @JvmStatic
         fun newInstance() = SearchFragment()

@@ -1,49 +1,38 @@
 package com.jamid.workconnect
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
-import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.google.android.material.tabs.TabLayoutMediator
 import com.jamid.workconnect.databinding.FragmentNotificationBinding
+import me.everything.android.ui.overscroll.OverScrollDecoratorHelper
 
-class NotificationFragment : BaseBottomSheetFragment() {
+class NotificationFragment : SupportFragment(R.layout.fragment_notification, TAG, true) {
 
     private lateinit var binding: FragmentNotificationBinding
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_notification, container, false)
-        // Inflate the layout for this fragment
-        return binding.root
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding = FragmentNotificationBinding.bind(view)
+        binding.notificationPager.adapter = NotificationPager(activity)
 
-        binding.notificationPager.adapter = NotificationPager(requireActivity())
+        OverScrollDecoratorHelper.setUpOverScroll(binding.notificationPager.getChildAt(0) as RecyclerView, OverScrollDecoratorHelper.ORIENTATION_HORIZONTAL)
 
-        TabLayoutMediator(binding.notificationTabs, binding.notificationPager) { t, p ->
+        TabLayoutMediator(activity.mainBinding.primaryTabs, binding.notificationPager) { t, p ->
             when (p) {
                 0 -> t.text = "General"
                 1 -> t.text = "Requests"
             }
         }.attach()
 
-        binding.cancelNotificationsBtn.setOnClickListener {
-            findNavController().navigateUp()
-        }
-
     }
 
     companion object {
+        const val TITLE = "Notifications"
+        const val TAG = "NotificationFragment"
 
         @JvmStatic
         fun newInstance() = NotificationFragment()

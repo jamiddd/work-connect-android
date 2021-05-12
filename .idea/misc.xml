@@ -3,12 +3,18 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/drawable/black_over_white_back_arrow.xml" value="0.2111111111111111" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/drawable/bottom_sheet_background.xml" value="0.8" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/drawable/bottom_transparent_view.xml" value="0.24212962962962964" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/drawable/chat_doc_background.xml" value="0.24212962962962964" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/drawable/circle.xml" value="0.23881278538812786" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/drawable/cursor_drawable.xml" value="0.1259259259259259" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/drawable/dark_grey_extra_rounded.xml" value="0.8" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/drawable/dark_grey_rounded_rect.xml" value="0.8" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/drawable/dismiss_button_ripple.xml" value="0.3421296296296296" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/drawable/dissmiss_button_ripple.xml" value="0.3421296296296296" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/drawable/grey_extra_rounded_edittext.xml" value="0.8" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/drawable/grey_outline_rect.xml" value="0.2324074074074074" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/drawable/grey_rounded_rect_edittext.xml" value="0.8" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/drawable/ic_baseline_close_24.xml" value="0.2111111111111111" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/drawable/ic_chat_tail.xml" value="0.24212962962962964" />
@@ -19,83 +25,102 @@
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/drawable/left_balloon.xml" value="0.24212962962962964" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/drawable/light_grey_extra_rounded.xml" value="0.8" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/drawable/light_grey_rounded_rect.xml" value="0.8" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/drawable/quote_background.xml" value="0.23881278538812786" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/drawable/quote_background_night.xml" value="0.23881278538812786" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/drawable/right_balloon.xml" value="0.24212962962962964" />
-        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/activity_main.xml" value="0.4" />
-        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/chat_balloon_doc_left.xml" value="0.562565720294427" />
-        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/chat_balloon_doc_right.xml" value="0.8" />
-        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/chat_balloon_image_left.xml" value="0.4" />
-        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/chat_balloon_image_right.xml" value="0.4" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/drawable/status_bar_overlay.xml" value="0.20092592592592592" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/activity_main.xml" value="0.264" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/chat_balloon_doc_left.xml" value="0.4" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/chat_balloon_doc_right.xml" value="0.264" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/chat_balloon_image_left.xml" value="0.6" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/chat_balloon_image_right.xml" value="0.264" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/chat_balloon_left.xml" value="0.4" />
-        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/chat_balloon_right.xml" value="0.8" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/chat_balloon_right.xml" value="0.2" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/chat_channel_layout.xml" value="0.4" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/chip.xml" value="0.22777777777777777" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/chip_filter.xml" value="0.1" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/creating_blog_progress_dialog.xml" value="0.22777777777777777" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/creating_project_progress_dialog.xml" value="0.264" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/dissmiss_button_ripple.xml" value="0.3277777777777778" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_auth.xml" value="0.264" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_blank.xml" value="0.8" />
-        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_blog.xml" value="0.22777777777777777" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_blog.xml" value="0.2" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_blogs.xml" value="0.2" />
-        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_chat.xml" value="0.4" />
-        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_chat_channel.xml" value="0.22777777777777777" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_chat.xml" value="0.264" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_chat_channel.xml" value="0.264" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_collaborations_list.xml" value="0.176" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_create_option.xml" value="0.3142174432497013" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_create_project.xml" value="0.264" />
-        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_edit.xml" value="0.32647644326476444" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_edit.xml" value="0.264" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_editor.xml" value="0.264" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_explore.xml" value="0.22777777777777777" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_explore_home.xml" value="0.264" />
-        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_followers.xml" value="0.3277777777777778" />
-        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_followings.xml" value="0.3277777777777778" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_followers.xml" value="0.264" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_followings.xml" value="0.264" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_general_notification.xml" value="0.2" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_guest.xml" value="0.23333333333333334" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_home.xml" value="0.42523768366465" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_image.xml" value="0.8" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_image_crop.xml" value="0.2" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_image_pager.xml" value="0.22777777777777777" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_image_select.xml" value="0.23333333333333334" />
-        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_image_view.xml" value="0.2" />
-        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_interest.xml" value="0.264" />
-        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_location.xml" value="0.4" />
-        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_media.xml" value="0.22777777777777777" />
-        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_media_document.xml" value="0.2162037037037037" />
-        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_media_image.xml" value="0.22777777777777777" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_image_view.xml" value="0.264" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_interest.xml" value="0.2" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_location.xml" value="0.2" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_media.xml" value="0.264" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_media_document.xml" value="0.176" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_media_image.xml" value="0.2" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_media_links.xml" value="0.22777777777777777" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_message.xml" value="0.176" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_message_menu.xml" value="0.22777777777777777" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_notification.xml" value="0.22777777777777777" />
-        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_post_menu.xml" value="0.264" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_post_menu.xml" value="0.2916666666666667" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_profile.xml" value="0.264" />
-        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_project.xml" value="0.2" />
-        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_project_detail.xml" value="0.28488708743485813" />
-        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_project_guidelines.xml" value="0.264" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_project.xml" value="0.20689655172413793" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_project_detail.xml" value="0.264" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_project_guidelines.xml" value="0.25504322766570603" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_project_list.xml" value="0.2" />
-        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_projects.xml" value="0.536" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_projects.xml" value="0.176" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_request.xml" value="0.22777777777777777" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_saved_posts.xml" value="0.2" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_saved_projects.xml" value="0.22777777777777777" />
-        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_search.xml" value="0.4" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_search.xml" value="0.16666666666666666" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_search_blogs.xml" value="0.264" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_search_people.xml" value="0.1287037037037037" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_search_projects.xml" value="0.22777777777777777" />
-        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_sign_in.xml" value="0.22777777777777777" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_settings.xml" value="0.264" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_sign_in.xml" value="0.4068471337579618" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_tag.xml" value="0.264" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_user.xml" value="0.264" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/fragment_user_detail.xml" value="0.22777777777777777" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/generic_dialog_layout.xml" value="0.4" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/generic_menu_item.xml" value="0.3277777777777778" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/generic_menu_layout.xml" value="0.264" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/micro_blog_item.xml" value="0.4" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/micro_post_item.xml" value="0.4" />
-        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/micro_project_item.xml" value="0.22777777777777777" />
-        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/mini_project_item.xml" value="0.176" />
-        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/nested_child_recycler_item.xml" value="0.4" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/micro_project_item.xml" value="0.264" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/mini_project_item.xml" value="0.2" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/nested_child_recycler_item.xml" value="0.2" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/network_state_item.xml" value="0.264" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/notification_item.xml" value="0.4" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/paging_end_layout.xml" value="0.4" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/post_frag_test.xml" value="0.264" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/post_meta_layout.xml" value="0.4" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/profile_temp.xml" value="0.22777777777777777" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/project_detail_container.xml" value="0.264" />
-        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/project_detail_content.xml" value="0.4" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/project_detail_content.xml" value="0.264" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/project_fragment_content.xml" value="0.264" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/search_item_layout.xml" value="0.4" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/search_layout.xml" value="0.2" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/square_image_grid.xml" value="0.8" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/upload_document_fragment.xml" value="0.264" />
-        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/user_horizontal_layout.xml" value="0.6658959537572254" />
-        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/user_item.xml" value="0.536" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/user_horizontal_layout.xml" value="0.4" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/user_item.xml" value="0.264" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/user_section.xml" value="0.22777777777777777" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/layout/vertical_document_layout.xml" value="0.4" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/menu/explore_menu.xml" value="0.18703703703703703" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/menu/image_select_deselect_menu.xml" value="0.14537037037037037" />
+        <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/menu/other_user_menu.xml" value="0.23842592592592593" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/menu/project_guidelines_menu.xml" value="0.8" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/xml/file_paths.xml" value="0.22777777777777777" />
         <entry key="..\:/Users/jamid/AndroidStudioProjects/WorkConnect/app/src/main/res/xml/search_scene.xml" value="0.22777777777777777" />

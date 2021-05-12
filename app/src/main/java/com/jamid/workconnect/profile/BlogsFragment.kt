@@ -2,24 +2,24 @@ package com.jamid.workconnect.profile
 
 import android.os.Bundle
 import android.view.View
-import androidx.paging.PagedList
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.firebase.ui.firestore.paging.FirestorePagingOptions
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
-import com.jamid.workconnect.*
-import com.jamid.workconnect.adapter.PostAdapter
+import com.jamid.workconnect.InsetControlFragment
+import com.jamid.workconnect.R
+import com.jamid.workconnect.adapter.paging2.PostAdapter
 import com.jamid.workconnect.databinding.FragmentBlogsBinding
-import com.jamid.workconnect.interfaces.PostItemClickListener
-import com.jamid.workconnect.interfaces.PostsLoadStateListener
-import com.jamid.workconnect.message.ProjectDetailContainer
-import com.jamid.workconnect.model.Post
+import com.jamid.workconnect.home.EditorFragment
 import com.jamid.workconnect.model.User
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import me.everything.android.ui.overscroll.OverScrollDecoratorHelper
 
-class BlogsFragment : BaseFeedFragment(R.layout.fragment_blogs) {
+class BlogsFragment : InsetControlFragment(R.layout.fragment_blogs) {
 
     private lateinit var binding: FragmentBlogsBinding
     private lateinit var postAdapter: PostAdapter
+    private var job: Job? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -27,35 +27,46 @@ class BlogsFragment : BaseFeedFragment(R.layout.fragment_blogs) {
         binding = FragmentBlogsBinding.bind(view)
         val user = arguments?.getParcelable<User>(ARG_USER)
 
-        setRecyclerView(binding.blogsRecycler)
-        setDeleteListeners()
-
-
         if (user != null) {
 
-            val query = FirebaseFirestore.getInstance()
-                .collection(POSTS)
-                .orderBy(CREATED_AT, Query.Direction.DESCENDING)
-                .whereEqualTo(TYPE, BLOG)
-                .whereEqualTo(UID, user.id)
-
-            val config = PagedList.Config.Builder().setPageSize(10).setEnablePlaceholders(false).setPrefetchDistance(5).build()
-
-            val options = FirestorePagingOptions.Builder<Post>()
-                .setLifecycleOwner(viewLifecycleOwner)
-                .setQuery(query, config, Post::class.java)
-                .build()
-
-            val parent = activity.currentBottomFragment
-            postAdapter = if (parent is ProjectDetailContainer) {
-                PostAdapter(viewModel, options, viewLifecycleOwner, parent as PostItemClickListener, parent as PostsLoadStateListener)
-            } else {
-                PostAdapter(viewModel, options, viewLifecycleOwner, activity, activity)
-            }
+            postAdapter = PostAdapter()
 
             binding.blogsRecycler.apply {
                 adapter = postAdapter
-                layoutManager = LinearLayoutManager(requireContext())
+                itemAnimator = null
+                layoutManager = LinearLayoutManager(activity)
+            }
+
+            OverScrollDecoratorHelper.setUpOverScroll(binding.blogsRecycler, OverScrollDecoratorHelper.ORIENTATION_VERTICAL)
+
+
+            if (user.id == viewModel.user.value?.id) {
+                binding.noBlogsCreatePost.visibility = View.VISIBLE
+            } else {
+                binding.noBlogsCreatePost.visibility = View.GONE
+            }
+
+            binding.noBlogsCreatePost.setOnClickListener {
+                activity.toFragment(EditorFragment.newInstance(), EditorFragment.TAG)
+            }
+
+            viewModel.userBlogs(user.id).observe(viewLifecycleOwner) {
+                if (!it.isNullOrEmpty()) {
+                    job?.cancel()
+                    activity.mainBinding.primaryProgressBar.visibility = View.GONE
+                    binding.blogsRecycler.visibility = View.VISIBLE
+                    binding.noBlogsLayoutScroll.visibility = View.GONE
+                    postAdapter.submitList(it)
+                } else {
+                    activity.mainBinding.primaryProgressBar.visibility = View.VISIBLE
+                    job = lifecycleScope.launch {
+                        delay(1000)
+                        activity.mainBinding.primaryProgressBar.visibility = View.GONE
+                        binding.blogsRecycler.visibility = View.GONE
+                        OverScrollDecoratorHelper.setUpOverScroll(binding.noBlogsLayoutScroll)
+                        binding.noBlogsLayoutScroll.visibility = View.VISIBLE
+                    }
+                }
             }
         }
     }

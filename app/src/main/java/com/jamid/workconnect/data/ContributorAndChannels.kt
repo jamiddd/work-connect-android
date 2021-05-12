@@ -8,5 +8,5 @@ data class ContributorAndChannels(
     @Embedded
     val contributor: ChatChannelContributor,
     @Relation(parentColumn="id", entityColumn="userId")
-    val chatChannelIds: List<ChannelIds>
+    val chatChannelIds: List<String>
 )

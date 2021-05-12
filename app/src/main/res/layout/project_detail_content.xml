@@ -2,16 +2,46 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    style="@style/NonPrimaryFragmentStyle"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+
+    <TextView
+        android:id="@+id/project_detail_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="19dp"
+        android:text="The Project Title that is Too Long to Fit in One Line"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
+        app:layout_constraintBottom_toTopOf="@+id/pd_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0"
+        app:layout_constraintVertical_chainStyle="packed" />
+
+    <TextView
+        android:id="@+id/pd_content"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:maxLines="5"
+        android:text="@string/large_text"
+        app:layout_constraintBottom_toTopOf="@+id/guidelines_btn"
+        app:layout_constraintEnd_toEndOf="@+id/project_detail_title"
+        app:layout_constraintStart_toStartOf="@+id/project_detail_title"
+        app:layout_constraintTop_toBottomOf="@+id/project_detail_title" />
+
     <Button
         android:id="@+id/guidelines_btn"
-        style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+        style="@style/ProjectDetailTextButton"
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:layout_marginBottom="8dp"
-        android:backgroundTint="@color/grey"
         android:insetTop="0dp"
         android:insetBottom="0dp"
         android:paddingStart="12dp"
@@ -21,11 +51,9 @@
         android:text="Project guidelines"
         android:textAlignment="textStart"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        android:textColor="@color/black"
         app:cornerRadius="0dp"
         app:icon="@drawable/ic_baseline_keyboard_arrow_right_24"
         app:iconGravity="end"
-        app:iconTint="@color/black"
         app:layout_constraintBottom_toTopOf="@+id/image_link_doc_btn"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -34,11 +62,10 @@
 
     <Button
         android:id="@+id/image_link_doc_btn"
-        style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+        style="@style/ProjectDetailTextButton"
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:layout_marginBottom="8dp"
-        android:backgroundTint="@color/grey"
         android:insetTop="0dp"
         android:insetBottom="0dp"
         android:paddingStart="12dp"
@@ -48,11 +75,9 @@
         android:text="Images, Links, Docs"
         android:textAlignment="textStart"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        android:textColor="@color/black"
         app:cornerRadius="0dp"
         app:icon="@drawable/ic_baseline_keyboard_arrow_right_24"
         app:iconGravity="end"
-        app:iconTint="@color/black"
         app:layout_constraintBottom_toTopOf="@+id/contributors_horizontal_header"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -64,10 +89,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
-        android:fontFamily="@font/title_semi"
         android:text="Contributors"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         app:layout_constraintBottom_toTopOf="@+id/project_detail_contributors_list"
@@ -79,6 +103,7 @@
         android:id="@+id/project_detail_contributors_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:nestedScrollingEnabled="true"
         android:overScrollMode="never"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -86,24 +111,6 @@
         app:layout_constraintTop_toBottomOf="@+id/contributors_horizontal_header"
         tools:itemCount="5"
         tools:listitem="@layout/user_horizontal_layout" />
-
-    <TextView
-        android:id="@+id/project_detail_title"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="19dp"
-        android:fontFamily="sans-serif-condensed-medium"
-        android:text="The Project Title that is Too Long to Fit in One Line"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
-        app:layout_constraintBottom_toTopOf="@+id/pd_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0"
-        app:layout_constraintVertical_chainStyle="packed" />
 
     <ProgressBar
         android:id="@+id/project_detail_contributors_progress"
@@ -118,15 +125,4 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/contributors_horizontal_header" />
 
-    <TextView
-        android:id="@+id/pd_content"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:maxLines="5"
-        android:text="@string/large_text"
-        app:layout_constraintBottom_toTopOf="@+id/guidelines_btn"
-        app:layout_constraintEnd_toEndOf="@+id/project_detail_title"
-        app:layout_constraintStart_toStartOf="@+id/project_detail_title"
-        app:layout_constraintTop_toBottomOf="@+id/project_detail_title" />
 </androidx.constraintlayout.widget.ConstraintLayout>

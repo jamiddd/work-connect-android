@@ -18,7 +18,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.060000002"
             app:layout_constraintVertical_chainStyle="packed"
-            app:placeholderImage="@color/grey"
+            app:placeholderImage="@color/darkestGrey"
             app:viewAspectRatio="1.77" />
 
         <TextView
@@ -28,7 +28,7 @@
             android:padding="8dp"
             android:text="Project title that is big"
             android:textAppearance="@style/TextAppearance.AppCompat.Display1"
-            android:textColor="@color/black"
+            android:textSize="30sp"
             app:layout_constraintBottom_toTopOf="@+id/project_content"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -42,7 +42,7 @@
             android:layout_height="wrap_content"
             android:padding="12dp"
             android:text="@string/large_text"
-            android:textColor="@color/black"
+            android:textSize="16sp"
             app:layout_constraintBottom_toTopOf="@+id/project_meta_text"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -96,7 +96,7 @@
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/project_contributors_list"
-            android:layout_width="393dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:clipToPadding="false"
             android:paddingStart="8dp"

@@ -9,12 +9,24 @@
         android:id="@+id/messageFragment"
         android:name="com.jamid.workconnect.message.MessageFragment"
         android:label=" "
-        tools:layout="@layout/fragment_message" />
+        tools:layout="@layout/fragment_message" >
+        <action
+            android:id="@+id/action_messageFragment_to_chatFragment"
+            app:destination="@id/chatFragment" />
+    </fragment>
     <fragment
         android:id="@+id/chatFragment"
         android:name="com.jamid.workconnect.message.ChatFragment"
-        android:label=" "
-        tools:layout="@layout/fragment_chat" />
+        tools:layout="@layout/fragment_chat"
+        android:label=" ">
+        <deepLink
+            android:id="@+id/deepLink"
+            app:action="ACTION_VIEW"
+            app:uri="workconnect:messages.com/chatFragment" />
+        <argument
+            android:name="chatChannel"
+            app:argType="com.jamid.workconnect.model.ChatChannel" />
+    </fragment>
     <dialog
         android:id="@+id/imageCropFragment"
         android:name="com.jamid.workconnect.ImageCropFragment"
@@ -22,10 +34,10 @@
         tools:layout="@layout/fragment_image_crop" />
     <fragment
         android:id="@+id/imageViewFragment"
-        android:name="com.jamid.workconnect.ImageViewFragment"
+        android:name="com.jamid.workconnect.views.zoomable.ImageViewFragment"
         android:label="ImageViewFragment"
         tools:layout="@layout/fragment_image_view" />
-    <dialog
+    <fragment
         android:id="@+id/projectDetailFragment"
         android:name="com.jamid.workconnect.message.ProjectDetailFragment"
         android:label="ProjectDetailFragment"
@@ -35,24 +47,24 @@
         android:name="com.jamid.workconnect.UserFragment"
         android:label="UserFragment"
         tools:layout="@layout/fragment_user" />
-    <dialog
+    <fragment
         android:id="@+id/projectGuidelinesFragment"
         android:name="com.jamid.workconnect.message.ProjectGuidelinesFragment"
         android:label="ProjectGuidelinesFragment"
         tools:layout="@layout/fragment_project_guidelines" />
-    <dialog
+    <fragment
         android:id="@+id/followingsFragment"
         android:name="com.jamid.workconnect.profile.FollowingsFragment"
         android:label="FollowingsFragment"
         tools:layout="@layout/fragment_followings" />
 
-    <dialog
+    <fragment
         android:id="@+id/followersFragment"
         android:name="com.jamid.workconnect.profile.FollowersFragment"
         android:label="FollowersFragment"
         tools:layout="@layout/fragment_followers" />
 
-    <dialog
+    <fragment
         android:id="@+id/mediaFragment"
         android:name="com.jamid.workconnect.message.MediaFragment"
         android:label="MediaFragment"

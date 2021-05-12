@@ -6,7 +6,6 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?attr/selectableItemBackground"
         android:clickable="true"
         android:focusable="true">
 
@@ -38,7 +37,6 @@
             android:maxLines="1"
             android:singleLine="true"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-            android:textColor="@color/black"
             app:layout_constraintBottom_toTopOf="@+id/chatChannelLastMsgContent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
@@ -53,7 +51,6 @@
             android:ellipsize="end"
             android:maxLines="1"
             android:singleLine="true"
-            android:textColor="@color/black"
             android:visibility="gone"
             app:layout_constraintBottom_toTopOf="@+id/chatChannelLastUpdated"
             app:layout_constraintEnd_toEndOf="@+id/chatChannelName"

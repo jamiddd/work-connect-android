@@ -13,13 +13,13 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
         android:ellipsize="end"
         android:maxLines="1"
         android:text="Document Name that can be Long"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        android:textColor="@color/black"
         app:layout_constraintBottom_toTopOf="@+id/doc_meta"
-        app:layout_constraintEnd_toStartOf="@+id/pin_doc"
+        app:layout_constraintEnd_toStartOf="@+id/doc_down_btn"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/doc_img"
         app:layout_constraintTop_toTopOf="parent"
@@ -27,16 +27,17 @@
 
     <ImageView
         android:id="@+id/doc_img"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
         android:layout_marginStart="8dp"
+        android:tint="@color/blue_500"
         app:layout_constraintBottom_toBottomOf="@+id/doc_meta"
         app:layout_constraintEnd_toStartOf="@+id/doc_name_text"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintHorizontal_chainStyle="spread_inside"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/doc_name_text"
-        app:srcCompat="@drawable/ic_document" />
+        app:srcCompat="@drawable/ic_pdf_format" />
 
     <TextView
         android:id="@+id/doc_meta"
@@ -52,16 +53,29 @@
         app:layout_constraintTop_toBottomOf="@+id/doc_name_text" />
 
     <Button
-        android:id="@+id/pin_doc"
+        android:id="@+id/doc_down_btn"
         style="@style/Theme.Button.IconOnly"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
-        app:icon="@drawable/ic_round_push_pin_24"
+        android:visibility="gone"
+        app:icon="@drawable/ic_round_arrow_downward_24"
         app:layout_constraintBottom_toBottomOf="@+id/doc_meta"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/doc_name_text"
-        app:layout_constraintTop_toTopOf="@+id/doc_name_text" />
+        app:layout_constraintTop_toTopOf="@+id/doc_name_text"
+        tools:ignore="SpeakableTextPresentCheck" />
+
+    <ProgressBar
+        android:id="@+id/media_down_progress"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:indeterminate="true"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/doc_down_btn"
+        app:layout_constraintEnd_toEndOf="@+id/doc_down_btn"
+        app:layout_constraintStart_toStartOf="@+id/doc_down_btn"
+        app:layout_constraintTop_toTopOf="@+id/doc_down_btn" />
 </androidx.constraintlayout.widget.ConstraintLayout>

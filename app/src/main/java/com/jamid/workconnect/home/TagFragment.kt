@@ -1,5 +1,7 @@
 package com.jamid.workconnect.home
 
+import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -25,6 +27,11 @@ class TagFragment : Fragment(R.layout.fragment_tag) {
         val activity = requireActivity() as MainActivity
 
         binding = FragmentTagBinding.bind(view)
+
+        if (Build.VERSION.SDK_INT <= 27) {
+            binding.tagLayoutRoot.removeView(binding.tagLayoutBlur)
+            binding.tagLayoutRoot.setBackgroundColor(Color.WHITE)
+        }
 
         binding.addTagBtn.isEnabled = false
 

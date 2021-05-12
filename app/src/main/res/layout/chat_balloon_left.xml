@@ -51,6 +51,7 @@
 
         <ImageView
             android:id="@+id/leftMsgTail"
+            style="@style/ChatBalloonLeftTail"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:rotation="-14"
@@ -64,6 +65,7 @@
 
         <TextView
             android:id="@+id/otherUserMessage"
+            style="@style/ChatBalloonLeft"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
@@ -74,7 +76,6 @@
             android:paddingEnd="16dp"
             android:paddingBottom="12dp"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-            android:textColor="@color/black"
             android:translationY="2dp"
             app:layout_constraintBottom_toTopOf="@+id/otherUserMessageTime"
             app:layout_constraintEnd_toEndOf="parent"

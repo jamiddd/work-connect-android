@@ -2,13 +2,12 @@
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    style="@style/PostCardStyle"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_marginTop="8dp"
     android:layout_marginEnd="8dp"
-    android:layout_marginBottom="8dp"
-    app:strokeColor="@color/grey"
-    app:strokeWidth="1dp">
+    android:layout_marginBottom="8dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="280dp"
@@ -27,7 +26,6 @@
             android:minHeight="50dp"
             android:text="Title of the blog that can be too long or either too short but regardless is a title"
             android:textAppearance="@style/TextAppearance.AppCompat.Small"
-            android:textColor="@color/black"
             app:layout_constraintBottom_toTopOf="@+id/micro_blog_content"
             app:layout_constraintEnd_toStartOf="@+id/micro_blog_save_btn"
             app:layout_constraintHorizontal_bias="0.5"
@@ -99,7 +97,7 @@
             android:layout_marginStart="8dp"
             android:ellipsize="end"
             android:maxLines="1"
-            android:text="Jamid Deka ● a few moments ago"
+            android:text="Jamid Deka •  a few moments ago"
             android:textSize="12sp"
             app:layout_constraintBottom_toBottomOf="@+id/micro_blog_user_img"
             app:layout_constraintEnd_toEndOf="parent"

@@ -1,26 +1,25 @@
 package com.jamid.workconnect.profile
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
-import androidx.paging.PagedList
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.firebase.ui.firestore.paging.FirestorePagingOptions
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
-import com.jamid.workconnect.*
-import com.jamid.workconnect.adapter.PostAdapter
+import com.jamid.workconnect.InsetControlFragment
+import com.jamid.workconnect.R
+import com.jamid.workconnect.adapter.paging2.PostAdapter
 import com.jamid.workconnect.databinding.FragmentProjectListBinding
-import com.jamid.workconnect.interfaces.PostItemClickListener
-import com.jamid.workconnect.interfaces.PostsLoadStateListener
-import com.jamid.workconnect.message.ProjectDetailContainer
-import com.jamid.workconnect.model.Post
+import com.jamid.workconnect.home.CreateProjectFragment
 import com.jamid.workconnect.model.User
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import me.everything.android.ui.overscroll.OverScrollDecoratorHelper
 
-class ProjectListFragment : BaseFeedFragment(R.layout.fragment_project_list) {
+class ProjectListFragment : InsetControlFragment(R.layout.fragment_project_list) {
 
     private lateinit var postAdapter: PostAdapter
     private lateinit var binding: FragmentProjectListBinding
+    private var job: Job? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -28,36 +27,45 @@ class ProjectListFragment : BaseFeedFragment(R.layout.fragment_project_list) {
         binding = FragmentProjectListBinding.bind(view)
         val user = arguments?.getParcelable<User>(ARG_USER)
 
-        setDeleteListeners()
-        setRecyclerView(binding.projectsRecycler)
-
         if (user != null) {
 
-            val query = FirebaseFirestore.getInstance()
-                .collection(POSTS)
-                .orderBy(CREATED_AT, Query.Direction.DESCENDING)
-                .whereEqualTo(UID, user.id)
-                .whereEqualTo(TYPE, PROJECT)
-
-            val config = PagedList.Config.Builder().setPageSize(10).setEnablePlaceholders(false).setPrefetchDistance(5).build()
-
-            val options = FirestorePagingOptions.Builder<Post>()
-                .setLifecycleOwner(viewLifecycleOwner)
-                .setQuery(query, config, Post::class.java)
-                .build()
-
-            val parent = activity.currentBottomFragment
-            postAdapter = if (parent is ProjectDetailContainer) {
-                Log.d("ProjectList", "yes")
-                PostAdapter(viewModel, options, viewLifecycleOwner, parent as PostItemClickListener, parent as PostsLoadStateListener)
-            } else {
-                Log.d("ProjectList", "No")
-                PostAdapter(viewModel, options, viewLifecycleOwner, activity, activity)
-            }
+            postAdapter = PostAdapter()
 
             binding.projectsRecycler.apply {
                 adapter = postAdapter
-                layoutManager = LinearLayoutManager(requireContext())
+                itemAnimator = null
+                layoutManager = LinearLayoutManager(activity)
+            }
+
+            OverScrollDecoratorHelper.setUpOverScroll(binding.projectsRecycler, OverScrollDecoratorHelper.ORIENTATION_VERTICAL)
+
+            if (user.id == viewModel.user.value?.id) {
+                binding.noUserPostsCreatePost.visibility = View.VISIBLE
+            } else {
+                binding.noUserPostsCreatePost.visibility = View.GONE
+            }
+
+            binding.noUserPostsCreatePost.setOnClickListener {
+                activity.toFragment(CreateProjectFragment.newInstance(), CreateProjectFragment.TAG)
+            }
+
+            viewModel.userProjects(user.id).observe(viewLifecycleOwner) {
+                if (it.isNotEmpty()) {
+                    job?.cancel()
+                    activity.mainBinding.primaryProgressBar.visibility = View.GONE
+                    binding.projectsRecycler.visibility = View.VISIBLE
+                    binding.noUserPostsLayoutScroll.visibility = View.GONE
+                    postAdapter.submitList(it)
+                } else {
+                    activity.mainBinding.primaryProgressBar.visibility = View.VISIBLE
+                    job = lifecycleScope.launch {
+                        delay(2000)
+                        activity.mainBinding.primaryProgressBar.visibility = View.GONE
+                        binding.projectsRecycler.visibility = View.GONE
+                        OverScrollDecoratorHelper.setUpOverScroll(binding.noUserPostsLayoutScroll)
+                        binding.noUserPostsLayoutScroll.visibility = View.VISIBLE
+                    }
+                }
             }
         }
     }
@@ -67,7 +75,7 @@ class ProjectListFragment : BaseFeedFragment(R.layout.fragment_project_list) {
         private const val ARG_USER = "ARG_USER"
 
         @JvmStatic
-        fun newInstance(user: User?) = ProjectListFragment().apply {
+        fun newInstance(user: User) = ProjectListFragment().apply {
             arguments = Bundle().apply {
                 putParcelable(ARG_USER, user)
             }

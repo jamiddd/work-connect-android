@@ -1,95 +1,83 @@
 package com.jamid.workconnect.message
 
-import android.content.Context
 import android.os.Bundle
 import android.view.View
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
-import androidx.paging.PagedList
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.firebase.ui.firestore.paging.FirestorePagingOptions
-import com.google.android.material.transition.platform.MaterialSharedAxis
-import com.google.firebase.firestore.Query
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
-import com.jamid.workconnect.*
-import com.jamid.workconnect.adapter.ChatChannelAdapter
+import com.jamid.workconnect.InsetControlFragment
+import com.jamid.workconnect.R
+import com.jamid.workconnect.adapter.GenericAdapter
+import com.jamid.workconnect.convertDpToPx
 import com.jamid.workconnect.databinding.FragmentChatChannelBinding
 import com.jamid.workconnect.model.ChatChannel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import me.everything.android.ui.overscroll.OverScrollDecoratorHelper
 
-class ChatChannelFragment : Fragment(R.layout.fragment_chat_channel) {
+class ChatChannelFragment : InsetControlFragment(R.layout.fragment_chat_channel) {
 
     private lateinit var binding: FragmentChatChannelBinding
-    private val viewModel: MainViewModel by activityViewModels()
-    private lateinit var chatChannelAdapter: ChatChannelAdapter
-    private lateinit var activity: MainActivity
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        exitTransition = MaterialSharedAxis(MaterialSharedAxis.X, true)
-        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.X, false)
-    }
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        activity = requireActivity() as MainActivity
-    }
+    private lateinit var channelAdapter: GenericAdapter<ChatChannel>
+    private var job: Job? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentChatChannelBinding.bind(view)
-        var query = Firebase.firestore.collection(CHAT_CHANNELS)
-            .whereArrayContains(CONTRIBUTORS_LIST, " ")
-            .orderBy(UPDATED_AT, Query.Direction.DESCENDING)
 
-        val config = PagedList.Config.Builder().setPageSize(10).setPrefetchDistance(5).setEnablePlaceholders(false).build()
-        var options = FirestorePagingOptions.Builder<ChatChannel>()
-            .setLifecycleOwner(viewLifecycleOwner)
-            .setDiffCallback(ChatChannelComparator())
-            .setQuery(query, config, ChatChannel::class.java)
-            .build()
+        setInsetView(binding.chatChannelRecycler, mapOf(INSET_TOP to 56, INSET_BOTTOM to 64))
+//        setRefreshListener(this)
 
-        chatChannelAdapter = ChatChannelAdapter(options, activity)
+        OverScrollDecoratorHelper.setUpOverScroll(binding.noChannelsLayoutScroll)
 
-        viewModel.windowInsets.observe(viewLifecycleOwner) { (status, nav) ->
-            binding.chatChannelRecycler.setPadding(0, status + convertDpToPx(56), 0, nav + convertDpToPx(64))
+        binding.noChannelsExploreBtn.setOnClickListener {
+            activity.mainBinding.bottomNav.selectedItemId = R.id.explore_navigation
         }
 
-        binding.chatChannelRecycler.apply {
-            adapter = chatChannelAdapter
-            layoutManager = LinearLayoutManager(requireContext())
-            addItemDecoration(DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL))
-        }
+        viewModel.miniUser.observe(viewLifecycleOwner) { user ->
+            if (user != null) {
+                channelAdapter = GenericAdapter(ChatChannel::class.java)
 
-        OverScrollDecoratorHelper.setUpOverScroll(binding.chatChannelRecycler, OverScrollDecoratorHelper.ORIENTATION_VERTICAL)
-       /* binding.chatChannelRefresher.setOnRefreshListener {
-            chatChannelAdapter.refresh()
-            binding.chatChannelRefresher.isRefreshing = false
-        }*/
+                binding.chatChannelRecycler.apply {
+                    adapter = channelAdapter
+                    layoutManager = LinearLayoutManager(activity)
+                    addItemDecoration(DividerItemDecoration(activity, DividerItemDecoration.VERTICAL))
+                }
 
-        viewModel.user.observe(viewLifecycleOwner) {
-            if (it != null) {
-                query = Firebase.firestore.collection(CHAT_CHANNELS)
-                    .whereArrayContains(CONTRIBUTORS_LIST, it.id)
-                    .orderBy(UPDATED_AT, Query.Direction.DESCENDING)
+                binding.chatChannelRefresher.setProgressViewOffset(false, 0, viewModel.windowInsets.value!!.first + convertDpToPx(64))
+                binding.chatChannelRefresher.setSlingshotDistance(convertDpToPx(54))
+                binding.chatChannelRefresher.setColorSchemeColors(ContextCompat.getColor(activity, R.color.blue_500))
+//                setOverScrollView(binding.chatChannelRecycler)
 
-                options = FirestorePagingOptions.Builder<ChatChannel>()
-                    .setLifecycleOwner(viewLifecycleOwner)
-                    .setDiffCallback(ChatChannelComparator())
-                    .setQuery(query, config, ChatChannel::class.java)
-                    .build()
-
-                chatChannelAdapter.updateOptions(options)
-
+                viewModel.chatChannelsLiveData.observe(viewLifecycleOwner) { list ->
+                    if (list.isNotEmpty()) {
+                        job?.cancel()
+                        binding.chatChannelRefresher.isRefreshing = false
+                        binding.noChannelsLayoutScroll.visibility = View.GONE
+                        binding.chatChannelRecycler.visibility = View.VISIBLE
+                        channelAdapter.submitList(list)
+                    } else {
+                        viewModel.getChatChannels()
+                        binding.chatChannelRefresher.isRefreshing = true
+                    }
+                }
+            } else {
+                binding.chatChannelRecycler.visibility = View.GONE
+                binding.noChannelsLayoutScroll.visibility = View.VISIBLE
             }
         }
 
-        viewModel.hasConversationsUpdated.observe(viewLifecycleOwner) {
-            if (it != null && it) {
-                chatChannelAdapter.refresh()
-                viewModel.hasConversationsUpdated.postValue(false)
+        if (viewModel.user.value == null) {
+            binding.chatChannelRecycler.visibility = View.GONE
+            binding.noChannelsLayoutScroll.visibility = View.VISIBLE
+        }
+
+        binding.chatChannelRefresher.setOnRefreshListener {
+
+            viewLifecycleOwner.lifecycleScope.launchWhenCreated {
+                delay(3000)
+                binding.chatChannelRefresher.isRefreshing = false
             }
         }
 
@@ -97,8 +85,18 @@ class ChatChannelFragment : Fragment(R.layout.fragment_chat_channel) {
 
     companion object {
 
+        const val TAG = "ChatChannelFragment"
+
         @JvmStatic
         fun newInstance() = ChatChannelFragment()
     }
+
+   /* override fun onRefreshStart() {
+        viewModel.getChatChannels()
+        lifecycleScope.launch {
+            delay(2000)
+            setOverScrollView(binding.chatChannelRecycler)
+        }
+    }*/
 
 }

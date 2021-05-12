@@ -1,14 +1,16 @@
 package com.jamid.workconnect
 
+import android.annotation.SuppressLint
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.Typeface
+import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.InputType
 import android.text.SpannableStringBuilder
 import android.text.Spanned
-import android.text.style.CharacterStyle
 import android.text.style.StrikethroughSpan
 import android.text.style.StyleSpan
 import android.text.style.UnderlineSpan
@@ -16,55 +18,94 @@ import android.view.Gravity
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
-import androidx.navigation.fragment.findNavController
+import androidx.core.view.isVisible
 import com.facebook.drawee.view.SimpleDraweeView
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
 import com.jamid.workconnect.databinding.FragmentBlogBinding
+import com.jamid.workconnect.model.BlogItemConverter
 import com.jamid.workconnect.model.Post
+import com.jamid.workconnect.model.SpanItem
 import com.jamid.workconnect.profile.ProfileFragment
-import me.everything.android.ui.overscroll.OverScrollDecoratorHelper
 
-class BlogFragment : BasePostFragment(R.layout.fragment_blog) {
+class BlogFragment : BasePostFragment(R.layout.fragment_blog, TAG, false) {
 
     private lateinit var binding: FragmentBlogBinding
-    private val db = Firebase.firestore
+    private var time: Long = 0
 
+    @SuppressLint("Recycle")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         binding = FragmentBlogBinding.bind(view)
-
-        val postObj = arguments?.getParcelable<Post>(ARG_POST)
-        val postId = arguments?.getString(ARG_POST_ID)
-
+        time = System.currentTimeMillis()
+        postId = arguments?.getString(ARG_POST_ID)
+        bottomBinding = binding.blogMetadata
+        initLayoutChanges(binding.blogBottomBlur, binding.blogScroller)
         hideKeyboard()
 
-        postObj?.let {
-            setMetadata(it, binding.blogMetadata, binding.blogBottomBlur, binding.blogScroller)
+        if (Build.VERSION.SDK_INT <= 27) {
+            val tempView = View(activity)
+            tempView.setBackgroundColor(Color.WHITE)
+            tempView.elevation = convertDpToPx(4).toFloat()
+            binding.blogFragmentRoot.addView(tempView)
+            val params = tempView.layoutParams as CoordinatorLayout.LayoutParams
+            params.gravity = Gravity.BOTTOM
+            params.height = viewModel.windowInsets.value!!.second
+            tempView.layoutParams = params
         }
 
-
-        if (postId != null) {
-            db.collection(POSTS).document(postId)
-                .get()
-                .addOnSuccessListener {
-                    if (it != null && it.exists()) {
-                        val p = it.toObject(Post::class.java)!!
-                        setMetadata(p, binding.blogMetadata, binding.blogBottomBlur, binding.blogScroller)
-                        initEverything()
-                    }
-                }.addOnFailureListener {
-
-                }
+        if (postId == null) {
+            post = arguments?.getParcelable(ARG_POST)
+            setPost()
+            initBlogItems(post!!)
         } else {
-            initEverything()
+            viewModel.getCachedPost(postId ?: "").observe(viewLifecycleOwner) { p0 ->
+                if (p0 != null) {
+                    post = p0
+                    setPost()
+                    initBlogItems(post!!)
+                } else {
+                    viewModel.getPost(postId ?: "")
+                }
+            }
         }
-
     }
 
-    private fun initEverything() {
+    override fun onStart() {
+        super.onStart()
+        activity.mainBinding.primaryMenuBtn.isVisible = false
+        /* activity.mainBinding.primaryMenuBtn.setOnClickListener {
+            val user = viewModel.user.value
+            if (user != null) {
+
+                viewModel.joinProject(post!!)
+
+                if (user.id != post!!.uid) {
+                    when {
+                        user.userPrivate.collaborationIds.contains(post!!.id) -> {
+                            activity.mainBinding.primaryMenuBtn.visibility = View.GONE
+                        }
+                        user.userPrivate.activeRequests.contains(post!!.id) -> {
+                            activity.mainBinding.primaryMenuBtn.isEnabled = false
+                        }
+                        else -> {
+                            activity.mainBinding.primaryMenuBtn.visibility = View.VISIBLE
+                            activity.mainBinding.primaryMenuBtn.isEnabled = true
+                        }
+                    }
+                } else {
+                    activity.mainBinding.primaryMenuBtn.visibility = View.GONE
+                }
+
+            } else {
+                activity.showSignInDialog(POST)
+            }
+        }*/
+    }
+
+    private fun initBlogItems(post: Post) {
+        viewModel.extras[ProjectFragment.ARG_POST] = post
+        activity.setFragmentTitle(post.title)
 
         val titleEditable = SpannableStringBuilder(post.title)
 
@@ -72,16 +113,15 @@ class BlogFragment : BasePostFragment(R.layout.fragment_blog) {
         (title.layoutParams as LinearLayout.LayoutParams).setMargins(0, convertDpToPx(4), 0, convertDpToPx(4))
         binding.blogItemContainer.addView(title)
 
-        OverScrollDecoratorHelper.setUpOverScroll(binding.blogScroller)
-
-        post.items?.forEach { blogItem ->
+        post.items?.forEach { item ->
+            val blogItem = BlogItemConverter(item)
             val child = if (blogItem.type != "Image") {
                 val e = SpannableStringBuilder(blogItem.content)
 
-                val listOfSpans = arrayListOf<CharacterStyle>()
+                val spans = mutableListOf<SpanItem>()
 
-                for (spanText in blogItem.spans) {
-                    val span = when (spanText) {
+                for (span in blogItem.spans) {
+                    val sp = when (span.span) {
                         "BOLD" -> {
                             StyleSpan(Typeface.BOLD)
                         }
@@ -98,17 +138,16 @@ class BlogFragment : BasePostFragment(R.layout.fragment_blog) {
                             StyleSpan(Typeface.BOLD)
                         }
                     }
-                    listOfSpans.add(span)
+                    spans.add(SpanItem(sp, span.start, span.end))
                 }
 
-                val spanRangesStart = blogItem.spanRangesStart
-                val spanRangesEnd = blogItem.spanRangesEnd
-
-                for (i in listOfSpans.indices) {
-                    e.setSpan(listOfSpans[i], spanRangesStart[i], spanRangesEnd[i], Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                if (spans.isNotEmpty()) {
+                    for (i in spans.indices) {
+                        e.setSpan(spans[i].span, spans[i].start, spans[i].end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                    }
                 }
 
-                getNewTextField(activity, blogItem.type, e, blogItem.hint)
+                getNewTextField(activity, blogItem.type, e, null)
             } else {
                 getNewImage(activity, blogItem.content)
             }
@@ -116,40 +155,54 @@ class BlogFragment : BasePostFragment(R.layout.fragment_blog) {
             binding.blogItemContainer.addView(child)
         }
 
-        val name = post.admin["name"] as String
-        val photo = post.admin["photo"] as String?
+        val name = post.admin.name
+        val photo = post.admin.photo
+
+        if (Build.VERSION.SDK_INT <= 27) {
+            binding.blogMetadata.authorName.setTextColor(ContextCompat.getColor(activity, R.color.black))
+        }
+
 
         binding.blogMetadata.adminPhoto.setImageURI(photo)
+        binding.blogMetadata.authorName.text = name
 
-        // OBSERVE FOR SIGN IN CHANGES
-        viewModel.user.observe(viewLifecycleOwner) {
-            if (it != null) {
-                if (it.id == post.uid) {
-                    binding.blogMetadata.adminFollowBtn.visibility = View.GONE
-                    binding.blogMetadata.authorName.text = name
-                } else {
-                    binding.blogMetadata.adminFollowBtn.visibility = View.VISIBLE
-                    binding.blogMetadata.authorName.text = "$name •"
+        binding.blogMetadata.adminPhoto.setOnClickListener {
+            activity.toFragment(ProfileFragment.newInstance(user = post.admin), ProfileFragment.TAG)
+        }
+
+        binding.blogMetadata.authorName.setOnClickListener {
+            activity.toFragment(ProfileFragment.newInstance(user = post.admin), ProfileFragment.TAG)
+        }
+
+        binding.blogScroller.setOnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY ->
+            if (scrollY > viewModel.windowInsets.value!!.first + convertDpToPx(56) + binding.blogItemContainer.getChildAt(0).measuredHeight / 2) {
+                activity.mainBinding.apply {
+                    primaryAppBar.apply {
+                        visibility = View.VISIBLE
+                        alpha = 1f
+                    }
+                    topDivider.apply {
+                        visibility = View.VISIBLE
+                        alpha = 1f
+                    }
+                    primaryToolbar.visibility = View.VISIBLE
+                }
+            } else {
+                activity.mainBinding.apply {
+                    primaryAppBar.apply {
+                        visibility = View.INVISIBLE
+                        alpha = 0f
+                    }
+                    topDivider.apply {
+                        visibility = View.INVISIBLE
+                        alpha = 0f
+                    }
+                    primaryToolbar.visibility = View.GONE
                 }
             }
         }
 
-        binding.blogMetadata.adminPhoto.setOnClickListener {
-            toProfileFragment()
-        }
-
-        binding.blogMetadata.authorName.setOnClickListener {
-            toProfileFragment()
-        }
     }
-
-    private fun toProfileFragment() {
-        val bundle = Bundle().apply {
-            putString(ProfileFragment.ARG_UID, post.uid)
-        }
-        findNavController().navigate(R.id.profileFragment, bundle)
-    }
-
 
     // preparing for next try
     private fun getNewTextField(context: Context, type: String, initialText: Editable?, hintText: String?) : TextView {
@@ -166,7 +219,21 @@ class BlogFragment : BasePostFragment(R.layout.fragment_blog) {
             text = initialText
             hint = hintText
             gravity = Gravity.CENTER_VERTICAL
-            setTextColor(ContextCompat.getColor(context, R.color.black))
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                if (activity.resources?.configuration?.isNightModeActive == true) {
+                    setTextColor(ContextCompat.getColor(context, R.color.white))
+                } else {
+                    setTextColor(ContextCompat.getColor(context, R.color.black))
+                }
+            } else {
+                if (activity.resources?.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES) {
+                    setTextColor(ContextCompat.getColor(context, R.color.white))
+                } else {
+                    setTextColor(ContextCompat.getColor(context, R.color.black))
+                }
+            }
+
         }
 
         setEditTextType(textView, type)
@@ -188,7 +255,7 @@ class BlogFragment : BasePostFragment(R.layout.fragment_blog) {
                 textView.setBackgroundColor(Color.TRANSPARENT)
             }
             "Paragraph" -> {
-                textView.textSize = convertDpToPx(7f)
+                textView.textSize = convertDpToPx(6f)
                 textView.typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL)
                 textView.background = null
                 textView.setBackgroundColor(Color.TRANSPARENT)
@@ -197,7 +264,22 @@ class BlogFragment : BasePostFragment(R.layout.fragment_blog) {
                 textView.textSize = convertDpToPx(5f)
                 textView.typeface = Typeface.create(Typeface.MONOSPACE, Typeface.BOLD)
                 textView.background = null
-                textView.setBackgroundColor(Color.parseColor("#F1F1F1"))
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    if (activity.resources?.configuration?.isNightModeActive == true) {
+                        textView.setBackgroundColor(ContextCompat.getColor(activity, R.color.darkestGrey))
+                    } else {
+                        textView.setBackgroundColor(ContextCompat.getColor(activity, R.color.grey))
+                    }
+                } else {
+                    if (activity.resources?.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES) {
+                        textView.setBackgroundColor(ContextCompat.getColor(activity, R.color.darkestGrey))
+                    } else {
+                        textView.setBackgroundColor(ContextCompat.getColor(activity, R.color.grey))
+                    }
+                }
+
+
                 textView.setPadding(convertDpToPx(16), convertDpToPx(12), convertDpToPx(16), convertDpToPx(12))
             }
             "Image" -> {
@@ -206,7 +288,20 @@ class BlogFragment : BasePostFragment(R.layout.fragment_blog) {
             "Quote" -> {
                 textView.textSize = convertDpToPx(7f)
                 textView.typeface = Typeface.create(Typeface.SERIF, Typeface.ITALIC)
-                textView.background = ContextCompat.getDrawable(textView.context, R.drawable.quote_background)
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    if (activity.resources?.configuration?.isNightModeActive == true) {
+                        textView.background = ContextCompat.getDrawable(textView.context, R.drawable.quote_background_night)
+                    } else {
+                        textView.background = ContextCompat.getDrawable(textView.context, R.drawable.quote_background)
+                    }
+                } else {
+                    if (activity.resources?.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES) {
+                        textView.background = ContextCompat.getDrawable(textView.context, R.drawable.quote_background_night)
+                    } else {
+                        textView.background = ContextCompat.getDrawable(textView.context, R.drawable.quote_background)
+                    }
+                }
             }
         }
     }
@@ -224,11 +319,20 @@ class BlogFragment : BasePostFragment(R.layout.fragment_blog) {
         return img
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        time = System.currentTimeMillis() - time
+        if (time > IS_INTERESTED_DURATION) {
+            viewModel.increaseProjectWeight(post!!)
+        }
+    }
+
     companion object {
 
         const val TAG = "BlogFragment"
         const val ARG_POST = "ARG_POST"
         const val ARG_POST_ID = "ARG_POST_ID"
+        const val TITLE = ""
 
         @JvmStatic
         fun newInstance(id: String? = null, post: Post? = null) = BlogFragment().apply {
@@ -238,4 +342,5 @@ class BlogFragment : BasePostFragment(R.layout.fragment_blog) {
             }
         }
     }
+
 }

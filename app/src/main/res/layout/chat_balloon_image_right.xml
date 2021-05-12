@@ -64,5 +64,18 @@
             app:srcCompat="@drawable/ic_chat_tail_right"
             app:tint="@color/grey" />
 
+        <ProgressBar
+            android:id="@+id/rightMsgProgress"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"
+            android:indeterminateTint="@color/white"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/currentUserImgMsg"
+            app:layout_constraintEnd_toEndOf="@+id/currentUserImgMsg"
+            app:layout_constraintStart_toStartOf="@+id/currentUserImgMsg"
+            app:layout_constraintTop_toTopOf="@+id/currentUserImgMsg" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

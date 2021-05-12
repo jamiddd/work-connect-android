@@ -51,6 +51,7 @@
 
         <ImageView
             android:id="@+id/leftDocMsgTail"
+            style="@style/ChatBalloonLeftTail"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:rotation="-14"
@@ -61,18 +62,22 @@
             app:layout_constraintStart_toStartOf="@+id/tailAnchor"
             app:layout_constraintTop_toTopOf="@+id/otherUserDocMessage"
             app:layout_constraintVertical_bias="1.0"
-            app:srcCompat="@drawable/ic_chat_tail" />
+            app:srcCompat="@drawable/ic_chat_tail"
+            tools:visibility="visible" />
 
         <LinearLayout
             android:id="@+id/otherUserDocMessage"
+            style="@style/ChatBalloonLeftDoc"
             android:layout_width="150dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginBottom="4dp"
-            android:padding="16dp"
-            android:orientation="vertical"
-            android:translationY="2dp"
             android:background="@drawable/chat_doc_background"
+            android:clickable="true"
+            android:focusable="true"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:translationY="2dp"
             app:layout_constraintBottom_toTopOf="@+id/otherUserDocMessageTime"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
@@ -103,6 +108,28 @@
                 android:gravity="center"
                 android:text="Size"
                 android:textSize="12sp" />
+
+            <ProgressBar
+                android:id="@+id/docProgressLeft"
+                style="?android:attr/progressBarStyle"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:indeterminate="true"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/downloadDocLeft"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:fontFamily="@font/title_semi"
+                android:minWidth="60dp"
+                android:minHeight="36dp"
+                android:text="Download"
+                android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                android:visibility="gone" />
 
         </LinearLayout>
 

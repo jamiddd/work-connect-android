@@ -5,35 +5,47 @@
 
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/projectFragmentRoot"
+        style="@style/NonPrimaryFragmentStyle"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/white"
-        android:fitsSystemWindows="true">
+        tools:context=".ProjectFragment">
 
-        <ScrollView
-            android:id="@+id/projectScrollContainer"
+
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/projectRefresher"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:clipToPadding="false"
-            android:fitsSystemWindows="true"
-            android:paddingBottom="100dp">
+            android:layout_height="match_parent">
 
-            <include
-                android:id="@+id/projectContent"
-                layout="@layout/project_fragment_content" />
+            <androidx.core.widget.NestedScrollView
+                android:id="@+id/projectScrollContainer"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:fillViewport="true"
+                tools:ignore="SpeakableTextPresentCheck">
 
-        </ScrollView>
+                <include
+                    android:id="@+id/projectContent"
+                    layout="@layout/project_fragment_content" />
+
+            </androidx.core.widget.NestedScrollView>
+
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/projectData"
+            style="@style/PostMetaCardStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:clickable="true"
             android:focusable="true"
             app:behavior_hideable="false"
             app:behavior_peekHeight="0dp"
-            app:cardElevation="20dp"
-            app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+            app:cardElevation="3dp"
+            app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
+            app:rippleColor="@color/transparent">
 
             <include
                 android:id="@+id/projectMetadata"
@@ -43,14 +55,34 @@
 
         <com.github.mmin18.widget.RealtimeBlurView
             android:id="@+id/project_bottom_blur"
+            style="@style/BlurOverlayStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
-            android:background="@color/white"
-            android:elevation="21dp"
-            android:fitsSystemWindows="true"
-            app:realtimeBlurRadius="10dp"
+            android:elevation="4dp"
             app:realtimeDownsampleFactor="5" />
+
+        <Button
+            android:id="@+id/exitProjectBtn"
+            style="@style/GenericButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:backgroundTint="@color/white"
+            android:elevation="4dp"
+            app:icon="@drawable/ic_round_arrow_back_24"
+            app:iconTint="@color/black" />
+
+        <Button
+            android:id="@+id/projectJoinBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_margin="8dp"
+            android:fontFamily="@font/title_semi"
+            android:text="Join"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            app:cornerRadius="24dp" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>

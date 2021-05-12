@@ -1,110 +1,141 @@
 package com.jamid.workconnect.profile
 
 import android.os.Bundle
-import android.view.LayoutInflater
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.View
-import android.view.ViewGroup
-import android.widget.Toast
-import androidx.core.content.ContextCompat
-import androidx.databinding.DataBindingUtil
-import androidx.fragment.app.activityViewModels
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.ListAdapter
-import androidx.recyclerview.widget.RecyclerView
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
-import com.jamid.workconnect.*
+import com.jamid.workconnect.R
+import com.jamid.workconnect.SupportFragment
+import com.jamid.workconnect.adapter.paging2.UserAdapter
+import com.jamid.workconnect.convertDpToPx
 import com.jamid.workconnect.databinding.FragmentFollowingsBinding
-import com.jamid.workconnect.databinding.UserHorizontalLayoutBinding
 import com.jamid.workconnect.model.User
-import com.jamid.workconnect.model.UserMinimal
+import me.everything.android.ui.overscroll.OverScrollDecoratorHelper
 
-class FollowingsFragment : BaseBottomSheetFragment() {
+class FollowingsFragment : SupportFragment(R.layout.fragment_followings, TAG, false) {
 
-    private val viewModel: MainViewModel by activityViewModels()
     private lateinit var binding: FragmentFollowingsBinding
-    private val db = Firebase.firestore
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_followings, container, false)
-        // Inflate the layout for this fragment
-        return binding.root
-    }
+    private lateinit var userAdapter: UserAdapter
+    private var textWatcher: TextWatcher? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val followingsAdapter = FollowingsAdapter()
+        binding = FragmentFollowingsBinding.bind(view)
 
-        val user = arguments?.getParcelable<User>("user")
+        val insets = viewModel.windowInsets.value
+        if (insets != null) {
+            binding.followingsRecycler.setPadding(0, convertDpToPx(120) + insets.first, 0, insets.second)
+        }
+
+        userAdapter = UserAdapter(activity)
+        val currentUser = viewModel.user.value
+
+        val user = arguments?.getParcelable<User>(ARG_USER)
         if (user != null) {
-            val followings = user.followings
 
-            binding.followingsRecycler.apply {
-                adapter = followingsAdapter
-                layoutManager = LinearLayoutManager(requireContext())
+            initAdapter(user, currentUser)
+
+            textWatcher = object : TextWatcher {
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {
+
+                }
+
+                override fun onTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    before: Int,
+                    count: Int
+                ) {
+
+                }
+
+                override fun afterTextChanged(query: Editable?) {
+                    if (!query.isNullOrBlank()) {
+                        setAdapter(user, currentUser, query.toString())
+                    } else {
+                        initAdapter(user, currentUser)
+                    }
+                }
+
             }
-
-            followingsAdapter.submitList(followings)
-
+            activity.mainBinding.primarySearchBar.addTextChangedListener(textWatcher)
         }
-
-        binding.followingsToolbar.setNavigationOnClickListener {
-            hideKeyboard()
-            findNavController().navigateUp()
-        }
-
     }
 
-    inner class FollowingsAdapter() : ListAdapter<String, FollowingsAdapter.FollowingsViewHolder>(StringComparator()) {
+    private fun initAdapter(user: User, currentUser: User?) {
 
-        inner class FollowingsViewHolder(val binding: UserHorizontalLayoutBinding): RecyclerView.ViewHolder(binding.root) {
-            fun bind(userId: String) {
-                db.collection(USER_MINIMALS).document(userId).get()
-                    .addOnSuccessListener {
-                        val user = it.toObject(UserMinimal::class.java)!!
+        val userAdapter = UserAdapter(activity)
 
-                        binding.userHorizName.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.transparent))
-                        binding.userHorizName.text = user.name
-                        binding.userHorizPhoto.setImageURI(user.photo)
-                        binding.userHorizAbout.text = "@" + user.username
-                        binding.userHorizAbout.visibility = View.VISIBLE
-                        binding.button.visibility = View.GONE
+        binding.followingsRecycler.apply {
+            adapter = userAdapter
+            layoutManager = LinearLayoutManager(activity)
+        }
 
-                        val bundle = Bundle().apply {
-                            putString("userId", userId)
-                        }
+        OverScrollDecoratorHelper.setUpOverScroll(binding.followingsRecycler, OverScrollDecoratorHelper.ORIENTATION_VERTICAL)
 
-                        binding.root.setOnClickListener {
-                            findNavController().navigate(R.id.userFragment, bundle)
-                        }
-
-                    }.addOnFailureListener {
-                        Toast.makeText(
-                            requireContext(),
-                            "Something went wrong :(",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
+        if (user.id == currentUser?.id) {
+            viewModel.userFollowings(user.id).observe(viewLifecycleOwner) {
+                if (it.isNotEmpty()) {
+                    userAdapter.submitList(it)
+                }
+            }
+        } else {
+            viewModel.userFollowings(user).observe(viewLifecycleOwner) {
+                if (it.isNotEmpty()) {
+                    userAdapter.submitList(it)
+                }
             }
         }
+    }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FollowingsViewHolder {
-            val binding = DataBindingUtil.inflate<UserHorizontalLayoutBinding>(LayoutInflater.from(parent.context), R.layout.user_horizontal_layout, parent, false)
-            return FollowingsViewHolder(binding)
+    private fun setAdapter(user: User, currentUser: User?, query: String) {
+        val userAdapter = UserAdapter(activity)
+
+        binding.followingsRecycler.apply {
+            adapter = userAdapter
+            layoutManager = LinearLayoutManager(activity)
         }
 
-        override fun onBindViewHolder(holder: FollowingsViewHolder, position: Int) {
-            holder.bind(getItem(position))
+        OverScrollDecoratorHelper.setUpOverScroll(binding.followingsRecycler, OverScrollDecoratorHelper.ORIENTATION_VERTICAL)
+
+        if (user.id == currentUser?.id) {
+            viewModel.userFollowings(user.id, query).observe(viewLifecycleOwner) {
+                if (it.isNotEmpty()) {
+                    userAdapter.submitList(it)
+                }
+            }
+        } else {
+            viewModel.userFollowings(user, query).observe(viewLifecycleOwner) {
+                if (it.isNotEmpty()) {
+                    userAdapter.submitList(it)
+                }
+            }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        activity.mainBinding.primarySearchBar.removeTextChangedListener(textWatcher)
+        activity.mainBinding.primarySearchBar.text.clear()
     }
 
     companion object {
 
+        const val TAG = "FollowingsFragment"
+        const val TITLE = "Followings"
+        private const val ARG_USER = "ARG_USER"
+
         @JvmStatic
-        fun newInstance() = FollowingsFragment()
+        fun newInstance(user: User) = FollowingsFragment().apply {
+            arguments = Bundle().apply {
+                putParcelable(ARG_USER, user)
+            }
+        }
     }
 }

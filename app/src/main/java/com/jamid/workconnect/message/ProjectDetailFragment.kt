@@ -2,111 +2,113 @@ package com.jamid.workconnect.message
 
 import android.os.Bundle
 import android.view.View
-import androidx.activity.addCallback
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
-import androidx.navigation.fragment.findNavController
-import androidx.navigation.navGraphViewModels
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.appbar.AppBarLayout
-import com.google.android.material.appbar.MaterialToolbar
-import com.google.android.material.transition.platform.MaterialSharedAxis
-import com.jamid.workconnect.MainActivity
-import com.jamid.workconnect.MainViewModel
 import com.jamid.workconnect.R
-import com.jamid.workconnect.adapter.VerticalContributorsAdapter
+import com.jamid.workconnect.SupportFragment
+import com.jamid.workconnect.adapter.paging2.UserHorizontalAdapter
+import com.jamid.workconnect.convertDpToPx
 import com.jamid.workconnect.databinding.FragmentProjectDetailBinding
-import com.jamid.workconnect.interfaces.UserItemClickListener
-import com.jamid.workconnect.show
+import com.jamid.workconnect.model.ChatChannel
+import me.everything.android.ui.overscroll.IOverScrollState
+import me.everything.android.ui.overscroll.OverScrollDecoratorHelper
 
-class ProjectDetailFragment : Fragment(R.layout.fragment_project_detail) {
+class ProjectDetailFragment : SupportFragment(R.layout.fragment_project_detail, TAG, false) {
 
     private lateinit var binding: FragmentProjectDetailBinding
-    private lateinit var verticalContributorsAdapter: VerticalContributorsAdapter
-    private val mainViewModel: MainViewModel by activityViewModels()
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-//        setHasOptionsMenu(true)
-        exitTransition = MaterialSharedAxis(MaterialSharedAxis.X, true)
-        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.X, false)
-    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         binding = FragmentProjectDetailBinding.bind(view)
-        val activity = requireActivity() as MainActivity
-        val toolbar = activity.findViewById<MaterialToolbar>(R.id.pdc_toolbar)
-        val appbar = activity.findViewById<AppBarLayout>(R.id.pdc_appbar)
-        toolbar.menu.clear()
-        val viewModel: ProjectDetailViewModel by navGraphViewModels(R.id.project_detail_navigation)
+        val chatChannel = arguments?.getParcelable<ChatChannel>(ARG_CHAT_CHANNEL) ?: return
 
-        viewModel.currentPost.observe(viewLifecycleOwner) {
+        viewModel.getCachedPost(chatChannel.postId).observe(viewLifecycleOwner) {
             if (it != null) {
+                binding.projectDetailImg.setImageURI(it.thumbnail)
+                binding.projectDetailContent.projectDetailTitle.text = it.title
                 binding.projectDetailContent.pdContent.text = it.content
-            }
-        }
 
-        viewModel.currentChatChannel.observe(viewLifecycleOwner) { chatChannel ->
-            if (chatChannel != null) {
-                binding.projectDetailContent.projectDetailTitle.text = chatChannel.postTitle
-
-                mainViewModel.channelContributors(chatChannel).observe(viewLifecycleOwner) { list ->
-                    if (list != null) {
-                        verticalContributorsAdapter = VerticalContributorsAdapter(parentFragment?.parentFragment as UserItemClickListener)
-                        binding.projectDetailContent.projectDetailContributorsList.apply {
-                            adapter = verticalContributorsAdapter
-                            layoutManager = LinearLayoutManager(activity)
-                        }
-
-                        val contributors = list.map {
-                            it.contributor
-                        }
-
-                        verticalContributorsAdapter.submitList(contributors)
-                    }
+                binding.projectDetailContent.guidelinesBtn.setOnClickListener { _ ->
+                    val fragment = ProjectGuidelinesFragment.newInstance(chatChannel, it)
+                    activity.toFragment(fragment, ProjectGuidelinesFragment.TAG)
                 }
-
+            } else {
+                viewModel.getPost(chatChannel.postId)
             }
         }
 
-        binding.projectDetailContent.guidelinesBtn.setOnClickListener {
-            findNavController().navigate(R.id.projectGuidelinesFragment)
+
+        val contributorAdapter = UserHorizontalAdapter(activity)
+
+        binding.projectDetailContent.projectDetailContributorsList.apply {
+            adapter = contributorAdapter
+            layoutManager = LinearLayoutManager(activity, LinearLayoutManager.HORIZONTAL, false)
         }
+
+        OverScrollDecoratorHelper.setUpOverScroll(binding.projectDetailContent.projectDetailContributorsList, OverScrollDecoratorHelper.ORIENTATION_HORIZONTAL)
+
+        viewModel.projectContributors(chatChannel.chatChannelId).observe(viewLifecycleOwner) { contributors ->
+            if (contributors.isNotEmpty()) {
+                contributorAdapter.submitList(contributors)
+            } else {
+                /*
+				TODO("Do something when there is no contributor, but it's not possible
+				 because the creator is also a contributor")
+				* */
+            }
+        }
+
+        val decorX = OverScrollDecoratorHelper.setUpOverScroll(binding.projectDetialScroller)
+
+        var prevState = IOverScrollState.STATE_IDLE
+
+        decorX.setOverScrollUpdateListener { decor, state, offset ->
+            if (state == IOverScrollState.STATE_DRAG_START_SIDE) {
+                prevState = state
+                binding.projectDetailImg.scaleX = 1 + offset/800
+                binding.projectDetailImg.scaleY = 1 + offset/800
+            }
+            if (state == IOverScrollState.STATE_BOUNCE_BACK && prevState == IOverScrollState.STATE_DRAG_START_SIDE) {
+                binding.projectDetailImg.scaleX = 1 + offset/800
+                binding.projectDetailImg.scaleY = 1 + offset/800
+            }
+            if (state == IOverScrollState.STATE_IDLE || state == IOverScrollState.STATE_DRAG_END_SIDE) {
+                prevState = state
+            }
+        }
+
+
 
         binding.projectDetailContent.imageLinkDocBtn.setOnClickListener {
-            findNavController().navigate(R.id.mediaFragment)
+            val fragment = MediaFragment.newInstance(chatChannel)
+            activity.toFragment(fragment, MediaFragment.TAG)
         }
 
-//        activity.mainBinding.primaryToolbar.setNavigationOnClickListener {
-//            activity.supportFragmentManager.beginTransaction()
-//                .remove(activity.currentBottomFragment)
-//                .commit()
-//        }
 
+        viewModel.windowInsets.observe(viewLifecycleOwner) { (top, bottom) ->
+            binding.projectDetialScroller.setPadding(0, convertDpToPx(200), 0, bottom + convertDpToPx(8))
 
-        activity.onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
-            activity.mainBinding.primaryAppBar.show()
-            val frag = activity.currentBottomFragment
-            frag?.let {
-                activity.currentBottomFragment = null
-                activity.supportFragmentManager.beginTransaction()
-                    .remove(it)
-                    .commit()
-            }
-
+            val params = binding.exitProjectDetail.layoutParams as ConstraintLayout.LayoutParams
+            params.setMargins(convertDpToPx(8), top + convertDpToPx(8), 0, 0)
+            binding.exitProjectDetail.layoutParams = params
         }
 
-        mainViewModel.windowInsets.observe(viewLifecycleOwner) { (top, bottom) ->
-//            binding.projectDetailScroller.setPadding(0, top + convertDpToPx(56), 0, bottom + convertDpToPx(8))
+        binding.exitProjectDetail.setOnClickListener {
+            activity.onBackPressed()
         }
+
     }
 
     companion object {
         const val TAG = "ProjectDetail"
+        const val ARG_CHAT_CHANNEL = "ARG_CHAT_CHANNEL"
 
         @JvmStatic
-        fun newInstance() = ProjectDetailFragment()
+        fun newInstance(chatChannel: ChatChannel) = ProjectDetailFragment().apply {
+            arguments = Bundle().apply {
+                putParcelable(ARG_CHAT_CHANNEL, chatChannel)
+            }
+        }
     }
 }

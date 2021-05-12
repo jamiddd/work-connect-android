@@ -1,261 +1,272 @@
 package com.jamid.workconnect
 
 import android.annotation.SuppressLint
-import android.graphics.Bitmap
+import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.view.*
 import android.widget.Toast
-import androidx.navigation.fragment.findNavController
-import androidx.palette.graphics.Palette
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.chip.Chip
 import com.google.android.material.snackbar.Snackbar
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
-import com.jamid.workconnect.adapter.ContributorAdapter
+import com.jamid.workconnect.adapter.GenericAdapter
 import com.jamid.workconnect.databinding.FragmentProjectBinding
-import com.jamid.workconnect.interfaces.UserItemClickListener
-import com.jamid.workconnect.message.ProjectDetailContainer
 import com.jamid.workconnect.model.Post
 import com.jamid.workconnect.model.Result
+import com.jamid.workconnect.model.User
 import com.jamid.workconnect.profile.ProfileFragment
-import me.everything.android.ui.overscroll.OverScrollDecoratorHelper
+import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.*
 
 
-class ProjectFragment : BasePostFragment(R.layout.fragment_project), UserItemClickListener {
+class ProjectFragment : BasePostFragment(R.layout.fragment_project, TAG, false) {
 
     private lateinit var binding: FragmentProjectBinding
-    private lateinit var contributorAdapter: ContributorAdapter
-    private val db = Firebase.firestore
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.project_fragment_menu, menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.refresh_project -> {
-                db.collection("posts").document(post.id).get()
-                    .addOnSuccessListener {
-                        val p = it.toObject(Post::class.java)!!
-                        post = p
-                    }.addOnFailureListener {
-                        viewModel.setCurrentError(it)
-                    }
-                true
-            }
-            else -> return super.onOptionsItemSelected(item)
-        }
-    }
+    private var time: Long = 0
 
     @SuppressLint("ShowToast")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentProjectBinding.bind(view)
+        time = System.currentTimeMillis()
+        postId = arguments?.getString(ARG_POST_ID)
+        bottomBinding = binding.projectMetadata
+        initLayoutChanges(binding.projectBottomBlur, binding.projectScrollContainer)
 
-        val postId = arguments?.getString(ARG_POST_ID)
-        val postObj = arguments?.getParcelable<Post>(ARG_POST)
+        if (Build.VERSION.SDK_INT <= 27) {
+            val tempView = View(activity)
+            tempView.setBackgroundColor(Color.WHITE)
+            tempView.elevation = convertDpToPx(4).toFloat()
+            binding.projectFragmentRoot.addView(tempView)
+            val params = tempView.layoutParams as CoordinatorLayout.LayoutParams
+            params.gravity = Gravity.BOTTOM
+            params.height = viewModel.windowInsets.value!!.second
+            tempView.layoutParams = params
+        }
 
         hideKeyboard()
 
-        postObj?.let {
-            setMetadata(it, binding.projectMetadata, binding.projectBottomBlur, binding.projectScrollContainer)
-        }
-
-        if (postId != null) {
-            db.collection(POSTS).document(postId).get()
-                .addOnSuccessListener {
-                    if (it != null && it.exists()) {
-                        val p = it.toObject(Post::class.java)!!
-                        setMetadata(p, binding.projectMetadata, binding.projectBottomBlur, binding.projectScrollContainer)
-                        initEverything()
-                    }
-                }.addOnFailureListener {
-
-                }
+        if (postId == null) {
+            post = arguments?.getParcelable(ARG_POST)
+            setPost()
+            initProject(post!!)
         } else {
-            initEverything()
+            viewModel.getCachedPost(postId ?: "").observe(viewLifecycleOwner) { p0 ->
+                if (p0 != null) {
+                    post = p0
+                    setPost()
+                    initProject(post!!)
+                } else {
+                    viewModel.getPost(postId ?: "")
+                }
+            }
         }
-
-        /*requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
-            findNavController().navigateUp()
-        }*/
-
-
-
-       /* binding.projectFragmentAppbar.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { appBarLayout, verticalOffset ->
-            when (verticalOffset) {
-                -1 * appBarLayout.totalScrollRange -> binding.projectFragmentToolbar.navigationIcon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_round_arrow_back_24)
-                0 -> binding.projectFragmentToolbar.navigationIcon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_round_arrow_back_white_24)
-            }
-        })*/
-
-        /*binding.projectScrollContainer.setOnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY ->
-            val bigTitleHeight = binding.projectContent.projectTitle.measuredHeight
-            val smallTitleHeight = binding.smallTitle.measuredHeight
-
-            if (scrollY <= 170) {
-                val factor: Float = smallTitleHeight.toFloat() / bigTitleHeight
-                val translation = smallTitleHeight.toFloat() - (scrollY * factor)
-                if (translation >= 0 ) {
-                    binding.smallTitle.translationY = translation
-                }
-            } else if (scrollY > 170) {
-                if (binding.smallTitle.translationY != 0f) {
-                    binding.smallTitle.translationY = 0f
-                }
-            }
-        }*/
-
-        OverScrollDecoratorHelper.setUpOverScroll(binding.projectScrollContainer)
 
         viewModel.requestSentResult.observe(viewLifecycleOwner) {
             val result = it ?: return@observe
 
             when (result) {
                 is Result.Success -> {
-                    binding.projectMetadata.postMetaJoinBtn.isEnabled = false
+                    activity.mainBinding.primaryMenuBtn.isEnabled = false
                     Snackbar.make(binding.root, "Sent request to join project!", Snackbar.LENGTH_LONG)
                         .setAnchorView(binding.projectData)
                         .show()
                 }
                 is Result.Error -> {
-                    binding.projectMetadata.postMetaJoinBtn.isEnabled = true
+                    activity.mainBinding.primaryMenuBtn.isEnabled = true
                     Toast.makeText(requireContext(), "Something went wrong !", Toast.LENGTH_SHORT)
                         .show()
                 }
             }
         }
-
     }
 
-    private fun initEverything() {
+    override fun onStart() {
+        super.onStart()
+        activity.mainBinding.primaryMenuBtn.setOnClickListener {
+            val user = viewModel.user.value
+            if (user != null) {
+                activity.mainBinding.primaryMenuBtn.isEnabled = false
+                viewModel.joinProject(post!!)
 
-        if (auth.currentUser != null && auth.currentUser!!.uid != post.uid) {
-            if (post.contributors?.contains(auth.currentUser!!.uid) == true) {
-                binding.projectMetadata.postMetaJoinBtn.visibility = View.GONE
-            } else {
-                val db = Firebase.firestore
-                db.collection("posts").document(post.id)
-                    .collection("requests")
-                    .whereEqualTo("sender", auth.currentUser!!.uid)
-                    .limit(1)
-                    .get()
-                    .addOnSuccessListener { requestSnapshots ->
-                        binding.projectMetadata.postMetaJoinBtn.isEnabled = requestSnapshots.isEmpty
-                    }.addOnFailureListener {
-                        viewModel.setCurrentError(it)
+                if (user.id != post!!.uid) {
+                    when {
+                        user.userPrivate.collaborationIds.contains(post!!.id) -> {
+                            activity.mainBinding.primaryMenuBtn.visibility = View.GONE
+                        }
+                        user.userPrivate.activeRequests.contains(post!!.id) -> {
+                            activity.mainBinding.primaryMenuBtn.isEnabled = false
+                        }
+                        else -> {
+                            activity.mainBinding.primaryMenuBtn.visibility = View.VISIBLE
+                            activity.mainBinding.primaryMenuBtn.isEnabled = true
+                        }
                     }
-            }
-        } else {
-            if (auth.currentUser?.uid == post.uid) {
-                binding.projectMetadata.postMetaJoinBtn.visibility = View.GONE
+                } else {
+                    activity.mainBinding.primaryMenuBtn.visibility = View.GONE
+                }
+
             } else {
-                binding.projectMetadata.postMetaJoinBtn.isEnabled = true
+                activity.showSignInDialog(POST)
             }
         }
+    }
+
+    private fun initProject(post: Post) {
+        viewModel.extras[ARG_POST] = post
+        activity.setFragmentTitle(post.title)
 
         binding.projectContent.projectImg.setImageURI(post.thumbnail)
 
-        val name = post.admin["name"] as String
-        val photo = post.admin["photo"] as String?
+        val name = post.admin.name
+        val photo = post.admin.photo
 
         binding.projectMetadata.apply {
             adminPhoto.setImageURI(photo)
-            authorName.text = "$name •"
+            authorName.text = name
 
-            postMetaJoinBtn.setOnClickListener {
-                if (auth.currentUser != null) {
-                    postMetaJoinBtn.isEnabled = false
-                    viewModel.joinProject(post)
-                } else {
-                    findNavController().navigate(R.id.signInFragment)
-                }
+            if (Build.VERSION.SDK_INT <= 27) {
+                authorName.setTextColor(ContextCompat.getColor(activity, R.color.black))
+            }
+
+        }
+
+        binding.projectRefresher.setOnRefreshListener {
+            viewLifecycleOwner.lifecycleScope.launchWhenCreated {
+                delay(3000)
+                binding.projectRefresher.isRefreshing = false
             }
         }
 
+        binding.projectRefresher.setProgressViewOffset(false, 0, activity.mainBinding.primaryToolbar.measuredHeight/2 + viewModel.windowInsets.value!!.first)
+        binding.projectRefresher.setSlingshotDistance(activity.mainBinding.primaryToolbar.measuredHeight/2 + viewModel.windowInsets.value!!.first)
+        binding.projectRefresher.setColorSchemeColors(ContextCompat.getColor(activity, R.color.blue_500))
+
         binding.projectContent.apply {
+
             projectTitle.text = post.title
-            projectContent.text = post.content + "\n" + post.content
+            projectContent.text = post.content
+
+            if (Build.VERSION.SDK_INT <= 27) {
+                projectTitle.setTextColor(ContextCompat.getColor(activity, R.color.black))
+                projectContent.setTextColor(ContextCompat.getColor(activity, R.color.black))
+            }
+
             if (post.location == null) {
                 projectMetaText.text = SimpleDateFormat("hh:mm a", Locale.UK).format(post.updatedAt)
             } else {
-                projectMetaText.text = SimpleDateFormat("hh:mm a", Locale.UK).format(post.updatedAt) + " • " + post.location!!.place
+                val metaText = SimpleDateFormat("hh:mm a", Locale.UK).format(post.updatedAt) + " • " + post.location!!.place
+                projectMetaText.text = metaText
             }
+
 
             val tags = post.tags
             if (!tags.isNullOrEmpty()) {
+
                 projectTagHeader.visibility = View.VISIBLE
                 projectTagsList.visibility = View.VISIBLE
+
+                binding.projectContent.projectTagsList.removeAllViews()
 
                 tags.forEach {
                     addNewChip(it)
                 }
+
             } else {
                 projectTagHeader.visibility = View.GONE
                 projectTagsList.visibility = View.GONE
             }
 
-            val parent = activity.currentBottomFragment
-            contributorAdapter = if (parent is ProjectDetailContainer) {
-                ContributorAdapter(parent)
-            } else {
-                ContributorAdapter(activity)
-            }
+            /*val contributorAdapter = UserHorizontalAdapter(activity)
 
-            val contributors = post.contributors
-            if (!contributors.isNullOrEmpty()) {
-                projectContributorsHeader.visibility = View.VISIBLE
-                projectContributorsList.visibility = View.VISIBLE
+            projectContributorsList.apply {
+                itemAnimator = null
+                layoutManager = LinearLayoutManager(
+                    activity,
+                    LinearLayoutManager.HORIZONTAL,
+                    false
+                )
+                adapter = contributorAdapter
+            }*/
 
-                projectContributorsList.apply {
-                    layoutManager = LinearLayoutManager(
-                        requireContext(),
-                        LinearLayoutManager.HORIZONTAL,
-                        false
-                    )
-                    adapter = contributorAdapter
-                }
-
-                contributorAdapter.submitList(contributors)
-            } else {
-                projectContributorsHeader.visibility = View.GONE
-                projectContributorsList.visibility = View.GONE
-            }
-        }
-
-        // OBSERVE FOR SIGN IN CHANGES
-        viewModel.user.observe(viewLifecycleOwner) {
-            if (it != null) {
-                if (it.id == post.uid) {
-                    binding.projectMetadata.adminFollowBtn.visibility = View.GONE
-                    binding.projectMetadata.authorName.text = name
-                } else {
-                    binding.projectMetadata.adminFollowBtn.visibility = View.VISIBLE
-                    binding.projectMetadata.authorName.text = "$name •"
-
-//                    viewModel.updateFollowingsMap(blog.uid, it.followings.contains(blog.uid))
-                }
-            }
-        }
-
-        val bundle = Bundle().apply {
-            putString(ProfileFragment.ARG_UID, post.uid)
+            initContributors()
         }
 
         binding.projectMetadata.authorName.setOnClickListener {
-            findNavController().navigate(R.id.profileFragment, bundle)
+            activity.toFragment(ProfileFragment.newInstance(user=post.admin), ProfileFragment.TAG)
         }
 
         binding.projectMetadata.adminPhoto.setOnClickListener {
-            findNavController().navigate(R.id.profileFragment, bundle)
+            activity.toFragment(ProfileFragment.newInstance(user=post.admin), ProfileFragment.TAG)
         }
     }
 
+    private fun initContributors() {
+        val contributorsAdapter = GenericAdapter(User::class.java)
+        binding.projectContent.projectContributorsList.apply {
+            itemAnimator = null
+            layoutManager = LinearLayoutManager(
+                activity,
+                LinearLayoutManager.HORIZONTAL,
+                false
+            )
+            adapter = contributorsAdapter
+        }
 
-    fun createPaletteSync(bitmap: Bitmap): Palette = Palette.from(bitmap).generate()
+        binding.projectScrollContainer.setOnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY ->
+            if (scrollY > activity.mainBinding.primaryAppBar.measuredHeight + binding.projectContent.projectTitle.measuredHeight) {
+                activity.mainBinding.apply {
+                    primaryAppBar.apply {
+                        visibility = View.VISIBLE
+                        alpha = 1f
+                    }
+                    topDivider.apply {
+                        visibility = View.VISIBLE
+                        alpha = 1f
+                    }
+                    primaryToolbar.visibility = View.VISIBLE
+                }
+            } else {
+                activity.mainBinding.apply {
+                    primaryAppBar.apply {
+                        visibility = View.INVISIBLE
+                        alpha = 0f
+                    }
+                    topDivider.apply {
+                        visibility = View.INVISIBLE
+                        alpha = 0f
+                    }
+                    primaryToolbar.visibility = View.GONE
+                }
+            }
+        }
+
+//        OverScrollDecoratorHelper.setUpOverScroll(binding.projectContent.projectContributorsList, OverScrollDecoratorHelper.ORIENTATION_HORIZONTAL)
+
+        viewLifecycleOwner.lifecycleScope.launchWhenCreated {
+            when(val contributorsResult = viewModel.getProjectContributors(post!!)) {
+                is Result.Success -> {
+                    val contributors = contributorsResult.data.toObjects(User::class.java)
+                    if (contributors.isNotEmpty()) {
+                        binding.projectContent.projectContributorsHeader.visibility = View.VISIBLE
+                        binding.projectContent.projectContributorsList.visibility = View.VISIBLE
+                        contributorsAdapter.submitList(contributors)
+                    } else {
+                        binding.projectContent.projectContributorsHeader.visibility = View.GONE
+                        binding.projectContent.projectContributorsList.visibility = View.GONE
+                    }
+                }
+                is Result.Error -> {
+                    binding.projectContent.projectContributorsHeader.visibility = View.GONE
+                    binding.projectContent.projectContributorsList.visibility = View.GONE
+                }
+            }
+        }
+    }
 
     private fun addNewChip(s: String) {
         val chip = Chip(requireContext())
@@ -265,6 +276,10 @@ class ProjectFragment : BasePostFragment(R.layout.fragment_project), UserItemCli
 
     override fun onDestroy() {
         super.onDestroy()
+        time = System.currentTimeMillis() - time
+        if (time > IS_INTERESTED_DURATION) {
+            viewModel.increaseProjectWeight(post)
+        }
         viewModel.clearProjectFragmentResults()
     }
 
@@ -273,6 +288,7 @@ class ProjectFragment : BasePostFragment(R.layout.fragment_project), UserItemCli
         const val TAG = "ProjectFragment"
         const val ARG_POST = "ARG_POST"
         const val ARG_POST_ID = "ARG_POST_ID"
+        const val TITLE = ""
 
         @JvmStatic
         fun newInstance(id: String? = null, post: Post? = null) = ProjectFragment().apply {
@@ -283,14 +299,4 @@ class ProjectFragment : BasePostFragment(R.layout.fragment_project), UserItemCli
         }
     }
 
-    override fun onUserPressed(userId: String) {
-        /*if (auth.currentUser?.uid != userId) {
-            val fragment = UserFragment.newInstance(userId)
-            requireActivity().supportFragmentManager.beginTransaction().add(android.R.id.content, fragment, UserFragment.TAG)
-                .addToBackStack(UserFragment.TAG)
-                .commit()
-        } else {
-            Toast.makeText(requireContext(), "Not implemented yet", Toast.LENGTH_SHORT).show()
-        }*/
-    }
 }

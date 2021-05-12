@@ -82,5 +82,18 @@
             app:roundedCornerRadius="16dp"
             tools:visibility="visible" />
 
+        <ProgressBar
+            android:id="@+id/leftMsgProgress"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"
+            android:indeterminateTint="@color/white"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/otherUserImageMessage"
+            app:layout_constraintEnd_toEndOf="@+id/otherUserImageMessage"
+            app:layout_constraintStart_toStartOf="@+id/otherUserImageMessage"
+            app:layout_constraintTop_toTopOf="@+id/otherUserImageMessage" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

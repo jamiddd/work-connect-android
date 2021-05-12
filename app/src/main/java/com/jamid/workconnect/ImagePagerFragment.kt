@@ -23,8 +23,6 @@ class ImagePagerFragment : Fragment() {
         viewPager2 = inflater.inflate(R.layout.fragment_image_pager, container, false) as ViewPager2
         val activity = requireActivity() as MainActivity
 
-
-
         viewPager2.adapter = ImagePagerAdapter(activity, listOf())
         viewPager2.currentItem = activity.currentImagePosition
 

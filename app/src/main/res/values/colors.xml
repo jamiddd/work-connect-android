@@ -8,6 +8,7 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="grey">#F1F1F1</color>
+    <color name="darkestGrey">#333333</color>
     <color name="darkerGrey">#aaa</color>
     <color name="semiTransparentDark">#80000000</color>
     <color name="transparent">#00000000</color>
@@ -16,9 +17,14 @@
     <color name="light_blue_A200">#FF40C4FF</color>
     <color name="light_blue_A400">#FF00B0FF</color>
     <color name="black_overlay">#66000000</color>
-
+    <color name="test">#10000000</color>
 
     <!-- Blur related -->
     <color name="blurOverlay">#C8FFFFFF</color>
-    <color name="blue_lightest">#1D304FFE</color>
+    <color name="blue_lightest">#56304FFE</color>
+    <color name="nearTransparent">#31FFFFFF</color>
+
+
+
+    <color name="navigationBarColor">#11FFFFFF</color>
 </resources>

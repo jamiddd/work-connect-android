@@ -5,7 +5,8 @@
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        style="@style/NonPrimaryFragmentStyle">
 
         <TextView
             android:id="@+id/empty_search_text"
@@ -20,7 +21,7 @@
         <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/searchViewPager"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" >
+            android:layout_height="match_parent">
 
         </androidx.viewpager2.widget.ViewPager2>
 

@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        style="@style/DialogBackground"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@drawable/bottom_sheet_background">
@@ -31,8 +32,7 @@
             android:layout_marginTop="16dp"
             android:layout_marginBottom="16dp"
             android:text="Add Location"
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-            android:textColor="@color/black"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
             app:layout_constraintBottom_toTopOf="@+id/customLocation"
             app:layout_constraintEnd_toStartOf="@+id/addCustomLocation"
             app:layout_constraintHorizontal_bias="0.5"
@@ -51,7 +51,6 @@
             android:text="Add"
             android:textAppearance="@style/TextAppearance.AppCompat.Small"
             app:icon="@drawable/ic_baseline_add_24"
-            app:iconTint="@color/blue_500"
             app:layout_constraintBottom_toBottomOf="@+id/addLocationFragmentTitle"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
@@ -76,6 +75,7 @@
 
         <EditText
             android:id="@+id/customLocation"
+            style="@style/EditTextStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
@@ -99,7 +99,6 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
             android:indeterminate="true"
-            android:indeterminateTint="@color/blue_500"
             android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/locationList"

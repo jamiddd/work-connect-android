@@ -4,26 +4,79 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/mainRoot"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fitsSystemWindows="true"
         tools:context=".MainActivity">
+
+        <ProgressBar
+            android:id="@+id/primaryListProgress"
+            style="@style/CircularDeterminateProgressBar"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:visibility="gone"
+            app:layout_anchor="@id/primaryAppBar"
+            app:layout_anchorGravity="bottom|center_horizontal"
+            tools:progress="60"
+            tools:visibility="visible" />
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/bottomCard"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_gravity="bottom"
+            app:cardBackgroundColor="@color/transparent">
+
+            <com.github.mmin18.widget.RealtimeBlurView
+                android:id="@+id/bottom_blur"
+                style="@style/BlurOverlayStyle"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:realtimeDownsampleFactor="5" />
+
+            <com.google.android.material.bottomnavigation.BottomNavigationView
+                android:id="@+id/bottomNav"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bottom_transparent_view"
+                android:clipToPadding="false"
+                app:itemTextAppearanceActive="@style/Theme.TabLayoutText"
+                app:itemTextAppearanceInactive="@style/Theme.TabLayoutText"
+                app:labelVisibilityMode="auto"
+                app:menu="@menu/main_navigation_menu" />
+
+            <View
+                android:id="@+id/bottomDivider"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?android:attr/listDivider" />
+
+        </androidx.cardview.widget.CardView>
+
+
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/navHostFragment"
+            android:name="androidx.navigation.fragment.NavHostFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:layout="@layout/fragment_home" />
 
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/primaryAppBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/transparent"
-            android:fitsSystemWindows="true"
             android:stateListAnimator="@animator/app_bar_elevation_reverse">
 
             <com.google.android.material.appbar.CollapsingToolbarLayout
+                android:id="@+id/topCollapseToolbar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
                 <com.github.mmin18.widget.RealtimeBlurView
                     android:id="@+id/primaryTopBlur"
+                    style="@style/BlurOverlayStyle"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:fitsSystemWindows="true"
@@ -31,54 +84,94 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:realtimeBlurRadius="40dp"
-                    app:realtimeDownsampleFactor="5"
-                    app:realtimeOverlayColor="@color/blurOverlay" />
+                    app:realtimeDownsampleFactor="5" />
 
                 <LinearLayout
                     android:id="@+id/linearPrimaryContainer"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:clipToPadding="false"
                     android:orientation="vertical">
 
-                    <com.google.android.material.appbar.MaterialToolbar
-                        android:id="@+id/primaryToolbar"
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/primaryToolbarContainer"
                         android:layout_width="match_parent"
-                        android:layout_height="?actionBarSize"
-                        android:fitsSystemWindows="false"
-                        app:contentInsetEnd="48dp"
-                        app:contentInsetEndWithActions="48dp"
-                        app:contentInsetStart="0dp"
-                        app:contentInsetStartWithNavigation="48dp"
-                        app:layout_collapseMode="pin"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintVertical_bias="0.0"
-                        app:menu="@menu/home_menu">
+                        android:layout_height="?actionBarSize">
+
+                        <com.google.android.material.appbar.MaterialToolbar
+                            android:id="@+id/primaryToolbar"
+                            android:layout_width="match_parent"
+                            android:layout_height="?actionBarSize"
+                            app:layout_collapseMode="pin"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
 
                         <com.facebook.drawee.view.SimpleDraweeView
                             android:id="@+id/user_icon"
                             android:layout_width="32dp"
                             android:layout_height="32dp"
                             android:layout_marginStart="8dp"
-                            android:layout_marginTop="12dp"
-                            android:layout_marginEnd="8dp"
-                            android:layout_marginBottom="12dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
                             app:placeholderImage="@drawable/ic_user"
                             app:roundAsCircle="true" />
 
                         <TextView
                             android:id="@+id/primaryTitle"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:fontFamily="sans-serif-condensed-medium"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="56dp"
+                            android:layout_marginEnd="56dp"
                             android:gravity="center"
+                            android:maxLines="1"
+                            android:singleLine="true"
                             android:text="Codesquare"
-                            android:textAllCaps="true"
-                            android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6" />
+                            android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
 
-                    </com.google.android.material.appbar.MaterialToolbar>
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/primaryMenuBtn"
+                            style="@style/Theme.Button.IconOnly"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="12dp"
+                            android:fontFamily="@font/title_semi"
+                            android:minWidth="36dp"
+                            android:minHeight="36dp"
+                            android:paddingStart="6dp"
+                            android:paddingEnd="0dp"
+                            android:textAllCaps="false"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                            app:icon="@drawable/ic_baseline_add_24"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:rippleColor="#CCCCCC"
+                            tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/backNavigationBtn"
+                            style="@style/Theme.Button.IconOnly"
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
+                            android:layout_marginStart="8dp"
+                            android:paddingStart="6dp"
+                            android:paddingEnd="0dp"
+                            android:visibility="gone"
+                            app:icon="@drawable/ic_round_arrow_back_24"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:rippleColor="#D1D1D1"
+                            tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
 
                     <androidx.constraintlayout.motion.widget.MotionLayout
                         android:id="@+id/primarySearchLayout"
@@ -87,10 +180,12 @@
                         android:clickable="true"
                         android:focusable="true"
                         android:visibility="gone"
-                        app:layoutDescription="@xml/search_scene">
+                        app:layoutDescription="@xml/search_scene"
+                        tools:visibility="visible">
 
                         <EditText
                             android:id="@+id/primarySearchBar"
+                            style="@style/SearchBarStyle"
                             android:layout_width="0dp"
                             android:layout_height="40dp"
                             android:layout_margin="8dp"
@@ -130,7 +225,6 @@
                         android:id="@+id/horizontalContainer"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:fitsSystemWindows="false"
                         android:scrollbars="none"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
@@ -141,7 +235,6 @@
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
                             android:clipToPadding="false"
-                            android:fitsSystemWindows="false"
                             android:paddingStart="8dp"
                             android:paddingEnd="8dp"
                             app:selectionRequired="true"
@@ -157,85 +250,6 @@
                                 android:text="Random"
                                 android:textAppearance="@style/chipText" />
 
-                            <com.google.android.material.chip.Chip
-                                android:id="@+id/chip6"
-                                style="@style/Widget.MaterialComponents.Chip.Choice"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Something Else"
-                                android:textAppearance="@style/chipText" />
-
-                            <com.google.android.material.chip.Chip
-                                android:id="@+id/chip7"
-                                style="@style/Widget.MaterialComponents.Chip.Choice"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Python"
-                                android:textAppearance="@style/chipText" />
-
-                            <com.google.android.material.chip.Chip
-                                android:id="@+id/chip8"
-                                style="@style/Widget.MaterialComponents.Chip.Choice"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Artificial Intelligence"
-                                android:textAppearance="@style/chipText" />
-
-                            <com.google.android.material.chip.Chip
-                                android:id="@+id/chip9"
-                                style="@style/Widget.MaterialComponents.Chip.Choice"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Something Else"
-                                android:textAppearance="@style/chipText" />
-
-                            <com.google.android.material.chip.Chip
-                                android:id="@+id/chip10"
-                                style="@style/Widget.MaterialComponents.Chip.Choice"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Python"
-                                android:textAppearance="@style/chipText" />
-
-                            <com.google.android.material.chip.Chip
-                                android:id="@+id/chip11"
-                                style="@style/Widget.MaterialComponents.Chip.Choice"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Artificial Intelligence"
-                                android:textAppearance="@style/chipText" />
-
-                            <com.google.android.material.chip.Chip
-                                android:id="@+id/chip12"
-                                style="@style/Widget.MaterialComponents.Chip.Choice"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Something Else"
-                                android:textAppearance="@style/chipText" />
-
-                            <com.google.android.material.chip.Chip
-                                android:id="@+id/chip13"
-                                style="@style/Widget.MaterialComponents.Chip.Choice"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Python"
-                                android:textAppearance="@style/chipText" />
-
-                            <com.google.android.material.chip.Chip
-                                android:id="@+id/chip14"
-                                style="@style/Widget.MaterialComponents.Chip.Choice"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Artificial Intelligence"
-                                android:textAppearance="@style/chipText" />
-
-                            <com.google.android.material.chip.Chip
-                                android:id="@+id/chip15"
-                                style="@style/Widget.MaterialComponents.Chip.Choice"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Artificial Intelligence"
-                                android:textAppearance="@style/chipText" />
                         </com.google.android.material.chip.ChipGroup>
                     </HorizontalScrollView>
 
@@ -244,8 +258,9 @@
                         style="@style/TabLayoutTheme"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:fitsSystemWindows="false"
+                        android:background="@color/transparent"
                         android:visibility="gone"
+                        app:tabMode="auto"
                         tools:visibility="visible">
 
                         <com.google.android.material.tabs.TabItem
@@ -305,7 +320,7 @@
 
         </com.google.android.material.appbar.AppBarLayout>
 
-       <!-- <com.google.android.material.appbar.AppBarLayout
+        <!-- <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/primaryAppBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -355,39 +370,6 @@
 
         </com.google.android.material.appbar.AppBarLayout>-->
 
-        <androidx.fragment.app.FragmentContainerView
-            android:id="@+id/navHostFragment"
-            android:name="androidx.navigation.fragment.NavHostFragment"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:fitsSystemWindows="true"
-            tools:layout="@layout/fragment_home" />
-
-        <com.github.mmin18.widget.RealtimeBlurView
-            android:id="@+id/bottom_blur"
-            android:layout_width="match_parent"
-            android:layout_height="90dp"
-            android:layout_gravity="bottom"
-            android:fitsSystemWindows="true"
-            app:realtimeBlurRadius="40dp"
-            app:realtimeDownsampleFactor="5"
-            app:realtimeOverlayColor="@color/blurOverlay" />
-
-        <com.google.android.material.bottomnavigation.BottomNavigationView
-            android:id="@+id/bottomNav"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:background="@drawable/bottom_transparent_view"
-            android:clipToPadding="false"
-            android:elevation="20dp"
-            android:fitsSystemWindows="true"
-            app:elevation="20dp"
-            app:itemTextAppearanceActive="@style/Theme.TabLayoutText"
-            app:itemTextAppearanceInactive="@style/Theme.TabLayoutText"
-            app:labelVisibilityMode="selected"
-            app:menu="@menu/main_navigation_menu" />
-
         <ProgressBar
             android:id="@+id/primaryProgressBar"
             style="?android:attr/progressBarStyle"
@@ -409,18 +391,11 @@
             app:layout_anchorGravity="bottom" />
 
         <View
-            android:id="@+id/bottomDivider"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="?android:attr/listDivider"
-            app:layout_anchor="@id/bottomNav" />
-
-        <View
             android:id="@+id/scrimForBottomSheet"
+            style="@style/PrimaryScrim"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:alpha="0"
-            android:background="#40444444"
             android:elevation="29dp" />
 
         <androidx.constraintlayout.widget.ConstraintLayout

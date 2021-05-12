@@ -1,6 +1,7 @@
 package com.jamid.workconnect.home
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -27,6 +28,11 @@ class LocationFragment : Fragment() {
     // onDestroyView.
     private val binding get() = _binding!!
 
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        activity = context as MainActivity
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -38,8 +44,6 @@ class LocationFragment : Fragment() {
     @SuppressLint("VisibleForTests")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        activity = requireActivity() as MainActivity
 
         viewModel.addressList.observe(viewLifecycleOwner, { list ->
             if (list != null) {

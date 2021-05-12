@@ -34,6 +34,7 @@
 
         <LinearLayout
             android:id="@+id/currentUserDocMsg"
+            style="@style/ChatBalloonLeftDoc"
             android:layout_width="150dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
@@ -81,6 +82,27 @@
                 app:layout_constraintStart_toStartOf="@+id/currentUserDocMsg"
                 app:layout_constraintTop_toBottomOf="@+id/currentUserDocName" />
 
+            <ProgressBar
+                android:id="@+id/docProgressRight"
+                style="?android:attr/progressBarStyle"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:indeterminate="true"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/downloadDocRight"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:fontFamily="@font/title_semi"
+                android:minWidth="60dp"
+                android:minHeight="36dp"
+                android:text="Download"
+                android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                android:visibility="gone" />
 
         </LinearLayout>
 

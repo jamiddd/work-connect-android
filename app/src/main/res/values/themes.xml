@@ -1,4 +1,3 @@
-<!--suppress ALL -->
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Theme.WorkConnect" parent="Theme.MaterialComponents.DayNight.NoActionBar">
@@ -10,18 +9,156 @@
         <item name="colorSecondary">@color/blue_500</item>
         <item name="colorSecondaryVariant">@color/blue_500</item>
         <item name="colorOnSecondary">@color/white</item>
-        <!-- Status bar color. -->
-        <item name="android:statusBarColor" tools:targetApi="l">@color/transparent</item>
+        <item name="android:statusBarColor">@color/transparent</item>
         <item name="android:windowLightStatusBar">true</item>
-<!--        <item name="android:windowTranslucentStatus">true</item>-->
-        <item name="android:windowTranslucentNavigation">true</item>
-        <item name="android:navigationBarColor">#2DFFFFFF</item>
-
-        <!-- Customize your theme here. -->
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
-
         <item name="bottomSheetDialogTheme">@style/AppBottomSheetDialogTheme</item>
+        <item name="actionOverflowButtonStyle">@style/MyActionButtonOverflow</item>
+        <item name="snackbarStyle">@style/Theme.Main.SnackBar.Primary</item>
+        <item name="snackbarTextViewStyle">@style/Theme.Main.SnackBar.SnackBarText</item>
+        <item name="snackbarButtonStyle">@style/Theme.Main.SnackBar.Button</item>
+    </style>
+
+    <style name="PostMetaCardStyle">
+        <item name="cardBackgroundColor">@color/white</item>
+        <item name="strokeColor">@color/grey</item>
+        <item name="strokeWidth">1dp</item>
+    </style>
+
+    <style name="ProjectImagePlaceholder">
+        <item name="placeholderImage">@color/darkerGrey</item>
+    </style>
+
+    <style name="PostCardStyle">
+        <item name="cardBackgroundColor">@color/white</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="strokeColor">@color/grey</item>
+        <item name="strokeWidth">1dp</item>
+    </style>
+
+    <style name="NonPrimaryFragmentStyle">
+        <item name="android:background">@color/white</item>
+    </style>
+
+    <style name="NonPrimaryFragmentStyleImageView">
+        <item name="android:background">@color/grey</item>
+    </style>
+
+    <style name="BackNavigationButton">
+        <item name="iconTint">#222222</item>
+    </style>
+
+    <style name="SearchBarStyle">
+        <item name="backgroundTint">#85CAC9C9</item>
+    </style>
+
+    <style name="ChatBalloonLeftTail">
+        <item name="tint">@color/grey</item>
+    </style>
+
+    <style name="ChatBalloonLeft" parent="Widget.AppCompat.TextView">
+        <item name="backgroundTint">@color/grey</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
+
+    <style name="ProjectDetailTextButton" parent="Widget.MaterialComponents.Button.UnelevatedButton">
+        <item name="backgroundTint">@color/grey</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="iconTint">@color/black</item>
+    </style>
+
+    <style name="ChatBalloonLeftDoc">
+        <item name="backgroundTint">@color/grey</item>
+    </style>
+
+
+    <style name="ChatEditTextStyle">
+        <item name="backgroundTint">#75D5D4D4</item>
+    </style>
+
+    <style name="GenericMenuContainer">
+        <item name="android:backgroundTint">#74BDBDBD</item>
+    </style>
+
+    <style name="GenericMenuDismissBtnShape" parent="ShapeAppearance.MaterialComponents.SmallComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">8dp</item>
+    </style>
+
+    <style name="PrimaryScrim">
+        <item name="android:background">#40444444</item>
+    </style>
+
+    <style name="DialogBackground">
+        <item name="android:backgroundTint">@null</item>
+    </style>
+
+    <style name="ChatSendButton" parent="Theme.Button.IconOnly">
+        <item name="backgroundTint">@color/blue_500</item>
+        <item name="iconTint">@color/white</item>
+    </style>
+
+    <style name="SwitchTextAppearance" parent="TextAppearance.AppCompat.Large">
+        <item name="android:textSize">20sp</item>
+    </style>
+
+    <style name="TextInputLayoutStyle" parent="Widget.MaterialComponents.TextInputLayout.FilledBox.Dense">
+        <item name="boxBackgroundColor">#F4F4F4</item>
+    </style>
+
+    <style name="InterestGroupBackground" parent="Widget.MaterialComponents.ChipGroup">
+        <item name="android:backgroundTint">#F1F1F1</item>
+    </style>
+
+
+    <style name="CropView">
+        <item name="android:background">@color/grey</item>
+    </style>
+
+    <style name="GenericButton" parent="Theme.Button.IconOnly">
+        <item name="iconTint">@color/blue_500</item>
+        <item name="rippleColor">#33304FFE</item>
+    </style>
+
+    <style name="GenericMenuDismissBtn" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:textAppearance">@style/TextAppearance.MaterialComponents.Headline6</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="android:backgroundTint">#A3D3D2D2</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetLeft">0dp</item>
+        <item name="android:insetRight">0dp</item>
+        <item name="android:paddingLeft">0dp</item>
+        <item name="android:paddingRight">0dp</item>
+        <item name="android:paddingTop">0dp</item>
+        <item name="android:paddingBottom">0dp</item>
+        <item name="rippleColor">#6BE4E4E4</item>
+        <item name="shapeAppearance">@style/GenericMenuDismissBtnShape</item>
+    </style>
+
+    <style name="BlurOverlayStyle">
+        <item name="realtimeOverlayColor">#CCF8F8F8</item>
+        <item name="realtimeBlurRadius">50dp</item>
+    </style>
+
+
+    <style name="Theme.Main.SnackBar.Primary" parent="@style/Widget.MaterialComponents.Snackbar.FullWidth">
+        <item name="backgroundTint">@color/grey</item>
+    </style>
+
+    <style name="Theme.Main.SnackBar.Button" parent="@style/Widget.MaterialComponents.Button.TextButton">
+        <item name="android:textColor">@color/blue_500</item>
+    </style>
+
+    <style name="Theme.Main.SnackBar.SnackBarText" parent="@style/Widget.MaterialComponents.Snackbar.TextView">
+        <item name="android:textColor">@color/darkestGrey</item>
+    </style>
+
+    <style name="MyActionButtonOverflow" parent="android:style/Widget.Holo.Light.ActionButton.Overflow">
+        <item name="android:src">@drawable/ic_baseline_more_horiz_24</item>
+        <item name="android:background">?android:attr/actionBarItemBackground</item>
+        <item name="android:contentDescription">"Overflow Icon"</item>
     </style>
 
     <style name="AppBottomSheetDialogTheme"
@@ -44,6 +181,7 @@
         <item name="android:minWidth">48dp</item>
         <item name="android:minHeight">48dp</item>
         <item name="cornerRadius">24dp</item>
+        <item name="iconTint">#222222</item>
     </style>
 
     <style name="ShapeAppearance.App.MediumComponent" parent="ShapeAppearance.MaterialComponents.MediumComponent">

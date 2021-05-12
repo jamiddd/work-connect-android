@@ -4,42 +4,41 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/blogFragmentRoot"
+        style="@style/NonPrimaryFragmentStyle"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/white"
-        android:fitsSystemWindows="true"
         tools:context=".BlogFragment">
 
-        <ScrollView
+        <androidx.core.widget.NestedScrollView
             android:id="@+id/blogScroller"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipToPadding="false"
             android:fillViewport="true"
-            android:fitsSystemWindows="true"
             android:paddingTop="90dp"
             android:paddingBottom="100dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent">
+            tools:ignore="SpeakableTextPresentCheck">
 
             <LinearLayout
                 android:id="@+id/blogItemContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical" />
-        </ScrollView>
+        </androidx.core.widget.NestedScrollView>
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/blogData"
+            style="@style/PostMetaCardStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:clickable="true"
             android:focusable="true"
             app:behavior_hideable="false"
             app:behavior_peekHeight="0dp"
-            app:cardElevation="20dp"
-            app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+            app:cardElevation="3dp"
+            app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
+            app:rippleColor="#97D3D3D3">
 
             <include
                 android:id="@+id/blogMetadata"
@@ -49,13 +48,35 @@
 
         <com.github.mmin18.widget.RealtimeBlurView
             android:id="@+id/blog_bottom_blur"
+            style="@style/BlurOverlayStyle"
             android:layout_width="match_parent"
-            android:layout_gravity="bottom"
-            android:fitsSystemWindows="true"
             android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
             android:elevation="21dp"
-            app:realtimeDownsampleFactor="5"
-            app:realtimeBlurRadius="10dp" />
+            app:realtimeDownsampleFactor="5" />
+
+        <Button
+            android:id="@+id/exitBlogBtn"
+            style="@style/GenericButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:backgroundTint="@color/white"
+            android:elevation="4dp"
+            app:icon="@drawable/ic_round_arrow_back_24"
+            app:iconTint="@color/black" />
+
+        <!--<Button
+            android:id="@+id/projectJoinBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_margin="8dp"
+            android:fontFamily="@font/title_semi"
+            android:text="Join"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            app:cornerRadius="24dp" />-->
+
 
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>

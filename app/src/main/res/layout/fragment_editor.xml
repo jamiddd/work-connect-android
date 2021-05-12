@@ -5,6 +5,7 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/editorRoot"
+        style="@style/NonPrimaryFragmentStyle"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -59,7 +60,7 @@
                         android:layout_marginEnd="8dp"
                         android:ellipsize="end"
                         android:maxLines="1"
-                        android:text="Jamid Deka ⬤ 12:36 PM Today" />
+                        android:text="Jamid Deka • 12:36 PM Today" />
 
                 </LinearLayout>
 
@@ -92,7 +93,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/bottom_transparent_view"
-            android:fitsSystemWindows="true"
             app:cardBackgroundColor="@color/transparent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -100,11 +100,16 @@
 
             <com.github.mmin18.widget.RealtimeBlurView
                 android:id="@+id/cardBlur"
+                style="@style/BlurOverlayStyle"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:fitsSystemWindows="true"
-                app:realtimeBlurRadius="30dp"
                 app:realtimeDownsampleFactor="5" />
+
+            <View
+                android:id="@+id/divider15"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?android:attr/listDivider" />
 
             <HorizontalScrollView
                 android:layout_width="match_parent"
@@ -117,7 +122,7 @@
 
                     <Button
                         android:id="@+id/textTypeBtn"
-                        style="@style/Theme.Button.IconOnly"
+                        style="@style/GenericButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         app:icon="@drawable/ic_baseline_text_fields_24" />
@@ -126,7 +131,6 @@
                         android:id="@+id/toggleButtonTextType"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:background="#FDFCFC"
                         android:paddingHorizontal="4dp"
                         android:visibility="gone"
                         app:checkedButton="@+id/paraType"
@@ -167,7 +171,7 @@
 
                     <Button
                         android:id="@+id/imageTypeBtn"
-                        style="@style/Theme.Button.IconOnly"
+                        style="@style/GenericButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         app:icon="@drawable/ic_baseline_add_photo_alternate_24" />
@@ -176,7 +180,6 @@
                         android:id="@+id/toggleButtonImageType"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:background="#FDFCFC"
                         android:paddingHorizontal="4dp"
                         android:visibility="gone"
                         app:checkedButton="@+id/galleryType"
@@ -206,35 +209,35 @@
 
                     <Button
                         android:id="@+id/quoteBtn"
-                        style="@style/Theme.Button.IconOnly"
+                        style="@style/GenericButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         app:icon="@drawable/ic_baseline_format_quote_24" />
 
                     <Button
                         android:id="@+id/codeBtn"
-                        style="@style/Theme.Button.IconOnly"
+                        style="@style/GenericButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         app:icon="@drawable/ic_baseline_code_24" />
 
                     <Button
                         android:id="@+id/locationBtn"
-                        style="@style/Theme.Button.IconOnly"
+                        style="@style/GenericButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         app:icon="@drawable/ic_baseline_add_location_alt_24" />
 
                     <Button
                         android:id="@+id/tagBtn"
-                        style="@style/Theme.Button.IconOnly"
+                        style="@style/GenericButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         app:icon="@drawable/ic_baseline_label_24" />
 
                     <Button
                         android:id="@+id/linkBtn"
-                        style="@style/Theme.Button.IconOnly"
+                        style="@style/GenericButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         app:icon="@drawable/ic_baseline_insert_link_24" />

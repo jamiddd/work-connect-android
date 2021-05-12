@@ -9,7 +9,7 @@
         android:id="@+id/exploreFragment"
         android:name="com.jamid.workconnect.explore.ExploreFragment"
         tools:layout="@layout/fragment_explore"
-        android:label="ExploreFragment" />
+        android:label="" />
     <fragment
         android:id="@+id/projectFragment"
         android:name="com.jamid.workconnect.ProjectFragment"

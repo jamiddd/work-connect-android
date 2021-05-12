@@ -2,58 +2,62 @@ package com.jamid.workconnect.profile
 
 import android.os.Bundle
 import android.view.View
-import androidx.paging.PagedList
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.firebase.ui.firestore.paging.FirestorePagingOptions
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
-import com.jamid.workconnect.*
-import com.jamid.workconnect.adapter.PostAdapter
+import com.jamid.workconnect.InsetControlFragment
+import com.jamid.workconnect.R
+import com.jamid.workconnect.adapter.paging2.PostAdapter
 import com.jamid.workconnect.databinding.FragmentCollaborationsListBinding
-import com.jamid.workconnect.interfaces.PostItemClickListener
-import com.jamid.workconnect.interfaces.PostsLoadStateListener
-import com.jamid.workconnect.message.ProjectDetailContainer
-import com.jamid.workconnect.model.Post
 import com.jamid.workconnect.model.User
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import me.everything.android.ui.overscroll.OverScrollDecoratorHelper
 
-class CollaborationsListFragment : BaseFeedFragment(R.layout.fragment_collaborations_list) {
+class CollaborationsListFragment : InsetControlFragment(R.layout.fragment_collaborations_list) {
 
     private lateinit var postAdapter: PostAdapter
     private lateinit var binding: FragmentCollaborationsListBinding
+    private var job: Job? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         binding = FragmentCollaborationsListBinding.bind(view)
+        /*setInsetView(binding.collaborationsRecycler, mapOf(INSET_TOP to 8, INSET_BOTTOM to 48))*/
+
         val user = arguments?.getParcelable<User>(ARG_USER)
-        setRecyclerView(binding.collaborationsRecycler)
-        setDeleteListeners()
 
         if (user != null) {
-            val query = FirebaseFirestore.getInstance()
-                .collection(POSTS)
-                .orderBy(CREATED_AT, Query.Direction.DESCENDING)
-                .whereArrayContains(CONTRIBUTORS, user.id)
-                .whereEqualTo(TYPE, PROJECT)
 
-            val config = PagedList.Config.Builder().setPageSize(10).setEnablePlaceholders(false).setPrefetchDistance(5).build()
-
-            val options = FirestorePagingOptions.Builder<Post>()
-                .setLifecycleOwner(viewLifecycleOwner)
-                .setQuery(query, config, Post::class.java)
-                .build()
-
-            val parent = activity.currentBottomFragment
-            postAdapter = if (parent is ProjectDetailContainer) {
-                PostAdapter(viewModel, options, viewLifecycleOwner, parent as PostItemClickListener, parent as PostsLoadStateListener)
-            } else {
-                PostAdapter(viewModel, options, viewLifecycleOwner, activity, activity)
-            }
+            postAdapter = PostAdapter()
 
             binding.collaborationsRecycler.apply {
                 adapter = postAdapter
+                itemAnimator = null
                 layoutManager = LinearLayoutManager(activity)
             }
+
+            OverScrollDecoratorHelper.setUpOverScroll(binding.collaborationsRecycler, OverScrollDecoratorHelper.ORIENTATION_VERTICAL)
+
+            viewModel.userCollaborations(user.id).observe(viewLifecycleOwner) {
+                if (it.isNotEmpty()) {
+                    activity.mainBinding.primaryProgressBar.visibility = View.GONE
+                    binding.collaborationsRecycler.visibility = View.VISIBLE
+                    binding.noCollaborationsLayoutScroll.visibility = View.GONE
+                    postAdapter.submitList(it)
+                } else {
+                    activity.mainBinding.primaryProgressBar.visibility = View.VISIBLE
+                    job = lifecycleScope.launch {
+                        delay(2000)
+                        activity.mainBinding.primaryProgressBar.visibility = View.GONE
+                        binding.collaborationsRecycler.visibility = View.GONE
+                        OverScrollDecoratorHelper.setUpOverScroll(binding.noCollaborationsLayoutScroll)
+                        binding.noCollaborationsLayoutScroll.visibility = View.VISIBLE
+                    }
+                }
+            }
+
         }
     }
 

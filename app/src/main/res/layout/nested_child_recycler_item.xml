@@ -16,7 +16,6 @@
         android:paddingEnd="12dp"
         android:paddingBottom="12dp"
         android:text="Header of the Recyclerview"
-        android:textColor="@color/black"
         app:layout_constraintBottom_toTopOf="@+id/childRecyclerView"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0"

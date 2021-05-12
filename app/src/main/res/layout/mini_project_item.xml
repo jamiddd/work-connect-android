@@ -5,15 +5,14 @@
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/postRoot"
+        style="@style/PostCardStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
         app:cardElevation="0dp"
-        app:rippleColor="#1B000000"
-        app:strokeColor="@color/grey"
-        app:strokeWidth="1dp">
+        app:rippleColor="#1B000000">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -29,7 +28,6 @@
                 android:layout_marginEnd="12dp"
                 android:text="The title of the Blog that is too long"
                 android:textAppearance="@style/Theme.TabLayoutText"
-                android:textColor="@color/black"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toTopOf="@+id/projectAdminImg"
                 app:layout_constraintEnd_toStartOf="@+id/projectSaveBtn"
@@ -69,8 +67,9 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/projectAdminImg"
-                app:placeholderImage="@color/darkerGrey"
-                app:viewAspectRatio="1.66" />
+                app:placeholderImage="@color/darkestGrey"
+                app:viewAspectRatio="1.66"
+                tools:visibility="visible" />
 
             <TextView
                 android:id="@+id/projectMiniContent"
@@ -83,7 +82,6 @@
                 android:maxLines="5"
                 android:minHeight="70dp"
                 android:text="@string/large_text"
-                android:textColor="@color/black"
                 app:layout_constraintBottom_toTopOf="@+id/projectLikeBtn"
                 app:layout_constraintEnd_toStartOf="@+id/projectBlogImage"
                 app:layout_constraintHorizontal_chainStyle="packed"
@@ -106,7 +104,7 @@
 
             <Button
                 android:id="@+id/projectSaveBtn"
-                style="@style/Theme.Button.IconOnly"
+                style="@style/GenericButton"
                 android:layout_width="48dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="12dp"
@@ -119,7 +117,7 @@
 
             <Button
                 android:id="@+id/projectLikeBtn"
-                style="@style/Theme.Button.IconOnly"
+                style="@style/GenericButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
@@ -132,7 +130,7 @@
 
             <Button
                 android:id="@+id/projectDislikeBtn"
-                style="@style/Theme.Button.IconOnly"
+                style="@style/GenericButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="@style/TextAppearance.AppCompat.Small"
@@ -144,11 +142,10 @@
 
             <Button
                 android:id="@+id/projectOptionsBtn"
-                style="@style/Theme.Button.IconOnly"
+                style="@style/GenericButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:icon="@drawable/ic_baseline_more_horiz_24"
-                app:iconTint="@color/black"
                 app:layout_constraintBottom_toBottomOf="@+id/projectDislikeBtn"
                 app:layout_constraintEnd_toEndOf="@+id/projectSaveBtn"
                 app:layout_constraintTop_toTopOf="@+id/projectDislikeBtn"
@@ -173,12 +170,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:indeterminate="true"
-                android:indeterminateTint="@color/blue_500"
+                android:indeterminateTint="@color/white"
                 android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="@+id/projectThumb"
                 app:layout_constraintEnd_toEndOf="@+id/projectThumb"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/projectThumb" />
+                app:layout_constraintTop_toTopOf="@+id/projectThumb"
+                tools:visibility="visible" />
 
             <com.facebook.drawee.view.SimpleDraweeView
                 android:id="@+id/projectBlogImage"

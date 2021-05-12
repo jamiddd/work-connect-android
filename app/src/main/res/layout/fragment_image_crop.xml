@@ -4,6 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        style="@style/DialogBackground"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@drawable/bottom_sheet_background"
@@ -50,7 +51,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                android:fontFamily="@font/title_font"
                 android:text="Crop Image"
                 android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6" />
 
@@ -58,9 +58,9 @@
 
         <com.theartofdev.edmodo.cropper.CropImageView
             android:id="@+id/cropArea"
+            style="@style/CropView"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:background="@color/grey"
             app:layout_constraintBottom_toTopOf="@+id/horizontalScrollView"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

@@ -1,87 +1,104 @@
 package com.jamid.workconnect
 
 import android.os.Bundle
-import android.view.LayoutInflater
+import android.util.Log
 import android.view.View
-import android.view.ViewGroup
-import androidx.databinding.DataBindingUtil
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
-import androidx.navigation.fragment.findNavController
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.jamid.workconnect.adapter.ActiveRequestsAdapter
+import com.jamid.workconnect.adapter.paging2.NotificationAdapter
 import com.jamid.workconnect.databinding.FragmentRequestBinding
-import com.jamid.workconnect.interfaces.RequestItemClickListener
-import com.jamid.workconnect.model.Post
+import com.jamid.workconnect.interfaces.OnRefreshListener
+import com.jamid.workconnect.model.Result
+import com.jamid.workconnect.model.SimpleRequest
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import me.everything.android.ui.overscroll.OverScrollDecoratorHelper
 
-class RequestFragment : Fragment(), RequestItemClickListener {
+class RequestFragment : InsetControlFragment(R.layout.fragment_request), OnRefreshListener {
 
     private lateinit var binding: FragmentRequestBinding
-    private val viewModel: MainViewModel by activityViewModels()
-    private lateinit var activeRequestsAdapter: ActiveRequestsAdapter
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_request, container, false)
-        // Inflate the layout for this fragment
-        return binding.root
-    }
+    private lateinit var activeRequestsAdapter: NotificationAdapter<SimpleRequest>
+    private var job: Job? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding = FragmentRequestBinding.bind(view)
+        activeRequestsAdapter = NotificationAdapter(activity, SimpleRequest::class.java)
 
-        activeRequestsAdapter = ActiveRequestsAdapter(true, this as RequestItemClickListener)
+        setInsetView(binding.requestsRecycler, mapOf(INSET_TOP to 104, INSET_BOTTOM to 56, PROGRESS_OFFSET to 40))
+        setRefreshListener(this)
 
-        binding.activeRequestsProgressBar.visibility = View.VISIBLE
+        OverScrollDecoratorHelper.setUpOverScroll(binding.noRequestsLayoutScroll)
 
-        binding.requestsRecycler.apply {
-            layoutManager = LinearLayoutManager(requireContext())
-            adapter = activeRequestsAdapter
-        }
+        viewModel.user.observe(viewLifecycleOwner) { user ->
+            if (user != null) {
 
-        viewModel.user.observe(viewLifecycleOwner) {
-            if (it != null) {
-                val activeRequestsList = it.activeRequests
-                activeRequestsAdapter.submitList(activeRequestsList)
-
-                if (activeRequestsList.isEmpty()) {
-                    binding.noRequestsText.visibility = View.VISIBLE
+                binding.requestsRecycler.apply {
+                    layoutManager = LinearLayoutManager(activity)
+                    adapter = activeRequestsAdapter
                 }
-                binding.activeRequestsProgressBar.visibility = View.GONE
-                binding.activeRequestsProgressBar.visibility = View.GONE
+
+                setOverScrollView(binding.requestsRecycler)
+
+                viewModel.activeRequests(user.id).observe(viewLifecycleOwner) {
+                    if (it.isNotEmpty()) {
+                        job?.cancel()
+
+                        setOverScrollView(binding.requestsRecycler)
+                        activity.mainBinding.primaryProgressBar.visibility = View.GONE
+                        binding.noRequestsLayoutScroll.visibility = View.GONE
+                        binding.requestsRecycler.visibility = View.VISIBLE
+
+                        activeRequestsAdapter.submitList(it)
+                    } else {
+                        viewModel.clearAndFetchNewRequests()
+
+                        activity.mainBinding.primaryProgressBar.visibility = View.VISIBLE
+                        job = lifecycleScope.launch {
+                            delay(2000)
+                            activity.mainBinding.primaryProgressBar.visibility = View.GONE
+
+                            binding.requestsRecycler.visibility = View.GONE
+                            binding.noRequestsLayoutScroll.visibility = View.VISIBLE
+                        }
+
+                    }
+                }
+            } else {
+                binding.requestsRecycler.visibility = View.GONE
+                binding.noRequestsLayoutScroll.visibility = View.VISIBLE
             }
         }
 
-        binding.activeRequestsSwipeRefresh.setOnRefreshListener {
-            binding.activeRequestsSwipeRefresh.isRefreshing = false
+        viewModel.undoProjectResult.observe(viewLifecycleOwner) {
+            val result = it ?: return@observe
+
+            when (result) {
+                is Result.Success -> {
+                    Log.d(TAG, "Accepted - " + result.data.toString())
+                }
+                is Result.Error -> {
+                    viewModel.setCurrentError(result.exception)
+                }
+            }
         }
     }
 
     companion object {
 
+        private const val TAG = "RequestFragment"
+
         @JvmStatic
         fun newInstance() = RequestFragment()
     }
 
-    override fun onRequestItemClick(post: Post) {
-        val bundle = Bundle().apply {
-            putParcelable("post", post)
+    override fun onRefreshStart() {
+        viewModel.clearAndFetchNewRequests()
+        lifecycleScope.launch {
+            delay(2000)
+            setOverScrollView(binding.requestsRecycler)
         }
-        findNavController().navigate(R.id.projectFragment, bundle)
-    }
-
-    override fun onPositiveButtonClick(post: Post) {
-
-    }
-
-    override fun onNegativeButtonClick(post: Post) {
-
-    }
-
-    override fun onDelete(postId: String, pos: Int) {
-        activeRequestsAdapter.notifyItemRemoved(pos)
     }
 
 }

@@ -2,5 +2,5 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item android:id="@+id/saved_posts_item" android:title="Saved Posts" app:showAsAction="never" />
-    <item android:id="@+id/sign_out" android:title="Sign Out" app:showAsAction="never"/>
+    <item android:id="@+id/user_settings" android:title="Settings" app:showAsAction="never"/>
 </menu>
