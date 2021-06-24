@@ -29,9 +29,9 @@ class PostMenuFragment : Fragment(R.layout.fragment_post_menu) {
         viewModel.user.observe(viewLifecycleOwner) {
             if (it != null) {
                 when {
-                    it.activeRequests.contains(post.uid) -> {
+                    /*it.activeRequests.contains(post.uid) -> {
                         binding.postJoinText.visibility = View.GONE
-                    }
+                    }*/
                     post.contributors?.contains(it.id) == true -> {
                         binding.postJoinText.visibility = View.GONE
                     }

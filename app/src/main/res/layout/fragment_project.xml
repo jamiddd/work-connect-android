@@ -40,23 +40,23 @@
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/projectFragmentAppBar"
             android:layout_width="match_parent"
-            android:backgroundTint="@color/white"
-            android:layout_height="192dp">
+            android:layout_height="236dp"
+            android:backgroundTint="@color/white">
 
             <com.google.android.material.appbar.CollapsingToolbarLayout
                 android:layout_width="match_parent"
-                app:layout_scrollFlags="scroll|exitUntilCollapsed|snap|snapMargins"
-                app:titleEnabled="false"
-                app:contentScrim="@color/white"
+                android:layout_height="match_parent"
                 app:collapsedTitleGravity="center_horizontal"
+                app:contentScrim="@color/white"
                 app:expandedTitleTextAppearance="@style/WhiteToolbarText"
-                android:layout_height="match_parent">
+                app:layout_scrollFlags="scroll|exitUntilCollapsed|snap|snapMargins"
+                app:titleEnabled="false">
 
                 <com.facebook.drawee.view.SimpleDraweeView
                     android:id="@+id/projectImg"
                     android:layout_width="match_parent"
-                    app:placeholderImage="@color/darkerGrey"
-                    android:layout_height="match_parent"/>
+                    android:layout_height="match_parent"
+                    app:placeholderImage="@color/darkerGrey" />
 
                 <com.google.android.material.appbar.MaterialToolbar
                     android:id="@+id/projectFragmentToolbar"
@@ -77,12 +77,12 @@
                         android:id="@+id/projectAdminImg"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
-                        app:placeholderImage="@drawable/ic_user"
-                        app:roundAsCircle="true"
-                        android:focusable="true"
-                        android:clickable="true"
+                        android:layout_gravity="center_vertical|end"
                         android:layout_marginEnd="8dp"
-                        android:layout_gravity="center_vertical|end"/>
+                        android:clickable="true"
+                        android:focusable="true"
+                        app:placeholderImage="@drawable/ic_user"
+                        app:roundAsCircle="true" />
 
                 </com.google.android.material.appbar.MaterialToolbar>
 
