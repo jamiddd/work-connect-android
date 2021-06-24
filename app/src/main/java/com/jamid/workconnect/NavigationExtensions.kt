@@ -182,7 +182,7 @@ private fun BottomNavigationView.setupItemReselected(
     graphIdToTagMap: SparseArray<String>,
     fragmentManager: FragmentManager
 ) {
-    setOnNavigationItemReselectedListener { item ->
+    /*setOnNavigationItemReselectedListener { item ->
         val newlySelectedItemTag = graphIdToTagMap[item.itemId]
         val selectedFragment = fragmentManager.findFragmentByTag(newlySelectedItemTag)
                 as NavHostFragment
@@ -191,7 +191,7 @@ private fun BottomNavigationView.setupItemReselected(
         navController.popBackStack(
             navController.graph.startDestination, false
         )
-    }
+    }*/
 }
 
 private fun detachNavHostFragment(

@@ -36,7 +36,6 @@
             android:id="@+id/currentUserImgMsg"
             android:layout_width="200dp"
             android:layout_height="150dp"
-            android:layout_marginTop="4dp"
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="4dp"
             android:translationY="2dp"
@@ -63,6 +62,49 @@
             app:layout_constraintVertical_bias="1.0"
             app:srcCompat="@drawable/ic_chat_tail_right"
             app:tint="@color/grey" />
+
+        <ProgressBar
+            android:id="@+id/rightMsgProgress"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:indeterminate="true"
+            android:indeterminateTint="@color/blue_500"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/downloadBtn"
+            app:layout_constraintEnd_toEndOf="@+id/downloadBtn"
+            app:layout_constraintStart_toStartOf="@+id/downloadBtn"
+            app:layout_constraintTop_toTopOf="@+id/downloadBtn"
+            tools:visibility="visible" />
+
+        <Button
+            android:id="@+id/downloadBtn"
+            style="@style/Theme.Button.IconOnly"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:icon="@drawable/ic_round_arrow_downward_24"
+            app:iconTint="@color/blue_500"
+            app:layout_constraintBottom_toBottomOf="@+id/currentUserImgMsg"
+            app:layout_constraintEnd_toEndOf="@+id/currentUserImgMsg"
+            app:layout_constraintStart_toStartOf="@+id/currentUserImgMsg"
+            app:layout_constraintTop_toTopOf="@+id/currentUserImgMsg"
+            app:layout_constraintVertical_bias="0.45"
+            app:strokeColor="@color/blue_500"
+            app:strokeWidth="2dp"
+            tools:visibility="visible" />
+
+        <TextView
+            android:id="@+id/downloadTextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Download"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="@+id/downloadBtn"
+            app:layout_constraintStart_toStartOf="@+id/downloadBtn"
+            app:layout_constraintTop_toBottomOf="@+id/downloadBtn"
+            tools:visibility="visible" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

@@ -1,5 +1,6 @@
 <resources>
-    <string name="app_name">Work Connect</string>
+    <string name="app_name">Codesquare</string>
+    <string name="app_name_alt">Codesquare</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="skip"><u>Skip</u></string>
@@ -12,4 +13,14 @@
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="fullscreen_image_transition">fullscreen_image_transition</string>
+    <string name="title_create_project">Create Project</string>
+    <string name="title_create_blog">Create Blog</string>
+    <string name="title_edit_profile">Edit Profile</string>
+    <string name="messages">Messages</string>
+    <string name="explore">Explore</string>
+    <string name="edit">Edit</string>
+    <string name="sign_in_header"><b>Sign in</b> or <b>Create</b> new account</string>
+    <string name="user_detail_header">Let us <b>know you better</b></string>
+    <string name="interests_header">Select something that <b>interests</b> you.</string>
+    <string name="interests_header_alt">Explore other <b>interests</b></string>
 </resources>

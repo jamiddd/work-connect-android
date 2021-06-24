@@ -1,15 +1,16 @@
 package com.jamid.workconnect
 
 import android.graphics.Bitmap
-import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import com.canhub.cropper.CropImageView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.jamid.workconnect.databinding.FragmentImageCropBinding
-import com.theartofdev.edmodo.cropper.CropImageView
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -27,7 +28,7 @@ class ImageCropFragment : Fragment(R.layout.fragment_image_crop) {
 
         var currentDegrees = 0
 
-        val freeMode = arguments?.getBoolean("freeMode") ?: false
+        val freeMode = arguments?.getBoolean(ARG_FREE_MODE) ?: false
         var height = 0
         var width = 0
         val x: Int
@@ -55,7 +56,10 @@ class ImageCropFragment : Fragment(R.layout.fragment_image_crop) {
         }
 
         viewModel.currentImageUri.observe(viewLifecycleOwner) {
-            binding.cropArea.setImageUriAsync(it)
+            if (it != null) {
+                binding.cropArea.setImageUriAsync(it)
+                viewModel.setCurrentImage(null)
+            }
         }
 
         binding.cancelCropBtn.setOnClickListener {
@@ -79,21 +83,30 @@ class ImageCropFragment : Fragment(R.layout.fragment_image_crop) {
                 binding.cropArea.getCroppedImage(width, height)
             }
             if (bitmap != null) {
-                val file = File.createTempFile("image", ".jpeg")
-                val byteArrayOutputStream = ByteArrayOutputStream()
 
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 90, byteArrayOutputStream)
-                val ba = byteArrayOutputStream.toByteArray()
+                val externalDir = activity.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+                val name = "temp_" + System.currentTimeMillis().toString()
+                val file = File(externalDir, name)
 
-                val fos = FileOutputStream(file)
-                fos.write(ba)
-                fos.flush()
-                fos.close()
-                byteArrayOutputStream.flush()
+                if (file.createNewFile()) {
+                    val byteArrayOutputStream = ByteArrayOutputStream()
 
-                val tmpUri = Uri.fromFile(file)
-                viewModel.setCurrentCroppedImageUri(tmpUri)
-                activity.bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 90, byteArrayOutputStream)
+                    val ba = byteArrayOutputStream.toByteArray()
+
+                    val fos = FileOutputStream(file)
+                    fos.write(ba)
+                    fos.flush()
+                    fos.close()
+                    byteArrayOutputStream.flush()
+
+                    val uri = FileProvider.getUriForFile(activity, "com.jamid.workconnect.fileprovider", file)
+                    viewModel.setCurrentCroppedImageUri(uri)
+                } else {
+                    viewModel.setCurrentError(Exception("Could not create file."))
+                }
+
+                activity.hideBottomSheet()
             }
 
         }
@@ -122,6 +135,7 @@ class ImageCropFragment : Fragment(R.layout.fragment_image_crop) {
         const val ARG_HEIGHT = "ARG_HEIGHT"
         const val ARG_SHAPE_RECT = "RECTANGLE"
         const val ARG_SHAPE_OVAL = "OVAL"
+        const val ARG_FREE_MODE = "ARG_FREE_MODE"
 
         @JvmStatic
         fun newInstance(x: Int = 1, y: Int = 1, width: Int = 300, height: Int = 300, shape: String = ARG_SHAPE_OVAL) =
@@ -134,5 +148,12 @@ class ImageCropFragment : Fragment(R.layout.fragment_image_crop) {
                     putString(ARG_SHAPE, shape)
                 }
             }
+
+        @JvmStatic
+        fun newInstance(bundle: Bundle?) : ImageCropFragment {
+            return ImageCropFragment().apply {
+                arguments = bundle
+            }
+        }
     }
 }

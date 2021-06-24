@@ -1,26 +1,38 @@
 package com.jamid.workconnect.profile
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
-import androidx.paging.PagedList
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.navOptions
+import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.firebase.ui.firestore.paging.FirestorePagingOptions
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
-import com.jamid.workconnect.*
-import com.jamid.workconnect.adapter.PostAdapter
+import com.jamid.workconnect.InsetControlFragment
+import com.jamid.workconnect.R
+import com.jamid.workconnect.adapter.paging3.PostAdapter
 import com.jamid.workconnect.databinding.FragmentProjectListBinding
-import com.jamid.workconnect.interfaces.PostItemClickListener
-import com.jamid.workconnect.interfaces.PostsLoadStateListener
-import com.jamid.workconnect.message.ProjectDetailContainer
-import com.jamid.workconnect.model.Post
+import com.jamid.workconnect.home.CreateProjectFragment
 import com.jamid.workconnect.model.User
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
-class ProjectListFragment : BaseFeedFragment(R.layout.fragment_project_list) {
+@OptIn(androidx.paging.ExperimentalPagingApi::class)
+class ProjectListFragment : InsetControlFragment(R.layout.fragment_project_list) {
 
     private lateinit var postAdapter: PostAdapter
     private lateinit var binding: FragmentProjectListBinding
+    private var job: Job? = null
+
+    private fun getUserProjects(user: User) {
+        job?.cancel()
+        job = viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.otherUserProjectsFlow(user).collectLatest {
+                postAdapter.submitData(it)
+            }
+        }
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -28,38 +40,79 @@ class ProjectListFragment : BaseFeedFragment(R.layout.fragment_project_list) {
         binding = FragmentProjectListBinding.bind(view)
         val user = arguments?.getParcelable<User>(ARG_USER)
 
-        setDeleteListeners()
-        setRecyclerView(binding.projectsRecycler)
-
         if (user != null) {
 
-            val query = FirebaseFirestore.getInstance()
-                .collection(POSTS)
-                .orderBy(CREATED_AT, Query.Direction.DESCENDING)
-                .whereEqualTo(UID, user.id)
-                .whereEqualTo(TYPE, PROJECT)
+            initAdapter()
 
-            val config = PagedList.Config.Builder().setPageSize(10).setEnablePlaceholders(false).setPrefetchDistance(5).build()
-
-            val options = FirestorePagingOptions.Builder<Post>()
-                .setLifecycleOwner(viewLifecycleOwner)
-                .setQuery(query, config, Post::class.java)
-                .build()
-
-            val parent = activity.currentBottomFragment
-            postAdapter = if (parent is ProjectDetailContainer) {
-                Log.d("ProjectList", "yes")
-                PostAdapter(viewModel, options, viewLifecycleOwner, parent as PostItemClickListener, parent as PostsLoadStateListener)
+            if (user.id == viewModel.user.value?.id) {
+                binding.noUserPostsCreatePost.visibility = View.VISIBLE
             } else {
-                Log.d("ProjectList", "No")
-                PostAdapter(viewModel, options, viewLifecycleOwner, activity, activity)
+                binding.noUserPostsText.text = "No projects"
+                binding.noUserPostsCreatePost.visibility = View.GONE
             }
 
-            binding.projectsRecycler.apply {
-                adapter = postAdapter
-                layoutManager = LinearLayoutManager(requireContext())
+            val options = navOptions {
+                anim {
+                    enter = R.anim.slide_in_right
+                    exit = R.anim.slide_out_left
+                    popEnter = R.anim.slide_in_left
+                    popExit = R.anim.slide_out_right
+                }
+            }
+
+            binding.noUserPostsCreatePost.setOnClickListener {
+//                activity.toFragment(CreateProjectFragment.newInstance(), CreateProjectFragment.TAG)
+                findNavController().navigate(R.id.createProjectFragment, null, options)
+            }
+
+            setRefresher(user)
+
+            getUserProjects(user)
+
+        }
+    }
+
+    private fun initAdapter() {
+        postAdapter = PostAdapter()
+
+        binding.projectsRecycler.apply {
+            adapter = postAdapter
+            itemAnimator = null
+            setRecycledViewPool(activity.recyclerViewPool)
+            layoutManager = LinearLayoutManager(activity)
+        }
+
+    }
+
+    private fun setRefresher(user: User) {
+        binding.projectsListRefresher.setOnRefreshListener {
+            getUserProjects(user)
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            postAdapter.loadStateFlow.collectLatest { loadStates ->
+                binding.projectsListRefresher.isRefreshing = true
+                if (loadStates.refresh is LoadState.NotLoading) {
+                    delay(1000)
+                    binding.projectsListRefresher.isRefreshing = false
+                    if (postAdapter.itemCount == 0) {
+                        showEmptyNotificationsUI()
+                    } else {
+                        hideEmptyNotificationsUI()
+                    }
+                }
             }
         }
+    }
+
+    private fun hideEmptyNotificationsUI() {
+        binding.projectsListRefresher.visibility = View.VISIBLE
+        binding.noUserPostsLayoutScroll.visibility = View.GONE
+    }
+
+    private fun showEmptyNotificationsUI() {
+        binding.projectsListRefresher.visibility = View.GONE
+        binding.noUserPostsLayoutScroll.visibility = View.VISIBLE
     }
 
     companion object {
@@ -67,7 +120,7 @@ class ProjectListFragment : BaseFeedFragment(R.layout.fragment_project_list) {
         private const val ARG_USER = "ARG_USER"
 
         @JvmStatic
-        fun newInstance(user: User?) = ProjectListFragment().apply {
+        fun newInstance(user: User) = ProjectListFragment().apply {
             arguments = Bundle().apply {
                 putParcelable(ARG_USER, user)
             }

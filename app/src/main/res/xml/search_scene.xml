@@ -19,13 +19,13 @@
                 android:translationX="100dp" />
         </KeyFrameSet>
 
-<!--        <OnClick app:targetId="@id/primarySearchBar" app:clickAction="transitionToEnd" />-->
+<!--        <OnClick app:targetId="@id/searchBarText" app:clickAction="transitionToEnd" />-->
 
     </Transition>
 
 
     <ConstraintSet android:id="@+id/start">
-        <Constraint android:id="@+id/primarySearchBar"
+        <Constraint android:id="@+id/searchBarText"
             android:layout_width="0dp"
             android:layout_height="40dp"
             app:layout_constraintStart_toStartOf="parent"
@@ -42,14 +42,14 @@
             android:layout_width="wrap_content"
             android:layout_height="40dp"
             android:layout_marginEnd="8dp"
-            app:layout_constraintStart_toEndOf="@+id/primarySearchBar"
+            app:layout_constraintStart_toEndOf="@+id/searchBarText"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
     </ConstraintSet>
 
     <ConstraintSet android:id="@+id/end">
-        <Constraint android:id="@+id/primarySearchBar"
+        <Constraint android:id="@+id/searchBarText"
             android:layout_width="0dp"
             android:layout_height="40dp"
             app:layout_constraintStart_toStartOf="parent"
@@ -65,7 +65,7 @@
             android:id="@+id/cancelSearchBtn"
             android:layout_width="wrap_content"
             android:layout_height="40dp"
-            app:layout_constraintStart_toEndOf="@+id/primarySearchBar"
+            app:layout_constraintStart_toEndOf="@+id/searchBarText"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

@@ -5,34 +5,80 @@
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <TextView
-            android:id="@+id/empty_search_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Search for Projects, Blogs and People"
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-            android:visibility="gone"
-            app:layout_anchor="@id/empty_search_img"
-            app:layout_anchorGravity="bottom|center_horizontal" />
+        android:layout_height="match_parent"
+        style="@style/NonPrimaryFragmentStyle">
 
         <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/searchViewPager"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" >
+            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
+            android:layout_height="match_parent"/>
 
-        </androidx.viewpager2.widget.ViewPager2>
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/searchAppBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/white">
 
+            <androidx.constraintlayout.motion.widget.MotionLayout
+                android:id="@+id/searchMotionLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:applyMotionScene="true"
+                app:layoutDescription="@xml/search_scene">
 
-        <com.facebook.drawee.view.SimpleDraweeView
-            android:id="@+id/empty_search_img"
-            android:layout_width="200dp"
-            android:layout_height="200dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="200dp"
-            android:visibility="gone"
-            app:placeholderImage="@drawable/ic_empty_search_image" />
+                <EditText
+                    android:id="@+id/searchBarText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:background="@drawable/grey_rounded_rect_edittext"
+                    android:hint="Search for posts ..."
+                    android:inputType="textPersonName"
+                    android:maxLines="1"
+                    android:minHeight="40dp"
+                    android:paddingStart="12dp"
+                    android:paddingTop="8dp"
+                    android:paddingEnd="12dp"
+                    android:paddingBottom="8dp" />
+
+                <Button
+                    android:id="@+id/cancelSearchBtn"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:fontFamily="@font/roboto_medium"
+                    android:minWidth="60dp"
+                    android:text="Cancel"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Small" />
+
+            </androidx.constraintlayout.motion.widget.MotionLayout>
+
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/searchTabLayout"
+                style="@style/TabLayoutTheme"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <com.google.android.material.tabs.TabItem
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Projects" />
+
+                <com.google.android.material.tabs.TabItem
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Blogs" />
+
+                <com.google.android.material.tabs.TabItem
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Accounts" />
+
+            </com.google.android.material.tabs.TabLayout>
+
+        </com.google.android.material.appbar.AppBarLayout>
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>

@@ -1,36 +1,68 @@
 package com.jamid.workconnect.auth
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
-import android.view.ViewGroup
-import android.widget.ScrollView
+import android.view.inputmethod.EditorInfo
 import android.widget.Toast
-import androidx.activity.addCallback
 import androidx.core.widget.doAfterTextChanged
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.navOptions
-import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.jamid.workconnect.*
 import com.jamid.workconnect.databinding.FragmentSignInBinding
 import com.jamid.workconnect.model.Result
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import me.everything.android.ui.overscroll.OverScrollDecoratorHelper
 
-class SignInFragment : Fragment(R.layout.fragment_sign_in) {
+
+class SignInFragment : SupportFragment(R.layout.fragment_sign_in, TAG, false) {
 
     private lateinit var binding: FragmentSignInBinding
-    private val viewModel: MainViewModel by activityViewModels()
+    private var job: Job? = null
+    private var job1: Job? = null
+    private var mGoogleSignInClient: GoogleSignInClient? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentSignInBinding.bind(view)
-        val activity = requireActivity() as MainActivity
 
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getString(R.string.default_web_client_id))
+            .requestEmail()
+            .build()
+
+        setListeners()
+
+        binding.signInToolbar.setNavigationOnClickListener {
+            findNavController().navigateUp()
+        }
+
+        mGoogleSignInClient = GoogleSignIn.getClient(activity, gso)
+
+        binding.signInWithGoogleBtn.setOnClickListener {
+            signInWithGoogle()
+        }
+
+        binding.signInRegisterBtn.setOnClickListener {
+            signInRegister()
+        }
+
+        viewModel.windowInsets.observe(viewLifecycleOwner) { (top, _) ->
+            binding.signInToolbar.updateLayout(marginTop = top)
+        }
+    }
+
+    private fun fakeSignIn() {
+
+        hideKeyboard()
+
+        activity.toFragment(UserDetailFragment.newInstance(), UserDetailFragment.TAG)
+    }
+
+    private fun setListeners() {
 
         viewModel.signInResult.observe(viewLifecycleOwner) {
             val result = it ?: return@observe
@@ -40,12 +72,10 @@ class SignInFragment : Fragment(R.layout.fragment_sign_in) {
 
             when (result) {
                 is Result.Success -> {
-                    val user = result.data
-                    viewModel.setFirebaseUser(user)
-                    activity.bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+                    findNavController().navigateUp()
                 }
                 is Result.Error -> {
-                    Log.e(TAG, "Couldn't sign in due to some error - ${result.exception}")
+                    viewModel.setCurrentError(result.exception)
                 }
             }
         }
@@ -58,17 +88,8 @@ class SignInFragment : Fragment(R.layout.fragment_sign_in) {
 
             when (result) {
                 is Result.Success -> {
-                    val user = result.data
-                    viewModel.setFirebaseUser(user)
-                    val navOptions = navOptions {
-                        anim {
-                            enter = R.anim.slide_in_right
-                            exit = R.anim.slide_out_left
-                            popEnter = R.anim.slide_in_left
-                            popExit = R.anim.slide_out_right
-                        }
-                    }
-                    findNavController().navigate(R.id.userDetailFragment, null, navOptions)
+                    findNavController().navigate(R.id.userDetailFragment)
+//                    activity.toFragment(UserDetailFragment.newInstance(), UserDetailFragment.TAG)
                 }
                 is Result.Error -> {
                     Toast.makeText(
@@ -81,10 +102,12 @@ class SignInFragment : Fragment(R.layout.fragment_sign_in) {
         }
 
         viewModel.emailExists.observe(viewLifecycleOwner) {
-            if (it) {
-                binding.signInRegisterBtn.text = "Sign In"
-            } else {
-                binding.signInRegisterBtn.text = "Register"
+            if (it != null) {
+                if (it) {
+                    binding.signInRegisterBtn.text = "Sign In"
+                } else {
+                    binding.signInRegisterBtn.text = "Register"
+                }
             }
             binding.emailProgress.visibility = View.GONE
         }
@@ -96,6 +119,7 @@ class SignInFragment : Fragment(R.layout.fragment_sign_in) {
 
             when {
                 result.emailError != null -> {
+                    binding.emailProgress.visibility = View.GONE
                     binding.emailText.isErrorEnabled = true
                     binding.emailText.error = result.emailError
                 }
@@ -106,84 +130,92 @@ class SignInFragment : Fragment(R.layout.fragment_sign_in) {
             }
         }
 
-
-        binding.emailText.editText?.doAfterTextChanged {
-            if (!it.isNullOrBlank()) {
-                binding.emailText.error = null
-                binding.emailText.isErrorEnabled = false
-                val email = binding.emailText.editText?.text.toString()
-                val password = binding.passwordText.editText?.text.toString()
-                viewModel.validateSignInForm(email, password)
-                viewModel.checkIfEmailExists(email)
-                viewModel.checkIfUsernameExists(email.split('@')[0])
-
-                lifecycleScope.launch {
-                    delay(1000)
-                    binding.emailProgress.visibility = View.VISIBLE
-                    delay(5000)
-                    binding.emailProgress.visibility = View.GONE
+        binding.passwordText.editText?.setOnEditorActionListener { v, actionId, event ->
+            when (actionId) {
+                EditorInfo.IME_ACTION_DONE -> {
+                    binding.signInRegisterBtn.requestFocus()
+                    hideKeyboard()
+                    if (binding.signInRegisterBtn.isEnabled) {
+                        signInRegister()
+                    }
                 }
-            } else {
-                binding.emailProgress.visibility = View.GONE
             }
+            true
         }
 
         binding.passwordText.editText?.doAfterTextChanged {
             if (!it.isNullOrBlank()) {
+                job1?.cancel()
                 binding.passwordText.error = null
                 binding.passwordText.isErrorEnabled = false
                 val email = binding.emailText.editText?.text.toString()
                 val password = binding.passwordText.editText?.text.toString()
-                viewModel.validateSignInForm(email, password)
+                job1 = viewLifecycleOwner.lifecycleScope.launch {
+                    delay(1500)
+                    viewModel.validateSignInForm(email, password)
+                }
             }
         }
 
-        binding.signInRegisterBtn.setOnClickListener {
-            val emailExists = viewModel.emailExists.value ?: return@setOnClickListener
-
-            binding.signInProgress.visibility = View.VISIBLE
-            binding.signInRegisterBtn.visibility = View.INVISIBLE
-
-            val email = binding.emailText.editText?.text.toString()
-            val password = binding.passwordText.editText?.text.toString()
-
-            if (emailExists) {
-                viewModel.signIn(email, password)
+        binding.emailText.editText?.doAfterTextChanged {
+            if (!it.isNullOrBlank()) {
+                job?.cancel()
+                binding.emailText.error = null
+                binding.emailText.isErrorEnabled = false
+                val email = binding.emailText.editText?.text.toString()
+                val password = binding.passwordText.editText?.text.toString()
+                job = viewLifecycleOwner.lifecycleScope.launch {
+                    delay(2000)
+                    binding.emailProgress.visibility = View.VISIBLE
+                    viewModel.validateSignInForm(email, password)
+                    viewModel.checkIfEmailExists(email)
+                    viewModel.checkIfUsernameExists(email.split('@')[0])
+                    delay(5000)
+                    binding.emailProgress.visibility = View.GONE
+                }
             } else {
-                viewModel.register(email, password)
+                job?.cancel()
+                binding.emailProgress.visibility = View.GONE
             }
         }
+    }
 
+    private fun signInRegister() {
 
-        viewModel.windowInsets.observe(viewLifecycleOwner) { (top, bottom) ->
-            val windowHeight = getWindowHeight()
-//            val rect = windowHeight - top
+        hideKeyboard()
 
-            val params = binding.root.layoutParams as ViewGroup.LayoutParams
-            params.height = windowHeight
-            params.width = ViewGroup.LayoutParams.MATCH_PARENT
+        val emailExists = viewModel.emailExists.value ?: return
 
-            binding.root.layoutParams = params
+        binding.signInProgress.visibility = View.VISIBLE
+        binding.signInRegisterBtn.visibility = View.INVISIBLE
 
+        val email = binding.emailText.editText?.text.toString()
+        val password = binding.passwordText.editText?.text.toString()
+
+        if (emailExists) {
+            viewModel.signIn(email, password)
+        } else {
+            viewModel.register(email, password)
         }
+    }
 
-        OverScrollDecoratorHelper.setUpOverScroll(binding.root as ScrollView)
+    private fun signInWithGoogle() {
 
+        hideKeyboard()
 
-        activity.onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
-            activity.bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
-        }
-
+        val signInIntent = mGoogleSignInClient?.signInIntent
+        activity.requestGoogleSingInLauncher.launch(signInIntent)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        viewModel.setSignInResult(null)
-        viewModel.setRegisterResult(null)
+        viewModel.clearSignInChanges()
     }
 
     companion object {
         const val TAG = "SignInFragment"
+        const val TITLE = "Sign in Or Register"
+        const val RC_SIGN_IN = 12
 
         @JvmStatic
         fun newInstance() = SignInFragment()

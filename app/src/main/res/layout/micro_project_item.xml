@@ -4,13 +4,12 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <com.google.android.material.card.MaterialCardView
+        style="@style/PostCardStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
-        app:strokeColor="@color/grey"
-        app:strokeWidth="1dp">
+        android:layout_marginBottom="8dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="280dp"
@@ -26,7 +25,7 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="0.0"
                 app:layout_constraintVertical_chainStyle="packed"
-                app:placeholderImage="@color/grey"
+                app:placeholderImage="@color/darkerGrey"
                 app:viewAspectRatio="1.77" />
 
 
@@ -34,14 +33,15 @@
                 android:id="@+id/micro_project_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/title_semi"
+                android:ellipsize="end"
+                android:fontFamily="@font/roboto_medium"
+                android:maxLines="1"
                 android:paddingStart="16dp"
                 android:paddingTop="8dp"
                 android:paddingEnd="16dp"
                 android:paddingBottom="8dp"
                 android:text="Title of the Project that can be too Long"
                 android:textAppearance="@style/Theme.TabLayoutText"
-                android:textColor="@color/black"
                 android:textSize="15sp"
                 app:layout_constraintBottom_toTopOf="@+id/micro_project_user_img"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -65,7 +65,6 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:text="Jamid Deka"
-                android:textColor="@color/black"
                 app:layout_constraintBottom_toBottomOf="@+id/micro_project_user_img"
                 app:layout_constraintStart_toEndOf="@+id/micro_project_user_img"
                 app:layout_constraintTop_toTopOf="@+id/micro_project_user_img" />

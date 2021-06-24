@@ -25,12 +25,6 @@ class AuthFragment : Fragment(R.layout.fragment_auth) {
             activity.bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
         }
 
-//        val finalHost = NavHostFragment.create(R.navigation.auth_navigation)
-//        activity.supportFragmentManager.beginTransaction()
-//            .replace(R.id.authFragmentContainer, finalHost)
-//            .setPrimaryNavigationFragment(finalHost) // equivalent to app:defaultNavHost="true"
-//            .commit()
-
         val navHostFragment = childFragmentManager.findFragmentById(R.id.authFragmentContainer) as NavHostFragment
         val navController = navHostFragment.navController
 

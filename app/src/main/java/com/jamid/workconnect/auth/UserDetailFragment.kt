@@ -1,97 +1,86 @@
 package com.jamid.workconnect.auth
 
-import android.app.Activity
-import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.view.Gravity
 import android.view.View
-import android.view.ViewGroup
-import android.widget.Button
-import android.widget.PopupMenu
-import android.widget.ScrollView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.widget.doAfterTextChanged
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.navOptions
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import com.jamid.workconnect.*
 import com.jamid.workconnect.databinding.FragmentUserDetailBinding
-import com.jamid.workconnect.interfaces.ImageSelectMenuListener
+import com.jamid.workconnect.model.GenericMenuItem
 import com.jamid.workconnect.model.Result
-import me.everything.android.ui.overscroll.OverScrollDecoratorHelper
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
-class UserDetailFragment : Fragment(R.layout.fragment_user_detail), ImageSelectMenuListener {
+class UserDetailFragment : SupportFragment(R.layout.fragment_user_detail, TAG, false) {
 
     private lateinit var binding: FragmentUserDetailBinding
-    private val viewModel: MainViewModel by activityViewModels()
     private var imageUrl: Uri? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentUserDetailBinding.bind(view)
-        val activity = requireActivity() as MainActivity
 
-        val popUpMenu = PopupMenu(requireContext(), binding.userImg, (Gravity.BOTTOM or Gravity.START))
-        popUpMenu.menuInflater.inflate(R.menu.image_select_deselect_menu, popUpMenu.menu)
         binding.addImgBtn.setOnClickListener {
-            popUpMenu.show()
-            /*
-            val fragment = ImageSelectFragment.newInstance()
-            fragment.show(childFragmentManager, "ImageSelectFragment")*/
+            showMenu()
         }
+
+        binding.userImg.setColorFilter(ContextCompat.getColor(activity, R.color.semiTransparentDark))
 
         binding.userImg.isClickable = true
+        binding.userImg.colorFilter
         binding.userImg.setOnClickListener {
-            /*val fragment = ImageSelectFragment.newInstance()
-            fragment.show(childFragmentManager, "ImageSelectFragment")*/
-            popUpMenu.show()
+            showMenu()
         }
 
-        popUpMenu.setOnMenuItemClickListener {
-            when (it.itemId) {
-                R.id.select_from_gallery -> {
+        setListeners()
 
-                }
-                R.id.take_a_photo -> {
+        binding.userFullNameText.doAfterTextChanged {
+            binding.updateUserBtn.isEnabled = !it.isNullOrBlank() && it.length > 3
+        }
 
-                }
-                R.id.remove_image -> {
+        val currentUser = Firebase.auth.currentUser
 
-                }
+        if (currentUser != null) {
+            currentUser.photoUrl?.let {
+                binding.userImg.setImageURI(it.toString())
+                imageUrl = it
             }
-            true
         }
+
+        binding.updateUserBtn.setOnClickListener {
+            hideKeyboard()
+            viewModel.updateFirebaseUser(imageUrl, binding.userFullNameText.text?.trimEnd().toString())
+//            activity.toFragment(InterestFragment.newInstance(true), InterestFragment.TAG)
+        }
+
+        viewModel.windowInsets.observe(viewLifecycleOwner) { (top, _) ->
+            binding.userDetailToolbar.updateLayout(marginTop = top)
+        }
+
+    }
+
+    private fun setListeners() {
 
         viewModel.profilePhotoUploadResult.observe(viewLifecycleOwner) {
-            val result = it ?: return@observe
-
             binding.imageUploadProgress.visibility = View.GONE
             binding.userImg.colorFilter = null
-            imageUrl = when (result) {
-                is Result.Success -> {
-                    result.data
-                }
-                is Result.Error -> {
-                    Toast.makeText(requireContext(), result.exception.localizedMessage, Toast.LENGTH_SHORT).show()
-                    null
-                }
-            }
+            imageUrl = it
         }
 
         viewModel.currentCroppedImageUri.observe(viewLifecycleOwner) {
             if (it != null) {
                 binding.addImgBtn.visibility = View.GONE
-
-                val path = it.path
                 binding.userImg.setImageURI(it.toString())
 
                 binding.imageUploadProgress.visibility = View.VISIBLE
-                binding.userImg.setColorFilter(ContextCompat.getColor(requireContext(), R.color.semiTransparentDark))
-                viewModel.uploadProfilePhoto(path)
-
+                binding.userImg.setColorFilter(ContextCompat.getColor(activity, R.color.semiTransparentDark))
+                viewModel.uploadProfilePhoto(it)
             } else {
                 binding.addImgBtn.visibility = View.VISIBLE
                 val s: String? = null
@@ -105,88 +94,37 @@ class UserDetailFragment : Fragment(R.layout.fragment_user_detail), ImageSelectM
 
             when (result) {
                 is Result.Success -> {
-                    val navOptions = navOptions {
-                        anim {
-                            enter = R.anim.slide_in_right
-                            exit = R.anim.slide_out_left
-                            popEnter = R.anim.slide_in_left
-                            popExit = R.anim.slide_out_right
-                        }
-                    }
-                    findNavController().navigate(R.id.interestFragment, null, navOptions)
+                    findNavController().navigate(R.id.interestFragment, Bundle().apply { putBoolean(InterestFragment.ARG_IS_SIGN_IN, true) })
+//                    activity.toFragment(InterestFragment.newInstance(true), InterestFragment.TAG)
                 }
                 is Result.Error -> {
                     Toast.makeText(requireContext(), result.exception.localizedMessage, Toast.LENGTH_SHORT).show()
                 }
             }
         }
-        val primaryBtn = activity.findViewById<Button>(R.id.primaryBtn)
-        primaryBtn.isEnabled = false
-        binding.userFullNameText.doAfterTextChanged {
-            primaryBtn.isEnabled = !it.isNullOrBlank() && it.length > 3
-        }
-
-        primaryBtn.setOnClickListener {
-            viewModel.updateFirebaseUser(imageUrl, binding.userFullNameText.text.trim().toString())
-        }
-
-        viewModel.windowInsets.observe(viewLifecycleOwner) { (top, bottom) ->
-            val windowHeight = getWindowHeight()
-//            val rect = windowHeight - top
-
-            val params = binding.root.layoutParams as ViewGroup.LayoutParams
-            params.height = windowHeight
-            params.width = ViewGroup.LayoutParams.MATCH_PARENT
-
-            binding.root.layoutParams = params
-
-        }
-
-        OverScrollDecoratorHelper.setUpOverScroll(binding.root as ScrollView)
-
     }
 
-    private fun selectImage() {
-        val intent = Intent().apply {
-            type = "image/*"
-            action = Intent.ACTION_GET_CONTENT
-        }
-        startActivityForResult(intent, IMAGE_SELECT_REQUEST)
-    }
+    private fun showMenu() {
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == Activity.RESULT_OK) {
-            when (requestCode) {
-                IMAGE_SELECT_REQUEST -> {
-                    val image = data?.data
-                    viewModel.setCurrentImage(image)
-                    findNavController().navigate(R.id.imageCropFragment)
-                }
-            }
-        }
+        hideKeyboard()
+
+        val tag = SELECT_IMAGE_MENU_USER
+        val menu = GenericMenuFragment.newInstance(tag, "Upload or Remove Image", arrayListOf(
+            GenericMenuItem(tag, "Select Image", R.drawable.ic_baseline_add_photo_alternate_24, 0),
+            GenericMenuItem(tag, "Take a Photo", R.drawable.ic_baseline_camera_alt_24, 1),
+            GenericMenuItem(tag, "Remove Image", R.drawable.ic_baseline_delete_24, 2)
+        ))
+
+        activity.showBottomSheet(menu, tag)
     }
 
     companion object {
 
-        const val IMAGE_SELECT_REQUEST = 12
+        const val TAG = "UserDetailFragment"
+        const val TITLE = "User Detail"
 
         @JvmStatic
         fun newInstance() = UserDetailFragment()
-    }
-
-    override fun onSelectImageFromGallery() {
-        selectImage()
-    }
-
-    override fun onCaptureEvent() {
-        //
-    }
-
-    override fun onImageRemove() {
-        viewModel.setCurrentCroppedImageUri(null)
-        viewModel.setCurrentImage(null)
-        imageUrl = null
     }
 
     override fun onDestroy() {

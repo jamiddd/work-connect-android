@@ -4,26 +4,88 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/mainRoot"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fitsSystemWindows="true"
         tools:context=".MainActivity">
 
-        <com.google.android.material.appbar.AppBarLayout
-            android:id="@+id/primaryAppBar"
+        <androidx.cardview.widget.CardView
+            android:id="@+id/bottomCard"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/transparent"
-            android:fitsSystemWindows="true"
-            android:stateListAnimator="@animator/app_bar_elevation_reverse">
+            android:layout_height="56dp"
+            android:layout_gravity="bottom">
 
-            <com.google.android.material.appbar.CollapsingToolbarLayout
+            <!--
+            <com.github.mmin18.widget.RealtimeBlurView
+                android:id="@+id/bottom_blur"
+                style="@style/BlurOverlayStyle"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:realtimeDownsampleFactor="5" />-->
+
+            <com.google.android.material.bottomnavigation.BottomNavigationView
+                android:id="@+id/bottomNav"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:background="@drawable/bottom_transparent_view"
+                android:clipToPadding="false"
+                app:itemTextAppearanceActive="@style/Theme.TabLayoutText"
+                app:itemTextAppearanceInactive="@style/Theme.TabLayoutText"
+                app:labelVisibilityMode="auto"
+                app:menu="@menu/main_navigation_menu" />
 
-                <com.github.mmin18.widget.RealtimeBlurView
+            <View
+                android:id="@+id/bottomDivider"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?android:attr/listDivider" />
+
+        </androidx.cardview.widget.CardView>
+
+
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/navHostFragment"
+            android:name="androidx.navigation.fragment.NavHostFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:navGraph="@navigation/main_graph"
+            app:defaultNavHost="true"
+            tools:layout="@layout/fragment_home" />
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/bottomNavBackground"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom" >
+
+            <View
+                android:id="@+id/divider17"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?android:attr/listDivider" />
+        </androidx.cardview.widget.CardView>
+
+       <!-- <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/primaryAppBar"
+            style="@style/AppBarStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:stateListAnimator="@animator/app_bar_elevation"
+            android:visibility="gone">
+
+            <com.google.android.material.appbar.CollapsingToolbarLayout
+                android:id="@+id/topCollapseToolbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_scrollFlags="scroll|enterAlways|exitUntilCollapsed|snap|snapMargins"
+                app:titleEnabled="false"
+                app:toolbarId="@id/primaryToolbar">
+                &lt;!&ndash;                app:layout_scrollFlags="scroll|enterAlways|exitUntilCollapsed">&ndash;&gt;
+
+                &lt;!&ndash;<com.github.mmin18.widget.RealtimeBlurView
                     android:id="@+id/primaryTopBlur"
+                    style="@style/BlurOverlayStyle"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:fitsSystemWindows="true"
@@ -31,281 +93,193 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:realtimeBlurRadius="40dp"
-                    app:realtimeDownsampleFactor="5"
-                    app:realtimeOverlayColor="@color/blurOverlay" />
+                    app:realtimeDownsampleFactor="5" />&ndash;&gt;
 
-                <LinearLayout
-                    android:id="@+id/linearPrimaryContainer"
+                <com.google.android.material.tabs.TabLayout
+                    android:id="@+id/primaryTabs"
+                    style="@style/TabLayoutTheme"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical">
+                    android:layout_height="wrap_content"
+                    android:background="@color/transparent"
+                    android:visibility="gone"
+                    app:layout_collapseMode="pin"
+                    app:tabMode="auto"
+                    tools:visibility="visible">
 
-                    <com.google.android.material.appbar.MaterialToolbar
-                        android:id="@+id/primaryToolbar"
-                        android:layout_width="match_parent"
-                        android:layout_height="?actionBarSize"
-                        android:fitsSystemWindows="false"
-                        app:contentInsetEnd="48dp"
-                        app:contentInsetEndWithActions="48dp"
-                        app:contentInsetStart="0dp"
-                        app:contentInsetStartWithNavigation="48dp"
-                        app:layout_collapseMode="pin"
+                    <com.google.android.material.tabs.TabItem
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Monday" />
+
+                    <com.google.android.material.tabs.TabItem
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Tuesday" />
+
+                    <com.google.android.material.tabs.TabItem
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Wednesday" />
+                </com.google.android.material.tabs.TabLayout>
+
+                <HorizontalScrollView
+                    android:id="@+id/horizontalContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:scrollbars="none">
+
+                    <com.google.android.material.chip.ChipGroup
+                        android:id="@+id/popularInterestsGroup"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:clipToPadding="false"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        app:selectionRequired="true"
+                        app:singleLine="true"
+                        app:singleSelection="true">
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/first_chip"
+                            style="@style/Widget.MaterialComponents.Chip.Choice"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:checked="true"
+                            android:text="Random"
+                            android:textAppearance="@style/chipText" />
+
+                    </com.google.android.material.chip.ChipGroup>
+                </HorizontalScrollView>
+
+                <androidx.constraintlayout.motion.widget.MotionLayout
+                    android:id="@+id/primarySearchLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:visibility="gone"
+                    app:layoutDescription="@xml/search_scene"
+                    tools:visibility="visible">
+
+                    <EditText
+                        android:id="@+id/primarySearchBar"
+                        style="@style/SearchBarStyle"
+                        android:layout_width="0dp"
+                        android:layout_height="40dp"
+                        android:layout_margin="8dp"
+                        android:animateLayoutChanges="true"
+                        android:background="@drawable/grey_rounded_rect_edittext"
+                        android:drawableEnd="@drawable/ic_baseline_search_24"
+                        android:drawablePadding="8dp"
+                        android:hint="Search"
+                        android:inputType="textPersonName"
+                        android:maxLines="1"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.5"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintVertical_bias="0.0"
-                        app:menu="@menu/home_menu">
+                        tools:visibility="visible" />
 
-                        <com.facebook.drawee.view.SimpleDraweeView
-                            android:id="@+id/user_icon"
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
-                            android:layout_marginStart="8dp"
-                            android:layout_marginTop="12dp"
-                            android:layout_marginEnd="8dp"
-                            android:layout_marginBottom="12dp"
-                            app:placeholderImage="@drawable/ic_user"
-                            app:roundAsCircle="true" />
-
-                        <TextView
-                            android:id="@+id/primaryTitle"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:fontFamily="sans-serif-condensed-medium"
-                            android:gravity="center"
-                            android:text="Codesquare"
-                            android:textAllCaps="true"
-                            android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6" />
-
-                    </com.google.android.material.appbar.MaterialToolbar>
-
-                    <androidx.constraintlayout.motion.widget.MotionLayout
-                        android:id="@+id/primarySearchLayout"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:clickable="true"
-                        android:focusable="true"
+                    <Button
+                        android:id="@+id/cancelSearchBtn"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:layout_marginEnd="8dp"
+                        android:fontFamily="@font/title_semi"
+                        android:minWidth="60dp"
+                        android:text="Cancel"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Small"
                         android:visibility="gone"
-                        app:layoutDescription="@xml/search_scene">
-
-                        <EditText
-                            android:id="@+id/primarySearchBar"
-                            android:layout_width="0dp"
-                            android:layout_height="40dp"
-                            android:layout_margin="8dp"
-                            android:background="@drawable/grey_rounded_rect_edittext"
-                            android:drawableEnd="@drawable/ic_baseline_search_24"
-                            android:hint="Search"
-                            android:paddingStart="16dp"
-                            android:paddingEnd="16dp"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintHorizontal_bias="0.5"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
-                            tools:visibility="visible" />
-
-                        <Button
-                            android:id="@+id/cancelSearchBtn"
-                            style="@style/Widget.MaterialComponents.Button.TextButton"
-                            android:layout_width="wrap_content"
-                            android:layout_height="40dp"
-                            android:layout_marginEnd="8dp"
-                            android:fontFamily="@font/title_semi"
-                            android:minWidth="60dp"
-                            android:text="Cancel"
-                            android:textAppearance="@style/TextAppearance.AppCompat.Small"
-                            android:visibility="gone"
-                            app:layout_constraintBottom_toBottomOf="@+id/primarySearchBar"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintHorizontal_bias="0.5"
-                            app:layout_constraintStart_toEndOf="@+id/primarySearchBar"
-                            app:layout_constraintTop_toTopOf="@+id/primarySearchBar"
-                            tools:visibility="visible" />
-
-                    </androidx.constraintlayout.motion.widget.MotionLayout>
-
-                    <HorizontalScrollView
-                        android:id="@+id/horizontalContainer"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:fitsSystemWindows="false"
-                        android:scrollbars="none"
+                        app:layout_constraintBottom_toBottomOf="@+id/primarySearchBar"
                         app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.5"
+                        app:layout_constraintStart_toEndOf="@+id/primarySearchBar"
+                        app:layout_constraintTop_toTopOf="@+id/primarySearchBar"
+                        tools:visibility="visible" />
+
+                </androidx.constraintlayout.motion.widget.MotionLayout>
+
+
+                <com.google.android.material.appbar.MaterialToolbar
+                    android:id="@+id/primaryToolbar"
+                    style="@style/ToolBarStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="?actionBarSize"
+                    app:layout_collapseMode="pin"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:title="Codesquare"
+                    app:titleCentered="true" />
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/primaryToolbarContent"
+                    android:layout_width="match_parent"
+                    android:layout_height="?actionBarSize"
+                    app:layout_collapseMode="pin">
+
+                    <com.facebook.drawee.view.SimpleDraweeView
+                        android:id="@+id/user_icon"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_marginStart="8dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/primaryToolbar">
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:placeholderImage="@drawable/ic_user"
+                        app:roundAsCircle="true" />
 
-                        <com.google.android.material.chip.ChipGroup
-                            android:id="@+id/popularInterestsGroup"
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:clipToPadding="false"
-                            android:fitsSystemWindows="false"
-                            android:paddingStart="8dp"
-                            android:paddingEnd="8dp"
-                            app:selectionRequired="true"
-                            app:singleLine="true"
-                            app:singleSelection="true">
-
-                            <com.google.android.material.chip.Chip
-                                android:id="@+id/first_chip"
-                                style="@style/Widget.MaterialComponents.Chip.Choice"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:checked="true"
-                                android:text="Random"
-                                android:textAppearance="@style/chipText" />
-
-                            <com.google.android.material.chip.Chip
-                                android:id="@+id/chip6"
-                                style="@style/Widget.MaterialComponents.Chip.Choice"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Something Else"
-                                android:textAppearance="@style/chipText" />
-
-                            <com.google.android.material.chip.Chip
-                                android:id="@+id/chip7"
-                                style="@style/Widget.MaterialComponents.Chip.Choice"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Python"
-                                android:textAppearance="@style/chipText" />
-
-                            <com.google.android.material.chip.Chip
-                                android:id="@+id/chip8"
-                                style="@style/Widget.MaterialComponents.Chip.Choice"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Artificial Intelligence"
-                                android:textAppearance="@style/chipText" />
-
-                            <com.google.android.material.chip.Chip
-                                android:id="@+id/chip9"
-                                style="@style/Widget.MaterialComponents.Chip.Choice"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Something Else"
-                                android:textAppearance="@style/chipText" />
-
-                            <com.google.android.material.chip.Chip
-                                android:id="@+id/chip10"
-                                style="@style/Widget.MaterialComponents.Chip.Choice"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Python"
-                                android:textAppearance="@style/chipText" />
-
-                            <com.google.android.material.chip.Chip
-                                android:id="@+id/chip11"
-                                style="@style/Widget.MaterialComponents.Chip.Choice"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Artificial Intelligence"
-                                android:textAppearance="@style/chipText" />
-
-                            <com.google.android.material.chip.Chip
-                                android:id="@+id/chip12"
-                                style="@style/Widget.MaterialComponents.Chip.Choice"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Something Else"
-                                android:textAppearance="@style/chipText" />
-
-                            <com.google.android.material.chip.Chip
-                                android:id="@+id/chip13"
-                                style="@style/Widget.MaterialComponents.Chip.Choice"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Python"
-                                android:textAppearance="@style/chipText" />
-
-                            <com.google.android.material.chip.Chip
-                                android:id="@+id/chip14"
-                                style="@style/Widget.MaterialComponents.Chip.Choice"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Artificial Intelligence"
-                                android:textAppearance="@style/chipText" />
-
-                            <com.google.android.material.chip.Chip
-                                android:id="@+id/chip15"
-                                style="@style/Widget.MaterialComponents.Chip.Choice"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Artificial Intelligence"
-                                android:textAppearance="@style/chipText" />
-                        </com.google.android.material.chip.ChipGroup>
-                    </HorizontalScrollView>
-
-                    <com.google.android.material.tabs.TabLayout
-                        android:id="@+id/primaryTabs"
-                        style="@style/TabLayoutTheme"
-                        android:layout_width="match_parent"
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/primaryMenuBtn"
+                        style="@style/Theme.Button.IconOnly"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:fitsSystemWindows="false"
+                        android:layout_marginEnd="12dp"
+                        android:backgroundTintMode="src_in"
+                        android:enabled="false"
+                        android:fontFamily="@font/roboto_medium"
+                        android:minWidth="36dp"
+                        android:minHeight="36dp"
+                        android:paddingStart="6dp"
+                        android:paddingEnd="0dp"
+                        android:textAllCaps="false"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                        app:backgroundTint="@color/mtrl_btn_text_btn_bg_color_selector"
+                        app:icon="@drawable/ic_baseline_add_24"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:rippleColor="#CCCCCC"
+                        tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/backNavigationBtn"
+                        style="@style/Theme.Button.IconOnly"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:layout_marginStart="8dp"
+                        android:paddingStart="6dp"
+                        android:paddingEnd="0dp"
                         android:visibility="gone"
-                        tools:visibility="visible">
+                        app:icon="@drawable/ic_round_arrow_back_24"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:rippleColor="#D1D1D1"
+                        tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
 
-                        <com.google.android.material.tabs.TabItem
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Monday" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
-                        <com.google.android.material.tabs.TabItem
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Tuesday" />
-
-                        <com.google.android.material.tabs.TabItem
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Wednesday" />
-                    </com.google.android.material.tabs.TabLayout>
-
-                    <!--<LinearLayout
-                        android:id="@+id/primarySearchLayout"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:animateLayoutChanges="true"
-                        android:background="@color/blue_500"
-                        android:fitsSystemWindows="false"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <EditText
-                            android:id="@+id/primarySearchBar"
-                            android:layout_width="0dp"
-                            android:layout_height="40dp"
-                            android:layout_margin="8dp"
-                            android:layout_weight="1"
-                            android:background="@drawable/grey_rounded_rect_edittext"
-                            android:drawableEnd="@drawable/ic_baseline_search_24"
-                            android:hint="Search"
-                            android:paddingStart="16dp"
-                            android:paddingEnd="16dp"
-                            tools:visibility="visible" />
-
-                        <Button
-                            android:id="@+id/cancelSearchBtn"
-                            style="@style/Widget.MaterialComponents.Button.TextButton"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="8dp"
-                            android:fontFamily="@font/title_semi"
-                            android:minWidth="60dp"
-                            android:text="Cancel"
-                            android:textAppearance="@style/TextAppearance.AppCompat.Small"
-                            android:visibility="gone" />
-                    </LinearLayout>-->
-
-                </LinearLayout>
             </com.google.android.material.appbar.CollapsingToolbarLayout>
 
-        </com.google.android.material.appbar.AppBarLayout>
+        </com.google.android.material.appbar.AppBarLayout>-->
 
-       <!-- <com.google.android.material.appbar.AppBarLayout
+        <!-- <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/primaryAppBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -355,72 +329,13 @@
 
         </com.google.android.material.appbar.AppBarLayout>-->
 
-        <androidx.fragment.app.FragmentContainerView
-            android:id="@+id/navHostFragment"
-            android:name="androidx.navigation.fragment.NavHostFragment"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:fitsSystemWindows="true"
-            tools:layout="@layout/fragment_home" />
-
-        <com.github.mmin18.widget.RealtimeBlurView
-            android:id="@+id/bottom_blur"
-            android:layout_width="match_parent"
-            android:layout_height="90dp"
-            android:layout_gravity="bottom"
-            android:fitsSystemWindows="true"
-            app:realtimeBlurRadius="40dp"
-            app:realtimeDownsampleFactor="5"
-            app:realtimeOverlayColor="@color/blurOverlay" />
-
-        <com.google.android.material.bottomnavigation.BottomNavigationView
-            android:id="@+id/bottomNav"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:background="@drawable/bottom_transparent_view"
-            android:clipToPadding="false"
-            android:elevation="20dp"
-            android:fitsSystemWindows="true"
-            app:elevation="20dp"
-            app:itemTextAppearanceActive="@style/Theme.TabLayoutText"
-            app:itemTextAppearanceInactive="@style/Theme.TabLayoutText"
-            app:labelVisibilityMode="selected"
-            app:menu="@menu/main_navigation_menu" />
-
-        <ProgressBar
-            android:id="@+id/primaryProgressBar"
-            style="?android:attr/progressBarStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:elevation="19dp"
-            android:indeterminate="true"
-            android:visibility="gone"
-            tools:visibility="visible" />
-
-
-        <View
-            android:id="@+id/topDivider"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="?android:attr/listDivider"
-            app:layout_anchor="@id/primaryAppBar"
-            app:layout_anchorGravity="bottom" />
-
-        <View
-            android:id="@+id/bottomDivider"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="?android:attr/listDivider"
-            app:layout_anchor="@id/bottomNav" />
 
         <View
             android:id="@+id/scrimForBottomSheet"
+            style="@style/PrimaryScrim"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:alpha="0"
-            android:background="#40444444"
             android:elevation="29dp" />
 
         <androidx.constraintlayout.widget.ConstraintLayout

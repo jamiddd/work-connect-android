@@ -1,26 +1,11 @@
 package com.jamid.workconnect
 
-import android.app.Dialog
 import android.os.Bundle
-import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.view.Window
-import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
-import androidx.fragment.app.activityViewModels
-import androidx.navigation.fragment.findNavController
-import com.google.android.material.tabs.TabLayoutMediator
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
-import com.jamid.workconnect.databinding.FragmentUserBinding
-import com.jamid.workconnect.model.User
 
 class UserFragment : DialogFragment() {
 
-    private lateinit var binding: FragmentUserBinding
+   /* private lateinit var binding: FragmentUserBinding
     private val viewModel: MainViewModel by activityViewModels()
     private var hasChanged = false
 
@@ -32,7 +17,7 @@ class UserFragment : DialogFragment() {
         return binding.root
     }
 
-    /** The system calls this only when creating the layout in a dialog. */
+    *//** The system calls this only when creating the layout in a dialog. *//*
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         // The only reason you might override this method when using onCreateView() is
         // to modify any dialog characteristics. For example, the dialog includes a
@@ -44,12 +29,12 @@ class UserFragment : DialogFragment() {
     }
 
     private fun setFollowButton(state: Boolean) {
-      /*  binding.profileFollowBtn.isSelected = state
+      *//*  binding.profileFollowBtn.isSelected = state
         if (state) {
             binding.profileFollowBtn.text = getString(R.string.unfollow_text)
         } else {
             binding.profileFollowBtn.text = getString(R.string.follow_text)
-        }*/
+        }*//*
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -60,12 +45,12 @@ class UserFragment : DialogFragment() {
         val otherUserId = arguments?.getString(ARG_USER_ID) ?: return
 
 //        binding.profileFragment.editBtn.visibility = View.GONE
-/*
+*//*
 
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
             dismiss()
         }
-*/
+*//*
 
         db.collection(USERS).document(otherUserId).get()
             .addOnSuccessListener {
@@ -146,7 +131,7 @@ class UserFragment : DialogFragment() {
     }
 
     private fun setUserMetaText(otherUser: User) {
-      /*  val projectIds = mutableListOf<String>()
+      *//*  val projectIds = mutableListOf<String>()
         val blogIds = mutableListOf<String>()
         projectIds.addAll(otherUser.projectIds)
         blogIds.addAll(otherUser.blogIds)
@@ -193,11 +178,11 @@ class UserFragment : DialogFragment() {
 
         sp.setSpan(clickableSpan1, 0, followersCount.toString().length + 13, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         sp.setSpan(clickableSpan, followersCount.toString().length + 13, followersCount.toString().length + 24, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-*/
-       /* binding.profileFragment.userMeta.text = sp
+*//*
+       *//* binding.profileFragment.userMeta.text = sp
         binding.profileFragment.userMeta.movementMethod = LinkMovementMethod.getInstance()
-        binding.profileFragment.userMeta.highlightColor = Color.TRANSPARENT*/
-    }
+        binding.profileFragment.userMeta.highlightColor = Color.TRANSPARENT*//*
+    }*/
 
     companion object {
 

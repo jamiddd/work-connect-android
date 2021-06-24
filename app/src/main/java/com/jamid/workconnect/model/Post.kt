@@ -1,71 +1,50 @@
 package com.jamid.workconnect.model
 
 import android.os.Parcelable
+import androidx.room.Embedded
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import com.google.firebase.firestore.Exclude
+import com.google.firebase.firestore.IgnoreExtraProperties
 import com.jamid.workconnect.PROJECT
-import com.jamid.workconnect.home.BlogItem
 import kotlinx.parcelize.Parcelize
-import kotlinx.parcelize.RawValue
 
+@IgnoreExtraProperties
 @Parcelize
+@Entity(tableName = "posts")
 data class Post(
+    @PrimaryKey(autoGenerate = false)
     var id: String,
     var title: String,
-    var content: String?,
-    var thumbnail: String?,
-    var admin: @RawValue Map<String, Any?>,
-    var location: SimpleLocation?,
-    var tags: List<String>,
-    var links: List<String>,
+    @Embedded(prefix = "admin_")
+    var admin: User,
     var uid: String,
-    var likes: Long,
-    var dislikes: Long,
-    var createdAt: Long,
-    var updatedAt: Long,
-    var chatChannelId: String,
-    var guidelines: String,
-    var contributors: List<String>?,
-    var items: List<BlogItem>?,
-    var type: String
+    var likes: Long = 0,
+    var dislikes: Long = 0,
+    var chatChannelId: String? = null,
+    var guidelines: String? = null,
+    @Embedded(prefix = "location_")
+    var location: SimpleLocation? = null,
+    var content: String? = null,
+    var thumbnail: String? = null,
+    var createdAt: Long = System.currentTimeMillis(),
+    var updatedAt: Long = System.currentTimeMillis(),
+    var tags: List<String> = emptyList(),
+    var links: List<String> = emptyList(),
+    var contributors: List<String>? = null,
+    var indices: List<String> = emptyList(),
+    var searchRank: Long = 0,
+    var weightage: Double = 0.0,
+    var items: List<String>? = null,
+    var type: String = PROJECT,
+    @Embedded(prefix = "post_local_")
+    @Exclude @set: Exclude @get: Exclude
+    var postLocalData: PostLocalData = PostLocalData()
 ): Parcelable {
     constructor(): this(
     "",
     "",
-    null,
-    null,
-    mapOf(),
-    null,
-    emptyList(),
-    emptyList(),
-    "",
-    0,
-    0,
-    0,
-    0,
-    "",
-    "",
-    null,
-    null,
+    User(),
     ""
     )
-
-    companion object {
-        fun getEmptyInstance(type: String = PROJECT) = Post("",
-            "",
-            null,
-            null,
-            mapOf(),
-            null,
-            emptyList(),
-            emptyList(),
-            "",
-            0,
-            0,
-            0,
-            0,
-            "",
-            "",
-            null,
-            null,
-            "")
-    }
 }

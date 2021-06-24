@@ -1,156 +1,170 @@
 package com.jamid.workconnect.message
 
+import android.content.res.Configuration
+import android.graphics.Color
+import android.graphics.Rect
+import android.os.Build
 import android.os.Bundle
+import android.view.Gravity
 import android.view.View
-import android.widget.Toast
-import androidx.activity.addCallback
-import androidx.fragment.app.Fragment
+import android.widget.LinearLayout
+import android.widget.ProgressBar
+import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
+import androidx.core.view.setPadding
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.navGraphViewModels
-import com.google.android.material.appbar.MaterialToolbar
-import com.google.android.material.transition.platform.MaterialSharedAxis
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
-import com.jamid.workconnect.MainActivity
-import com.jamid.workconnect.R
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.jamid.workconnect.*
 import com.jamid.workconnect.databinding.FragmentProjectGuidelinesBinding
-import com.jamid.workconnect.hideKeyboard
-import com.jamid.workconnect.model.ChatChannelContributor
+import com.jamid.workconnect.model.ChatChannel
 import com.jamid.workconnect.model.Post
-import com.jamid.workconnect.model.Result
-import me.everything.android.ui.overscroll.OverScrollDecoratorHelper
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
-class ProjectGuidelinesFragment : Fragment(R.layout.fragment_project_guidelines) {
+class ProjectGuidelinesFragment : SupportFragment(R.layout.fragment_project_guidelines, TAG, false) {
 
     private lateinit var binding: FragmentProjectGuidelinesBinding
-    private val auth = Firebase.auth
-    val viewModel: ProjectDetailViewModel by navGraphViewModels(R.id.project_detail_navigation)
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setHasOptionsMenu(true)
-        enterTransition = MaterialSharedAxis(MaterialSharedAxis.X, true)
-        returnTransition = MaterialSharedAxis(MaterialSharedAxis.X, false)
-    }
+    private var positionFromBottom = 0
+    private var saved = false
+    private lateinit var dialog: AlertDialog
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val activity = requireActivity() as MainActivity
-
         binding = FragmentProjectGuidelinesBinding.bind(view)
+        val chatChannel = arguments?.getParcelable<ChatChannel>(ARG_CHAT_CHANNEL) ?: return
+        val post = arguments?.getParcelable<Post>(ARG_POST) ?: return
 
-        val toolbar = activity.findViewById<MaterialToolbar>(R.id.pdc_toolbar)
-
-        OverScrollDecoratorHelper.setUpStaticOverScroll(binding.pgContentScroller, OverScrollDecoratorHelper.ORIENTATION_VERTICAL)
+        binding.pgText.setText(post.guidelines)
 
         viewModel.guidelinesUpdateResult.observe(viewLifecycleOwner) {
-            val result = it ?: return@observe
-
-            when (result) {
-                is Result.Success -> {
-                    viewModel.postGuidelinesUpdate(result.data) {
-                        activity.mainBinding.primaryProgressBar.visibility = View.GONE
-                        findNavController().navigateUp()
-                    }
-                }
-                is Result.Error -> {
-                    Toast.makeText(activity, result.exception.localizedMessage, Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-
-        viewModel.currentContributor.observe(viewLifecycleOwner) {
             if (it != null) {
-                if (auth.currentUser != null) {
-                    if (auth.currentUser?.uid == it.id && it.admin) {
-                        binding.editModeNotification.visibility = View.VISIBLE
-                        toolbar.inflateMenu(R.menu.project_guidelines_menu)
-                    } else {
-                        binding.pgText.isEnabled = false
-                    }
-                }
-
+                dialog.dismiss()
+                findNavController().navigateUp()
+                viewModel.clearGuidelinesUpdateResult()
             }
         }
 
-        toolbar.setOnMenuItemClickListener {
-            when (it.itemId) {
-                R.id.pg_save -> {
-                    activity.mainBinding.primaryProgressBar.visibility = View.VISIBLE
-                    val text = binding.pgText.text
-                    if (text.isNotEmpty()) {
-                        hideKeyboard()
-                        val guidelines = text.toString()
-                        viewModel.updateGuidelines(guidelines)
-                    }
-                }
-            }
-            true
-        }
-
-        activity.onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
-            hideKeyboard()
+        binding.projectGuidelinesFragmentToolbar.setNavigationOnClickListener {
             findNavController().navigateUp()
         }
 
-        viewModel.currentPost.observe(viewLifecycleOwner) {
-            if (it != null) {
-                binding.pgText.setText(it.guidelines)
-            }
-        }
+        val currentUser = viewModel.user.value!!
 
-        /*binding.pgToolbar.setOnMenuItemClickListener {
-            when (it.itemId) {
-                R.id.pg_save -> {
-                    val text = binding.pgText.text
-                    if (!text.isNullOrBlank()) {
-                        db.collection(POSTS).document(post.id).update("guidelines", text.toString())
-                            .addOnSuccessListener {
-                                Toast.makeText(
-                                    requireContext(),
-                                    "Guidelines updated successfully.",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                                dismiss()
-                            }.addOnFailureListener {
-                                Toast.makeText(
-                                    requireContext(),
-                                    "Something went wrong",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
+        if (chatChannel.administrators.contains(currentUser.id)) {
+            binding.pgText.isEnabled = true
+
+            binding.saveGuidelinesButton.isEnabled = true
+
+            binding.saveGuidelinesButton.setOnClickListener {
+                val text = binding.pgText.text
+                if (!text.isNullOrBlank()) {
+                    saved = true
+
+                    val linearLayout = LinearLayout(activity)
+                    linearLayout.gravity = Gravity.CENTER_HORIZONTAL
+                    linearLayout.orientation = LinearLayout.VERTICAL
+                    val p = convertDpToPx(16)
+                    linearLayout.setPadding(p)
+                    val textView = TextView(activity)
+                    textView.text = "Updating project guidelines ..."
+                    textView.gravity = Gravity.CENTER_HORIZONTAL
+                    val progressBar = ProgressBar(activity)
+                    linearLayout.addView(progressBar)
+                    linearLayout.addView(textView)
+
+                    dialog = MaterialAlertDialogBuilder(activity)
+                        .setView(linearLayout)
+                        .show()
+
+                    viewModel.updatePost(post, text.trimEnd().toString())
+                }
+            }
+
+
+            val height = getWindowHeight()
+
+            binding.editNotification.setBackgroundColor(ContextCompat.getColor(activity, R.color.blue_500))
+            binding.editNotification.setTextColor(ContextCompat.getColor(activity, R.color.white))
+            binding.editNotification.text =  "You are in edit mode. Only you and other admins can edit the guidelines."
+
+            viewModel.windowInsets.observe(viewLifecycleOwner) { (top, bottom) ->
+                binding.projectGuidelinesFragmentToolbar.updateLayout(marginTop = top)
+
+                binding.pgContentScroller.setPadding(0, 0, 0, bottom + convertDpToPx(8))
+
+                val child = binding.pgText
+                val r = Rect()
+                child.getGlobalVisibleRect(r)
+
+                val p = child.selectionStart
+                val layout = child.layout
+                if (layout != null) {
+                    val line = layout.getLineForOffset(p)
+                    val baseline = layout.getLineBaseline(line)
+                    val ascent = layout.getLineAscent(line)
+
+                    val cursorY = baseline + ascent + r.top
+
+                    positionFromBottom = height - (bottom + convertDpToPx(48))
+
+                    if (cursorY > positionFromBottom) {
+                        // when the cursor is below the keyboard
+                        val diff = cursorY - positionFromBottom
+                        binding.pgContentScroller.scrollY = binding.pgContentScroller.scrollY + diff
+                    } else {
+                        // when the cursor is above the keyboard
                     }
                 }
             }
-            true
-        }*/
 
-        /*mainViewModel.windowInsets.observe(viewLifecycleOwner) { (top, bottom) ->
-            val windowHeight = getWindowHeight() + top + bottom
+        } else {
+            binding.saveGuidelinesButton.isEnabled = false
+            binding.pgText.isEnabled = false
 
-            val params = binding.root.layoutParams as ViewGroup.LayoutParams
-            params.height = windowHeight
-            params.width = ViewGroup.LayoutParams.MATCH_PARENT
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                if (activity.resources?.configuration?.isNightModeActive == true) {
+                    binding.editNotification.setBackgroundColor(Color.parseColor("#4C4B4B"))
+                    binding.editNotification.setTextColor(ContextCompat.getColor(activity, R.color.grey))
+                } else {
+                    binding.editNotification.setBackgroundColor(ContextCompat.getColor(activity, R.color.grey))
+                    binding.editNotification.setTextColor(ContextCompat.getColor(activity, R.color.darkerGrey))
+                }
+            } else {
+                if (activity.resources?.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES) {
+                    binding.editNotification.setBackgroundColor(Color.parseColor("#4C4B4B"))
+                    binding.editNotification.setTextColor(ContextCompat.getColor(activity, R.color.grey))
+                } else {
+                    binding.editNotification.setBackgroundColor(ContextCompat.getColor(activity, R.color.grey))
+                    binding.editNotification.setTextColor(ContextCompat.getColor(activity, R.color.darkerGrey))
+                }
+            }
 
-            binding.root.layoutParams = params
+            binding.editNotification.text =  "Only an admin can update the guidelines."
 
-        }*/
+            viewModel.windowInsets.observe(viewLifecycleOwner) { (top, bottom) ->
+                binding.projectGuidelinesFragmentToolbar.updateLayout(marginTop = top)
+                binding.pgContentScroller.setPadding(0, 0, 0, bottom + convertDpToPx(8))
+            }
 
+        }
     }
 
     companion object {
 
+        const val TITLE = "Guidelines"
         const val TAG = "ProjectGuidelines"
-        private const val ARG_POST = "ARG_POST"
-        private const val ARG_CURRENT_CONTRIBUTOR = "ARG_CURRENT_CONTRIBUTOR"
+        const val ARG_CHAT_CHANNEL = "ARG_CHAT_CHANNEL"
+        const val ARG_POST = "ARG_POST"
 
         @JvmStatic
-        fun newInstance(post: Post, currentContributor: ChatChannelContributor) =
+        fun newInstance(chatChannel: ChatChannel, post: Post) =
             ProjectGuidelinesFragment().apply {
                 arguments = Bundle().apply {
+                    putParcelable(ARG_CHAT_CHANNEL, chatChannel)
                     putParcelable(ARG_POST, post)
-                    putParcelable(ARG_CURRENT_CONTRIBUTOR, currentContributor)
                 }
             }
     }

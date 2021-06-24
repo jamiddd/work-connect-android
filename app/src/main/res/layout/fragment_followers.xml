@@ -6,64 +6,73 @@
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/white"
+        style="@style/NonPrimaryFragmentStyle"
         tools:context=".profile.FollowersFragment">
 
-        <com.google.android.material.appbar.AppBarLayout
-            android:id="@+id/followers_appbar"
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/followersRefresher"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/white">
+            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
+            android:layout_height="match_parent">
 
-            <com.google.android.material.appbar.MaterialToolbar
-                android:id="@+id/followers_toolbar"
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/followers_recycler"
                 android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                app:contentInsetEnd="72dp"
-                app:navigationIcon="@drawable/ic_round_arrow_back_24">
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                tools:listitem="@layout/user_horizontal_layout" />
 
-                <TextView
+
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:layout_width="match_parent"
+            android:backgroundTint="@color/white"
+            android:stateListAnimator="@animator/app_bar_elevation"
+            android:layout_height="wrap_content">
+
+            <!--<com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/exploreHomeToolbar"
+                android:layout_width="match_parent"
+                android:layout_marginTop="26dp"
+                android:layout_height="?actionBarSize"/>-->
+
+            <androidx.constraintlayout.motion.widget.MotionLayout
+                android:id="@+id/followersMotionLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layoutDescription="@xml/search_scene"
+                app:applyMotionScene="true">
+
+                <EditText
+                    android:id="@+id/searchBarText"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:text="Followers"
-                    android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6" />
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:background="@drawable/grey_rounded_rect_edittext"
+                    android:hint="Search ..."
+                    android:inputType="textPersonName"
+                    android:maxLines="1"
+                    android:minHeight="40dp"
+                    android:paddingStart="12dp"
+                    android:paddingTop="8dp"
+                    android:paddingEnd="12dp"
+                    android:paddingBottom="8dp" />
 
-            </com.google.android.material.appbar.MaterialToolbar>
+                <Button
+                    android:id="@+id/cancelSearchBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_margin="8dp"
+                    android:layout_height="wrap_content"
+                    android:minWidth="60dp"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                    android:fontFamily="@font/roboto_medium"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:text="Cancel"/>
 
-            <EditText
-                android:id="@+id/followers_search"
-                android:layout_width="match_parent"
-                android:layout_height="45dp"
-                android:layout_marginStart="12dp"
-                android:layout_marginEnd="12dp"
-                android:layout_marginBottom="8dp"
-                android:background="@drawable/grey_rounded_rect_edittext"
-                android:hint="Search"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp" />
+            </androidx.constraintlayout.motion.widget.MotionLayout>
 
         </com.google.android.material.appbar.AppBarLayout>
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/followers_recycler"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:clipToPadding="false"
-            android:paddingTop="8dp"
-            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
-            tools:listitem="@layout/user_horizontal_layout" />
-
-        <ProgressBar
-            android:id="@+id/followers_progress"
-            style="?android:attr/progressBarStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:indeterminate="true"
-            android:indeterminateTint="@color/blue_500"
-            android:visibility="gone"
-            tools:visibility="visible" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>

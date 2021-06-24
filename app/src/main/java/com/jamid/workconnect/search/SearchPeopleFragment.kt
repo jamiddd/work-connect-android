@@ -1,75 +1,111 @@
 package com.jamid.workconnect.search
 
+import android.content.Context
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.paging.PagedList
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.firebase.ui.firestore.paging.FirestorePagingOptions
-import com.google.firebase.firestore.Query
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
 import com.jamid.workconnect.*
-import com.jamid.workconnect.adapter.SearchAdapter
+import com.jamid.workconnect.adapter.GenericAdapter
+import com.jamid.workconnect.adapter.paging3.SearchAdapter
 import com.jamid.workconnect.databinding.FragmentSearchPeopleBinding
-import com.jamid.workconnect.model.SearchResult
+import com.jamid.workconnect.model.RecentSearch
+import com.jamid.workconnect.model.User
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 class SearchPeopleFragment : Fragment(R.layout.fragment_search_people) {
 
     private lateinit var binding: FragmentSearchPeopleBinding
-    private lateinit var searchAdapter: SearchAdapter
+    private lateinit var searchAdapter: SearchAdapter<User>
     private val viewModel: MainViewModel by activityViewModels()
+    private lateinit var recentSearchAdapter: GenericAdapter<RecentSearch>
+    private lateinit var activity: MainActivity
+    private var job: Job? = null
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        activity = context as MainActivity
+    }
+
+    private fun search(query: String) {
+        job?.cancel()
+        job = viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.searchUsers(query).collectLatest {
+                searchAdapter.submitData(it)
+            }
+        }
+    }
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val db = Firebase.firestore
         binding = FragmentSearchPeopleBinding.bind(view)
-        val activity = requireActivity() as MainActivity
 
-        val config = PagedList.Config.Builder()
-            .setPageSize(10)
-            .setEnablePlaceholders(false)
-            .setPrefetchDistance(5)
-            .build()
-
-        val initialQuery = db.collection(USERS_SEARCH)
-            .whereArrayContains(SUBSTRINGS, " ")
-            .orderBy(RANK, Query.Direction.DESCENDING)
-
-        val options = FirestorePagingOptions.Builder<SearchResult>()
-            .setQuery(initialQuery, config, SearchResult::class.java)
-            .setLifecycleOwner(viewLifecycleOwner)
-            .build()
-
-        searchAdapter = SearchAdapter(options, activity)
-
-        binding.userHorizRecycler.apply {
-            adapter = searchAdapter
-            addItemDecoration(DividerItemDecoration(activity, RecyclerView.VERTICAL))
-            layoutManager = LinearLayoutManager(activity)
-        }
+//        initSearchAdapter()
+        initRecentSearch()
 
         viewModel.currentQuery.observe(viewLifecycleOwner) {
-            if (it != null) {
-                val query = db.collection(USERS_SEARCH)
-                    .whereArrayContains(SUBSTRINGS, it)
-                    .orderBy(RANK, Query.Direction.DESCENDING)
+            if (!it.isNullOrBlank()) {
+                initSearchAdapter()
+                binding.searchPeopleRoot.visibility = View.VISIBLE
+                binding.noUsersFound.visibility = View.GONE
 
-                val newOptions = FirestorePagingOptions.Builder<SearchResult>()
-                    .setQuery(query, config, SearchResult::class.java)
-                    .setLifecycleOwner(viewLifecycleOwner)
-                    .build()
+                binding.searchResultsPeople.text = "Search Result"
 
-                searchAdapter.updateOptions(newOptions)
+                search(it)
+            } else {
+                if (recentSearchAdapter.itemCount > 0) {
+                    binding.noUsersFound.visibility = View.GONE
+                } else {
+                    binding.noUsersFound.visibility = View.VISIBLE
+                    binding.searchPeopleRoot.visibility = View.GONE
+                }
             }
         }
 
         viewModel.windowInsets.observe(viewLifecycleOwner) { (top, bottom) ->
-            binding.userHorizRecycler.setPadding(0, top + convertDpToPx(104), 0, bottom + convertDpToPx(8))
+            binding.userHorizRecycler.setPadding(0, 0, 0, bottom + convertDpToPx(8))
+        }
+    }
+
+    private fun initSearchAdapter() {
+        if (!::searchAdapter.isInitialized) {
+            searchAdapter = SearchAdapter(User::class.java, activity)
+
+            binding.userHorizRecycler.apply {
+                adapter = searchAdapter
+                addItemDecoration(DividerItemDecoration(activity, RecyclerView.VERTICAL))
+                layoutManager = LinearLayoutManager(activity)
+            }
+        }
+    }
+
+    private fun initRecentSearch() {
+        recentSearchAdapter = GenericAdapter(RecentSearch::class.java)
+
+        binding.userHorizRecycler.apply {
+            adapter = recentSearchAdapter
+            layoutManager = LinearLayoutManager(activity)
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.getRecentSearchesByType(USER).collectLatest {
+                binding.noUsersFound.visibility = View.GONE
+                if (it.isNotEmpty()) {
+                    recentSearchAdapter.submitList(it)
+                    binding.searchPeopleRoot.visibility = View.VISIBLE
+                    binding.searchResultsPeople.text = "Recent Search"
+                } else {
+                    binding.searchPeopleRoot.visibility = View.GONE
+                }
+            }
         }
     }
 

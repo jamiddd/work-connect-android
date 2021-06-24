@@ -3,9 +3,11 @@ package com.jamid.workconnect.home
 import android.content.Context
 import android.content.DialogInterface
 import android.content.res.ColorStateList
+import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.Rect
 import android.graphics.Typeface
+import android.os.Build
 import android.os.Bundle
 import android.text.*
 import android.text.style.CharacterStyle
@@ -17,94 +19,47 @@ import android.view.*
 import android.view.View
 import android.view.View.FOCUS_DOWN
 import android.widget.*
-import androidx.activity.addCallback
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.children
 import androidx.core.view.isVisible
 import androidx.core.widget.doOnTextChanged
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
-import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.facebook.drawee.view.SimpleDraweeView
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.transition.platform.MaterialSharedAxis
 import com.jamid.workconnect.*
 import com.jamid.workconnect.databinding.FragmentEditorBinding
-import com.jamid.workconnect.model.ObjectType
+import com.jamid.workconnect.model.GenericMenuItem
+import com.jamid.workconnect.model.Post
 import com.jamid.workconnect.model.Result
+import com.jamid.workconnect.model.User
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import me.everything.android.ui.overscroll.OverScrollDecoratorHelper
 import java.text.SimpleDateFormat
 import java.util.*
 
-
-class EditorFragment : Fragment() {
+class EditorFragment : SupportFragment(R.layout.fragment_editor, TAG, false) {
 
     private var currentImagePosition = 0
     private lateinit var binding: FragmentEditorBinding
-    private val viewModel: MainViewModel by activityViewModels()
     private lateinit var container: LinearLayout
     private var blogItemsList = arrayListOf<BlogItem>()
     private var currentImageProgressBar: ProgressBar? = null
     private var currentImage: SimpleDraweeView? = null
-    private var currentDialog: DialogInterface? = null
-    private var mActivePointerId: Int = 0
     private var positionFromBottom = 0
     private var prevLineCount = 0
+    private var isInitialized = false
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enterTransition = MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ true)
-        returnTransition = MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ false)
-    }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        binding = FragmentEditorBinding.inflate(inflater, container, false)
-        setHasOptionsMenu(true)
-        // Inflate the layout for this fragment
-        return binding.root
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.blog_menu, menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.done_blog -> {
-                // title, blogItemsList, tags, links
-                if (binding.titleText.text.isNullOrBlank()) return true
-                val title = binding.titleText.text.trim().toString()
-
-                val tags = mutableListOf<String>()
-
-                for (ch in binding.tagsGroup.children) {
-                    val chip = ch as Chip
-                    tags.add(chip.text.toString())
-                }
-                val links = emptyList<String>()
-
-                viewModel.upload(title, type = ObjectType.Blog, tags = tags, links = links, items = blogItemsList)
-
-                currentDialog = MaterialAlertDialogBuilder(requireContext())
-                    .setCancelable(false)
-                    .setView(R.layout.creating_blog_progress_dialog)
-                    .show()
-
-                true
-            }
-            else -> true
-        }
-    }
-
+    // TODO("Add ability to draft the blog for later")
     private fun onNavigateUp() {
         hideKeyboard()
         val dialogInterface = MaterialAlertDialogBuilder(requireContext()).setCancelable(
@@ -118,47 +73,35 @@ class EditorFragment : Fragment() {
             }.show()
 
         dialogInterface.setOnCancelListener {
-            findNavController().navigateUp()
+
         }
 
         dialogInterface.setOnDismissListener {
-            findNavController().navigateUp()
+
         }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        binding = FragmentEditorBinding.bind(view)
+
         val activity = requireActivity() as MainActivity
         container = binding.blogItemContainer
         var infoText = ""
 
-        viewModel.user.observe(viewLifecycleOwner) {
-            if (it != null) {
-                binding.authorImg.setImageURI(it.photo)
-                infoText = it.name + " ● " + SimpleDateFormat("h:mm a", Locale.UK).format(Date())
-                binding.authorInfo.text = infoText
-            }
-        }
+        val user = viewModel.user.value!!
+
+        binding.authorImg.setImageURI(user.photo)
+        infoText = user.name + " • " + SimpleDateFormat("h:mm a", Locale.UK).format(Date())
+        binding.authorInfo.text = infoText
         initContainer(activity)
 
+        binding.editorFragmentToolbar.setNavigationOnClickListener {
+            findNavController().navigateUp()
+        }
 
-        /*lifecycleScope.launch {
-            delay(1000)
-            ViewCompat.setOnApplyWindowInsetsListener(
-                binding.cardView
-            ) { _: View?, insets: WindowInsetsCompat ->
-                ViewCompat.onApplyWindowInsets(
-                    binding.cardView,
-                    insets.replaceSystemWindowInsets(
-                        insets.systemWindowInsetLeft, 0,
-                        insets.systemWindowInsetRight, 0
-                    )
-                )
-            }
-        }*/
-
-        ViewCompat.setOnApplyWindowInsetsListener(
+        /*ViewCompat.setOnApplyWindowInsetsListener(
             binding.cardView
         ) { _: View?, insets: WindowInsetsCompat ->
             ViewCompat.onApplyWindowInsets(
@@ -168,12 +111,44 @@ class EditorFragment : Fragment() {
                     insets.systemWindowInsetRight, 0
                 )
             )
+        }*/
+
+//        OverScrollDecoratorHelper.setUpOverScroll(binding.editorScroll)
+
+        viewModel.primaryBottomSheetState.observe(viewLifecycleOwner) {
+            if (isInitialized) {
+                if (it == BottomSheetBehavior.STATE_HIDDEN) {
+                    activity.onBackPressed()
+                }
+            }
+        }
+
+        viewModel.postUploadResult.observe(viewLifecycleOwner) {
+            val result = it ?: return@observe
+
+            isInitialized = true
+            activity.hideBottomSheet()
+
+            when (result) {
+                is Result.Success -> {
+                    Toast.makeText(
+                        requireContext(),
+                        "Blog created successfully",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+                is Result.Error -> {
+                    Toast.makeText(requireContext(), "Something went wrong - " + result.exception.localizedMessage, Toast.LENGTH_SHORT).show()
+                }
+            }
         }
 
         val screenHeight = getWindowHeight()
 
         viewModel.windowInsets.observe(viewLifecycleOwner) { (top, bottom) ->
-            binding.editorScroll.setPadding(0, top + convertDpToPx(56), 0, bottom + convertDpToPx(100))
+            binding.editorScroll.setPadding(0, convertDpToPx(8), 0, bottom + convertDpToPx(100))
+
+            binding.editorFragmentToolbar.updateLayout(marginTop = top)
 
             val currentPosition = findCurrentFocusedViewPosition()
             val child = container.getChildAt(currentPosition)
@@ -206,44 +181,17 @@ class EditorFragment : Fragment() {
                 }
             }
 
-            val params = binding.cardView.layoutParams as ConstraintLayout.LayoutParams
+            val params = binding.cardView.layoutParams as CoordinatorLayout.LayoutParams
             params.height = bottom + convertDpToPx(48)
-            params.width = ConstraintLayout.LayoutParams.MATCH_PARENT
-            params.bottomToBottom = binding.editorRoot.id
+            params.width = CoordinatorLayout.LayoutParams.MATCH_PARENT
+//            params.bottomToBottom = binding.editorRoot.id
             binding.cardView.layoutParams = params
 
-            val params1 = binding.cardBlur.layoutParams as ViewGroup.LayoutParams
+            /*val params1 = binding.cardBlur.layoutParams as ViewGroup.LayoutParams
             params1.height = bottom + convertDpToPx(48)
             params1.width = ViewGroup.LayoutParams.MATCH_PARENT
-            binding.cardBlur.layoutParams = params1
+            binding.cardBlur.layoutParams = params1*/
 
-        }
-
-        activity.onBackPressedDispatcher.addCallback(this) {
-            onNavigateUp()
-//            activity.supportFragmentManager.popBackStack()
-
-        }
-
-        viewModel.postUploadResult.observe(viewLifecycleOwner) {
-            val result = it ?: return@observe
-
-            currentDialog?.dismiss()
-
-            when (result) {
-                is Result.Success -> {
-                    Toast.makeText(
-                        requireContext(),
-                        "Created blog successfully.",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    viewModel.clearPostChanges()
-                    findNavController().navigateUp()
-                }
-                is Result.Error -> {
-                    Toast.makeText(requireContext(), result.exception.localizedMessage, Toast.LENGTH_SHORT).show()
-                }
-            }
         }
 
         viewModel.postPhotoUploadResult.observe(viewLifecycleOwner) {
@@ -257,7 +205,7 @@ class EditorFragment : Fragment() {
 
                     val container = (currentImage?.parent as ConstraintLayout?)!!
                     val pos = findImagePosition(container)
-                    blogItemsList[pos].content = result.data
+                    blogItemsList[pos].content = result.data.toString()
                 }
                 is Result.Error -> {
                     val text = TextView(requireContext())
@@ -276,15 +224,14 @@ class EditorFragment : Fragment() {
         viewModel.currentCroppedImageUri.observe(viewLifecycleOwner) {
             if (it != null) {
                 container.addViewAfter("Image", it.toString())
-                val path = it.path
-                viewModel.uploadPostImage(path, ObjectType.Blog)
+                viewModel.uploadPostImage(it, BLOG)
                 viewModel.setCurrentImage(null)
             }
         }
 
         viewModel.currentPlace.observe(viewLifecycleOwner) {
             if (it != null) {
-                binding.authorInfo.text = "$infoText ● $it"
+                binding.authorInfo.text = "$infoText • $it"
                 val location = viewModel.currentLocation.value
                 if (location != null) {
                     location.place = it
@@ -317,22 +264,6 @@ class EditorFragment : Fragment() {
             blogItemsList = prevData
         }
 
-        container.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
-
-            override fun onViewAttachedToWindow(v: View?) {
-                /*v?.let {
-                    Log.d("Editor", "Scrolling to new child.")
-                    it.requestFocus()
-                    val height = it.height
-                    binding.editorScroll.smoothScrollTo(0, binding.editorScroll.scrollY + height)
-                }*/
-            }
-
-            override fun onViewDetachedFromWindow(v: View?) {
-
-            }
-
-        })
 
         binding.textTypeBtn.setOnClickListener {
             lifecycleScope.launch {
@@ -365,8 +296,7 @@ class EditorFragment : Fragment() {
 
         binding.imageTypeBtn.setOnClickListener {
             hideKeyboard()
-            val fragment = ImageSelectFragment.newInstance()
-            activity.showBottomSheet(fragment, ImageSelectFragment.TAG)
+            openImageSelectMenu()
         }
 
         binding.imageTypeBtn.setOnLongClickListener {
@@ -385,17 +315,19 @@ class EditorFragment : Fragment() {
 
 
         binding.quoteBtn.setOnClickListener {
-            val editText = container.focusedChild as EditText
-            val currentPosition = findCurrentFocusedViewPosition()
-            val type = if (blogItemsList[currentPosition].type == "Quote") {
-                "Paragraph"
-            } else {
-                "Quote"
+            val editText = container.focusedChild as EditText?
+            if (editText != null) {
+                val currentPosition = findCurrentFocusedViewPosition()
+                val type = if (blogItemsList[currentPosition].type == "Quote") {
+                    "Paragraph"
+                } else {
+                    "Quote"
+                }
+
+                blogItemsList[currentPosition].type = type
+
+                setEditTextType(editText, type)
             }
-
-            blogItemsList[currentPosition].type = type
-
-            setEditTextType(editText, type)
         }
 
         binding.codeBtn.setOnClickListener {
@@ -413,6 +345,53 @@ class EditorFragment : Fragment() {
             val fragment = TagFragment.newInstance()
             activity.showBottomSheet(fragment, TagFragment.TAG)
         }
+
+        binding.authorInfo.setOnClickListener {
+            if (viewModel.currentPlace.value != null) {
+                val instance = GenericDialogFragment.newInstance(REMOVING_LOCATION, "Remove location", "Are you sure you want to remove the given location for this project?", isActionOn = true, isCancelable = true)
+                activity.showBottomSheet(instance, CreateProjectFragment.TAG)
+            } else {
+                infoText = user.name + " • " + SimpleDateFormat("h:mm a", Locale.UK).format(Date())
+                binding.authorInfo.text = infoText
+            }
+        }
+
+        /*activity.mainBinding.primaryMenuBtn.setOnClickListener {
+            // title, blogItemsList, tags, links
+            if (binding.titleText.text.isNullOrBlank()) return@setOnClickListener
+            val title = binding.titleText.text.trim().toString()
+
+            val tags = mutableListOf<String>()
+
+            for (ch in binding.tagsGroup.children) {
+                val chip = ch as Chip
+                tags.add(chip.text.toString())
+            }
+            val links = emptyList<String>()
+            val items = mutableListOf<String>()
+            for (blogItem in blogItemsList) {
+                items.add(blogItem.toString())
+            }
+
+            val post = Post("", title, User(), "", type = BLOG, tags = tags, items = items)
+
+            viewModel.uploadPost(post)
+
+            val instance = GenericDialogFragment.newInstance(CREATING_BLOG, "Creating Blog", "Creating your blog. Please wait ...", isCancelable = false, isProgressing = true)
+            activity.showBottomSheet(instance, TAG)
+
+        }*/
+
+    }
+
+    private fun openImageSelectMenu() {
+        val tag = SELECT_IMAGE_MENU_POST
+        val item1 = GenericMenuItem(tag, "Select from gallery", R.drawable.ic_baseline_add_photo_alternate_24, 0)
+        val item2 = GenericMenuItem(tag, "Take a photo", R.drawable.ic_baseline_camera_alt_24, 1)
+        val item3 = GenericMenuItem(tag, "Remove image", R.drawable.ic_baseline_delete_24, 2)
+
+        val fragment = GenericMenuFragment.newInstance(tag, "Add Image ...", arrayListOf(item1, item2, item3))
+        activity.showBottomSheet(fragment, tag)
     }
 
     private fun addNewChip(s: String) {
@@ -432,7 +411,11 @@ class EditorFragment : Fragment() {
         val textField = getNewTextField(activity, "Paragraph", null, null)
         container.addView(textField)
         textField.requestFocus()
-        showKeyboard()
+
+        lifecycleScope.launch {
+            delay(500)
+            showKeyboard()
+        }
     }
 
     private fun EditText.setListeners() {
@@ -442,11 +425,11 @@ class EditorFragment : Fragment() {
             if (!text.isNullOrEmpty()) {
                 val currentPos = findCurrentFocusedViewPosition()
                 if (text.last() == '\n' && count == 1 && blogItemsList[currentPos].type != "Code") {
-                    setText(text.trimEnd().toString())
+                    setText(text.trimEnd())
                     container.addViewAfter("Paragraph")
                 } else if (count == 1 && text.last() == '\n' && blogItemsList[findCurrentFocusedViewPosition()].type == "Code") {
                     if (text.length > 2 && text[text.lastIndex - 1] == '\n') {
-                        setText(text.trimEnd().toString())
+                        setText(text.trimEnd())
                         container.addViewAfter("Paragraph")
                     }
                 }
@@ -633,6 +616,7 @@ class EditorFragment : Fragment() {
     }
 
     companion object {
+        const val TITLE = "Create Blog"
         const val IMAGE_SELECT_REQUEST = 12
         const val TAG = "CreateBlogFragment"
         @JvmStatic
@@ -746,8 +730,22 @@ class EditorFragment : Fragment() {
                 editText.textSize = convertDpToPx(5f)
                 editText.typeface = Typeface.create(Typeface.MONOSPACE, Typeface.BOLD)
                 editText.background = null
-                editText.setBackgroundColor(Color.parseColor("#F1F1F1"))
                 editText.setPadding(convertDpToPx(16), convertDpToPx(12), convertDpToPx(16), convertDpToPx(12))
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    if (activity.resources?.configuration?.isNightModeActive == true) {
+                        editText.setBackgroundColor(ContextCompat.getColor(activity, R.color.darkestGrey))
+                    } else {
+                        editText.setBackgroundColor(ContextCompat.getColor(activity, R.color.grey))
+                    }
+                } else {
+                    if (activity.resources?.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES) {
+                        editText.setBackgroundColor(ContextCompat.getColor(activity, R.color.darkestGrey))
+                    } else {
+                        editText.setBackgroundColor(ContextCompat.getColor(activity, R.color.grey))
+                    }
+                }
+
             }
             "Image" -> {
                 throw Exception("Cannot create edittext of type image")
@@ -755,7 +753,20 @@ class EditorFragment : Fragment() {
             "Quote" -> {
                 editText.textSize = convertDpToPx(7f)
                 editText.typeface = Typeface.create(Typeface.SERIF, Typeface.ITALIC)
-                editText.background = ContextCompat.getDrawable(editText.context, R.drawable.quote_background)
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    if (activity.resources?.configuration?.isNightModeActive == true) {
+                        editText.background = ContextCompat.getDrawable(editText.context, R.drawable.quote_background_night)
+                    } else {
+                        editText.background = ContextCompat.getDrawable(editText.context, R.drawable.quote_background)
+                    }
+                } else {
+                    if (activity.resources?.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES) {
+                        editText.background = ContextCompat.getDrawable(editText.context, R.drawable.quote_background_night)
+                    } else {
+                        editText.background = ContextCompat.getDrawable(editText.context, R.drawable.quote_background)
+                    }
+                }
             }
         }
     }

@@ -3,10 +3,58 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-
-    <androidx.viewpager2.widget.ViewPager2
-        android:id="@+id/mediaViewPager"
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior" />
+        style="@style/NonPrimaryFragmentStyle">
+
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/mediaViewPager"
+            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/mediaFragmentAppBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/white">
+
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/mediaFragmentToolbar"
+                android:layout_width="match_parent"
+                app:title="Media"
+                app:titleCentered="true"
+                app:navigationIcon="@drawable/ic_round_arrow_back_24"
+                android:layout_marginTop="26dp"
+                app:titleTextColor="@color/black"
+                android:layout_height="?actionBarSize"/>
+
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/mediaFragmentTabLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/TabLayoutTheme">
+
+                <com.google.android.material.tabs.TabItem
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text=""/>
+
+                <com.google.android.material.tabs.TabItem
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text=""/>
+
+                <com.google.android.material.tabs.TabItem
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text=""/>
+
+            </com.google.android.material.tabs.TabLayout>
+
+        </com.google.android.material.appbar.AppBarLayout>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
 </layout>

@@ -4,42 +4,68 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/blogFragmentRoot"
+        style="@style/NonPrimaryFragmentStyle"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/white"
-        android:fitsSystemWindows="true"
         tools:context=".BlogFragment">
 
-        <ScrollView
+        <androidx.core.widget.NestedScrollView
             android:id="@+id/blogScroller"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipToPadding="false"
             android:fillViewport="true"
-            android:fitsSystemWindows="true"
             android:paddingTop="90dp"
+            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
             android:paddingBottom="100dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent">
+            tools:ignore="SpeakableTextPresentCheck">
 
             <LinearLayout
-                android:id="@+id/blogItemContainer"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical" />
-        </ScrollView>
+                android:orientation="vertical"
+                android:layout_height="wrap_content">
+
+                <LinearLayout
+                    android:id="@+id/blogItemContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+
+                <TextView
+                    android:id="@+id/blogTagsHeader"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="12dp"
+                    android:paddingTop="8dp"
+                    android:paddingEnd="12dp"
+                    android:paddingBottom="8dp"
+                    android:text="Tags"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/blogTags"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp">
+
+                </com.google.android.material.chip.ChipGroup>
+
+            </LinearLayout>
+
+        </androidx.core.widget.NestedScrollView>
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/blogData"
+            style="@style/PostMetaCardStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
             android:clickable="true"
             android:focusable="true"
-            app:behavior_hideable="false"
-            app:behavior_peekHeight="0dp"
-            app:cardElevation="20dp"
-            app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+            app:cardElevation="3dp"
+            app:rippleColor="@color/transparent">
 
             <include
                 android:id="@+id/blogMetadata"
@@ -47,16 +73,53 @@
 
         </com.google.android.material.card.MaterialCardView>
 
-        <com.github.mmin18.widget.RealtimeBlurView
-            android:id="@+id/blog_bottom_blur"
+        <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
-            android:layout_gravity="bottom"
-            android:fitsSystemWindows="true"
-            android:layout_height="wrap_content"
-            android:elevation="21dp"
-            app:realtimeDownsampleFactor="5"
-            app:realtimeBlurRadius="10dp" />
+            android:id="@+id/blogFragmentAppBar"
+            android:backgroundTint="@color/white"
+            android:layout_height="wrap_content">
 
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/blogFragmentToolbar"
+                android:layout_width="match_parent"
+                app:navigationIcon="@drawable/ic_round_arrow_back_24"
+                app:titleCentered="true"
+                app:subtitleCentered="true"
+                app:title="Blog"
+                android:layout_height="?actionBarSize">
+
+                <com.facebook.drawee.view.SimpleDraweeView
+                    android:id="@+id/blog_author_image"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    app:placeholderImage="@drawable/ic_user"
+                    app:roundAsCircle="true"
+                    android:visibility="gone"
+                    android:layout_marginEnd="8dp"
+                    android:layout_gravity="center_vertical|end"/>
+
+            </com.google.android.material.appbar.MaterialToolbar>
+
+        </com.google.android.material.appbar.AppBarLayout>
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>
+
+
+    <!--<com.fivehundredpx.android.blur.BlurringView
+        android:id="@+id/blog_bottom_blur"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:elevation="21dp" />-->
+
+    <!--<Button
+        android:id="@+id/projectJoinBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:layout_margin="8dp"
+        android:fontFamily="@font/title_semi"
+        android:text="Join"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        app:cornerRadius="24dp" />-->

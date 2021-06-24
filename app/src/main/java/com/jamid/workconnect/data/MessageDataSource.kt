@@ -12,8 +12,8 @@ class MessageDataSource(val chatChannelId: String, private val repository: MainR
         params: LoadInitialParams<Long>,
         callback: LoadInitialCallback<SimpleMessage>
     ) {
-        val items = repository.getChatMessages(chatChannelId)
-        callback.onResult(items)
+//        val items = repository.getChatMessages(chatChannelId)
+//        callback.onResult(items)
     }
 
     override fun loadAfter(params: LoadParams<Long>, callback: LoadCallback<SimpleMessage>) {

@@ -1,110 +1,126 @@
 package com.jamid.workconnect.profile
 
 import android.os.Bundle
-import android.view.LayoutInflater
+import android.text.Editable
+import android.text.TextWatcher
+import android.util.Log
 import android.view.View
-import android.view.ViewGroup
-import android.widget.Toast
-import androidx.core.content.ContextCompat
-import androidx.databinding.DataBindingUtil
-import androidx.fragment.app.activityViewModels
+import androidx.core.widget.doAfterTextChanged
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.ListAdapter
-import androidx.recyclerview.widget.RecyclerView
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
-import com.jamid.workconnect.*
+import com.jamid.workconnect.FOLLOWINGS
+import com.jamid.workconnect.R
+import com.jamid.workconnect.SupportFragment
+import com.jamid.workconnect.adapter.paging2.UserAdapter
 import com.jamid.workconnect.databinding.FragmentFollowingsBinding
-import com.jamid.workconnect.databinding.UserHorizontalLayoutBinding
 import com.jamid.workconnect.model.User
-import com.jamid.workconnect.model.UserMinimal
+import com.jamid.workconnect.updateLayout
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
-class FollowingsFragment : BaseBottomSheetFragment() {
+@OptIn(androidx.paging.ExperimentalPagingApi::class)
+class FollowingsFragment : SupportFragment(R.layout.fragment_followings, TAG, false) {
 
-    private val viewModel: MainViewModel by activityViewModels()
     private lateinit var binding: FragmentFollowingsBinding
-    private val db = Firebase.firestore
+    private var textWatcher: TextWatcher? = null
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_followings, container, false)
-        // Inflate the layout for this fragment
-        return binding.root
+    private var job: Job? = null
+    private lateinit var userAdapter: UserAdapter
+
+    private fun getFollowings(user: User, query: String? = null) {
+        job?.cancel()
+        job = viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.userFollowings(user, query).collectLatest {
+                userAdapter.submitData(it)
+            }
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val followingsAdapter = FollowingsAdapter()
 
-        val user = arguments?.getParcelable<User>("user")
+        binding = FragmentFollowingsBinding.bind(view)
+
+        /*val insets = viewModel.windowInsets.value
+        if (insets != null) {
+            binding.followingsRecycler.setPadding(0, 0, 0, insets.second)
+        }
+*/
+//        val currentUser = viewModel.user.value
+
+        binding.followingsMotionLayout.transitionToEnd()
+
+        viewModel.windowInsets.observe(viewLifecycleOwner) { (top, _) ->
+            binding.followingsMotionLayout.updateLayout(marginTop = top)
+        }
+
+        val user = arguments?.getParcelable<User>(ARG_USER)
         if (user != null) {
-            val followings = user.followings
 
-            binding.followingsRecycler.apply {
-                adapter = followingsAdapter
-                layoutManager = LinearLayoutManager(requireContext())
+            binding.cancelSearchBtn.setOnClickListener {
+                findNavController().navigateUp()
             }
 
-            followingsAdapter.submitList(followings)
+            binding.searchBarText.doAfterTextChanged {
+                if (!it.isNullOrBlank()) {
+                    getFollowings(user, it.toString())
+                }
+            }
+
+            initAdapter(user)
+
+        } else {
+            Log.d(FOLLOWINGS, "Hello")
+        }
+    }
+
+    private fun initAdapter(user: User, query: String? = null) = viewLifecycleOwner.lifecycleScope.launch {
+
+        userAdapter = UserAdapter()
+
+        getFollowings(user, query)
+
+        binding.followingsRecycler.apply {
+            adapter = userAdapter
+            layoutManager = LinearLayoutManager(activity)
+        }
+
+        binding.followingsRefresher.setOnRefreshListener {
+            userAdapter.refresh()
+            viewLifecycleOwner.lifecycleScope.launch {
+                delay(4000)
+                binding.followingsRefresher.isRefreshing = false
+            }
 
         }
 
-        binding.followingsToolbar.setNavigationOnClickListener {
-            hideKeyboard()
-            findNavController().navigateUp()
+        userAdapter.loadStateFlow.collectLatest { loadStates ->
+            binding.followingsRefresher.isRefreshing = loadStates.refresh is LoadState.Loading
         }
 
     }
 
-    inner class FollowingsAdapter() : ListAdapter<String, FollowingsAdapter.FollowingsViewHolder>(StringComparator()) {
-
-        inner class FollowingsViewHolder(val binding: UserHorizontalLayoutBinding): RecyclerView.ViewHolder(binding.root) {
-            fun bind(userId: String) {
-                db.collection(USER_MINIMALS).document(userId).get()
-                    .addOnSuccessListener {
-                        val user = it.toObject(UserMinimal::class.java)!!
-
-                        binding.userHorizName.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.transparent))
-                        binding.userHorizName.text = user.name
-                        binding.userHorizPhoto.setImageURI(user.photo)
-                        binding.userHorizAbout.text = "@" + user.username
-                        binding.userHorizAbout.visibility = View.VISIBLE
-                        binding.button.visibility = View.GONE
-
-                        val bundle = Bundle().apply {
-                            putString("userId", userId)
-                        }
-
-                        binding.root.setOnClickListener {
-                            findNavController().navigate(R.id.userFragment, bundle)
-                        }
-
-                    }.addOnFailureListener {
-                        Toast.makeText(
-                            requireContext(),
-                            "Something went wrong :(",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-            }
-        }
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FollowingsViewHolder {
-            val binding = DataBindingUtil.inflate<UserHorizontalLayoutBinding>(LayoutInflater.from(parent.context), R.layout.user_horizontal_layout, parent, false)
-            return FollowingsViewHolder(binding)
-        }
-
-        override fun onBindViewHolder(holder: FollowingsViewHolder, position: Int) {
-            holder.bind(getItem(position))
-        }
+    override fun onDestroyView() {
+        super.onDestroyView()
+        /*activity.mainBinding.primarySearchBar.removeTextChangedListener(textWatcher)
+        activity.mainBinding.primarySearchBar.text.clear()*/
     }
 
     companion object {
 
+        const val TAG = "FollowingsFragment"
+        const val TITLE = "Followings"
+        const val ARG_USER = "ARG_USER"
+
         @JvmStatic
-        fun newInstance() = FollowingsFragment()
+        fun newInstance(user: User) = FollowingsFragment().apply {
+            arguments = Bundle().apply {
+                putParcelable(ARG_USER, user)
+            }
+        }
     }
 }

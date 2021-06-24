@@ -3,136 +3,99 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/chat_fragment_root"
+        style="@style/NonPrimaryFragmentStyle"
         android:layout_width="match_parent"
-        android:background="@color/white"
         android:layout_height="match_parent"
         tools:context=".message.ChatFragment">
 
-     <!--   <com.google.android.material.appbar.AppBarLayout
-            android:id="@+id/chat_appbar"
+        <ScrollView
+            android:id="@+id/noChatLayoutScroll"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/transparent"
-            android:fitsSystemWindows="true"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            tools:visibility="visible">
 
-            <com.google.android.material.appbar.CollapsingToolbarLayout
-                android:id="@+id/chat_collapsing_toolbar"
+            <LinearLayout
+                android:id="@+id/noChatLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fitsSystemWindows="true">
+                android:layout_gravity="center"
+                android:orientation="vertical">
 
-                <com.github.mmin18.widget.RealtimeBlurView
-                    android:id="@+id/chat_toolbar_blur"
+                <ImageView
+                    android:id="@+id/noChatImage"
                     android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:fitsSystemWindows="true"
-                    app:realtimeBlurRadius="30dp"
-                    app:realtimeDownsampleFactor="5" />
+                    android:layout_height="200dp"
+                    app:srcCompat="@drawable/ic_empty_chat_channels" />
 
-                <com.google.android.material.appbar.MaterialToolbar
-                    android:id="@+id/chat_toolbar"
+                <TextView
+                    android:id="@+id/noChatText"
                     android:layout_width="match_parent"
-                    android:layout_height="?actionBarSize"
-                    android:fitsSystemWindows="false"
-                    app:buttonGravity="bottom"
-                    app:contentInsetEnd="72dp"
-                    app:contentInsetStartWithNavigation="72dp"
-                    app:navigationIcon="@drawable/ic_round_arrow_back_24">
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="24dp"
+                    android:layout_marginEnd="24dp"
+                    android:gravity="center"
+                    android:text="No conversations yet. Be the first one to send a message."
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
-                    <TextView
-                        android:id="@+id/chat_title"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
-                        android:fontFamily="@font/title_semi"
-                        android:gravity="center"
-                        android:text="" />
-
-                </com.google.android.material.appbar.MaterialToolbar>
-
-            </com.google.android.material.appbar.CollapsingToolbarLayout>
-
-        </com.google.android.material.appbar.AppBarLayout>-->
+            </LinearLayout>
+        </ScrollView>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/messagesRecycler"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipToPadding="false"
-            android:paddingTop="64dp"
+            android:paddingTop="8dp"
             android:paddingBottom="64dp"
-            app:layout_constraintBottom_toTopOf="@+id/placeholder_msg"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
             tools:itemCount="10"
-            tools:listitem="@layout/chat_balloon_right" />
+            tools:listitem="@layout/chat_balloon_right"
+            tools:visibility="invisible" />
 
-        <include
-            android:id="@+id/placeholder_msg"
-            layout="@layout/chat_balloon_right"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            app:layout_constraintBottom_toTopOf="@+id/bottomMessageLayout"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/messagesRecycler" />
-
-
-        <com.github.mmin18.widget.RealtimeBlurView
-            android:id="@+id/message_bottom_blur"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/bottomMessageLayout"
-            app:realtimeBlurRadius="40dp"
-            app:realtimeDownsampleFactor="5"
-            app:realtimeOverlayColor="@color/blurOverlay" />
-
-        <LinearLayout
+        <com.google.android.material.card.MaterialCardView
             android:id="@+id/bottomMessageLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingBottom="56dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent">
+            android:layout_gravity="bottom"
+            android:orientation="vertical">
 
-            <View
-                android:id="@+id/divider4"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginBottom="4dp"
-                android:background="?android:attr/listDivider" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/bottom_message_container"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="wrap_content">
+
+                <!--<com.fivehundredpx.android.blur.BlurringView
+                    android:id="@+id/message_bottom_blur"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />-->
 
                 <EditText
                     android:id="@+id/messageText"
+                    style="@style/ChatEditTextStyle"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="4dp"
+                    android:layout_marginBottom="52dp"
                     android:background="@drawable/grey_extra_rounded_edittext"
                     android:ems="10"
                     android:hint="Write your message ..."
                     android:inputType="textMultiLine"
+                    android:maxHeight="200dp"
                     android:maxLines="4"
                     android:minHeight="48dp"
                     android:paddingStart="12dp"
-                    android:paddingTop="6dp"
+                    android:paddingTop="4dp"
                     android:paddingEnd="50dp"
-                    android:paddingBottom="6dp"
+                    android:paddingBottom="4dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.5"
@@ -142,11 +105,12 @@
 
                 <Button
                     android:id="@+id/sendMsgBtn"
-                    style="@style/Theme.Button.IconOnly"
                     android:layout_width="36dp"
                     android:layout_height="36dp"
                     android:layout_marginEnd="8dp"
-                    android:backgroundTint="@color/blue_500"
+                    android:enabled="false"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
                     android:minWidth="48dp"
                     android:minHeight="48dp"
                     android:paddingStart="6dp"
@@ -165,7 +129,6 @@
                     android:layout_height="40dp"
                     android:layout_marginStart="4dp"
                     android:layout_marginEnd="4dp"
-                    android:backgroundTint="@color/grey"
                     android:paddingStart="8dp"
                     android:paddingEnd="0dp"
                     app:icon="@drawable/ic_baseline_add_24"
@@ -176,18 +139,61 @@
                     app:layout_constraintTop_toTopOf="@+id/messageText"
                     app:layout_constraintVertical_bias="0.50" />
             </androidx.constraintlayout.widget.ConstraintLayout>
-        </LinearLayout>
 
-        <TextView
-            android:id="@+id/noMsgText"
+            <View
+                android:id="@+id/divider4"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginBottom="4dp"
+                android:background="?android:attr/listDivider" />
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/chatFragmentAppBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/white">
+
+            <com.google.android.material.appbar.CollapsingToolbarLayout
+                android:layout_width="match_parent"
+                app:titleEnabled="false"
+                android:layout_height="wrap_content">
+
+                <com.google.android.material.appbar.MaterialToolbar
+                    android:id="@+id/chatFragmentToolbar"
+                    android:layout_width="match_parent"
+                    app:title=""
+                    app:titleCentered="true"
+                    app:navigationIcon="@drawable/ic_round_arrow_back_24"
+                    app:layout_collapseMode="pin"
+                    app:titleTextColor="@color/black"
+                    android:layout_height="?actionBarSize">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/projectInfoButton"
+                        style="@style/Theme.Button.IconOnly"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:layout_marginEnd="2dp"
+                        app:icon="@drawable/ic_baseline_info_24"
+                        app:rippleColor="@color/grey" />
+
+
+                </com.google.android.material.appbar.MaterialToolbar>
+
+            </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <ProgressBar
+            android:id="@+id/chatFragmentProgress"
+            style="?android:attr/progressBarStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="No messages"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:layout_gravity="center"
+            android:elevation="8dp" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>

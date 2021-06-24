@@ -14,7 +14,7 @@
             android:id="@+id/user_horiz_photo"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -31,13 +31,13 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
+            android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
-            android:background="@drawable/dark_grey_rounded_rect"
-            android:text=" "
+            android:fontFamily="@font/roboto_medium"
+            android:text="Jamid Deka"
             android:textAppearance="@android:style/TextAppearance.Material.Medium"
-            android:textColor="@color/black"
             app:layout_constraintBottom_toTopOf="@+id/user_horiz_about"
-            app:layout_constraintEnd_toStartOf="@+id/button"
+            app:layout_constraintEnd_toStartOf="@+id/user_horiz_btn"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/user_horiz_photo"
             app:layout_constraintTop_toTopOf="@+id/user_horiz_photo" />
@@ -46,16 +46,17 @@
             android:id="@+id/user_horiz_about"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:ellipsize="end"
+            android:maxLines="3"
             android:text="Hi I am Jamid Deka and this is my about section that is exposed to people"
-            android:textColor="@color/black"
-            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="@+id/user_horiz_photo"
             app:layout_constraintEnd_toEndOf="@+id/user_horiz_name"
             app:layout_constraintStart_toStartOf="@+id/user_horiz_name"
             app:layout_constraintTop_toBottomOf="@+id/user_horiz_name" />
 
         <Button
-            android:id="@+id/button"
+            android:id="@+id/user_horiz_btn"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -69,6 +70,7 @@
             app:layout_constraintBottom_toBottomOf="@+id/user_horiz_photo"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/user_horiz_name"
-            app:layout_constraintTop_toTopOf="@+id/user_horiz_photo" />
+            app:layout_constraintTop_toTopOf="@+id/user_horiz_photo"
+            tools:visibility="visible" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

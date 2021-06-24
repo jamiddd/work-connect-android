@@ -8,7 +8,7 @@ import com.jamid.workconnect.profile.BlogsFragment
 import com.jamid.workconnect.profile.CollaborationsListFragment
 import com.jamid.workconnect.profile.ProjectListFragment
 
-class ProfileFragmentPager(val user: User?, fa: FragmentActivity): FragmentStateAdapter(fa) {
+class ProfileFragmentPager(val user: User, fa: FragmentActivity): FragmentStateAdapter(fa) {
 
     override fun getItemCount() = 3
 

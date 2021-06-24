@@ -4,13 +4,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
+        style="@style/NonPrimaryFragmentStyle"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <ScrollView
-            android:id="@+id/scrollView4"
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/editScroll"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
             android:clickable="true"
             android:clipToPadding="false"
             android:fillViewport="true"
@@ -20,26 +22,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <com.facebook.drawee.view.SimpleDraweeView
-                    android:id="@+id/userChangeImgLarge"
-                    android:layout_width="120dp"
-                    android:layout_height="120dp"
-                    app:layout_constraintBottom_toBottomOf="@+id/userChangeImg"
-                    app:layout_constraintEnd_toEndOf="@+id/userChangeImg"
-                    app:layout_constraintStart_toStartOf="@+id/userChangeImg"
-                    app:layout_constraintTop_toTopOf="@+id/userChangeImg"
-                    app:placeholderImage="@drawable/ic_user"
-                    app:roundAsCircle="true" />
-
-                <com.github.mmin18.widget.RealtimeBlurView
+                <!--<com.fivehundredpx.android.blur.BlurringView
                     android:layout_width="0dp"
                     android:layout_height="0dp"
                     app:layout_constraintBottom_toTopOf="@+id/textView10"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:realtimeBlurRadius="50dp"
-                    app:realtimeDownsampleFactor="5" />
+                    app:layout_constraintTop_toTopOf="parent" />-->
 
 
                 <com.facebook.drawee.view.SimpleDraweeView
@@ -59,12 +48,11 @@
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/fullNameTextLayout"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.Dense"
+                    style="@style/TextInputLayoutStyle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
                     android:layout_marginEnd="16dp"
-                    app:boxBackgroundColor="#F4F4F4"
                     app:layout_constraintBottom_toTopOf="@+id/usernameTextLayout"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -78,13 +66,12 @@
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/usernameTextLayout"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.Dense"
+                    style="@style/TextInputLayoutStyle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="8dp"
                     android:layout_marginEnd="16dp"
-                    app:boxBackgroundColor="#F4F4F4"
                     app:layout_constraintBottom_toTopOf="@+id/userAboutTextLayout"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -99,13 +86,12 @@
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/userAboutTextLayout"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.Dense"
+                    style="@style/TextInputLayoutStyle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="8dp"
                     android:layout_marginEnd="16dp"
-                    app:boxBackgroundColor="#F4F4F4"
                     app:layout_constraintBottom_toTopOf="@+id/textView9"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -136,6 +122,7 @@
 
                 <com.google.android.material.chip.ChipGroup
                     android:id="@+id/interestsGroup"
+                    style="@style/InterestGroupBackground"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
@@ -171,6 +158,8 @@
                     style="?android:attr/progressBarStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:indeterminate="true"
+                    android:indeterminateTint="@color/white"
                     android:visibility="gone"
                     app:layout_constraintBottom_toBottomOf="@+id/userChangeImg"
                     app:layout_constraintEnd_toEndOf="@+id/userChangeImg"
@@ -208,25 +197,20 @@
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-        </ScrollView>
+        </androidx.core.widget.NestedScrollView>
 
         <androidx.cardview.widget.CardView
             android:id="@+id/addInterestLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/bottom_transparent_view"
             android:clickable="true"
             android:focusable="true"
-            app:cardBackgroundColor="@color/transparent"
             app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
-            <com.github.mmin18.widget.RealtimeBlurView
+            <!-- <com.fivehundredpx.android.blur.BlurringView
                 android:id="@+id/editBottomBlur"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:fitsSystemWindows="true"
-                app:realtimeBlurRadius="40dp"
-                app:realtimeDownsampleFactor="5" />
+                android:layout_height="0dp" />-->
 
             <View
                 android:id="@+id/divider10"
@@ -236,6 +220,7 @@
 
             <EditText
                 android:id="@+id/interestEditText"
+                style="@style/EditTextStyle"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:layout_gravity="top"
@@ -265,6 +250,36 @@
                 android:text="Add"
                 app:icon="@drawable/ic_baseline_add_24" />
         </androidx.cardview.widget.CardView>
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:layout_width="match_parent"
+            android:backgroundTint="@color/white"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/editFragmentToolbar"
+                android:layout_width="match_parent"
+                app:title="Edit profile"
+                app:titleCentered="true"
+                android:layout_marginTop="26dp"
+                app:navigationIcon="@drawable/ic_round_arrow_back_24"
+                android:layout_height="?actionBarSize">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/saveEditBtn"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end|center_vertical"
+                    android:layout_marginEnd="8dp"
+                    android:fontFamily="@font/roboto_medium"
+                    android:text="Save"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                    app:cornerRadius="24dp" />
+
+            </com.google.android.material.appbar.MaterialToolbar>
+
+        </com.google.android.material.appbar.AppBarLayout>
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>

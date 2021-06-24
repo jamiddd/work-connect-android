@@ -18,17 +18,17 @@
             android:layout_marginStart="8dp"
             android:clickable="true"
             android:focusable="true"
-            app:layout_constraintBottom_toBottomOf="@+id/requestContentText"
-            app:layout_constraintEnd_toStartOf="@+id/requestContentText"
+            app:layout_constraintBottom_toBottomOf="@+id/notificationContent"
+            app:layout_constraintEnd_toStartOf="@+id/notificationContent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintHorizontal_chainStyle="packed"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/projectNameText"
+            app:layout_constraintTop_toTopOf="@+id/notificationTitle"
             app:placeholderImage="@color/grey"
             app:roundAsCircle="true" />
 
         <TextView
-            android:id="@+id/requestContentText"
+            android:id="@+id/notificationContent"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
@@ -38,41 +38,42 @@
             app:layout_constraintEnd_toStartOf="@+id/negativeBtn"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/relevantImgView"
-            app:layout_constraintTop_toBottomOf="@+id/projectNameText" />
+            app:layout_constraintTop_toBottomOf="@+id/notificationTitle" />
 
         <TextView
-            android:id="@+id/projectNameText"
+            android:id="@+id/notificationTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
+            android:fontFamily="@font/roboto_medium"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-            android:textColor="@color/black"
-            app:layout_constraintBottom_toTopOf="@+id/requestContentText"
-            app:layout_constraintEnd_toEndOf="@+id/requestContentText"
+            android:textSize="17sp"
+            app:layout_constraintBottom_toTopOf="@+id/notificationContent"
+            app:layout_constraintEnd_toEndOf="@+id/notificationContent"
             app:layout_constraintStart_toEndOf="@+id/relevantImgView"
             app:layout_constraintTop_toTopOf="parent" />
 
         <Button
             android:id="@+id/positiveBtn"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
             android:minWidth="0dp"
             android:minHeight="0dp"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
             android:text="Accept"
             android:textAppearance="@style/TextAppearance.AppCompat.Small"
             android:visibility="gone"
-            app:cornerRadius="0dp"
             app:layout_constraintBottom_toBottomOf="@+id/negativeBtn"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/negativeBtn"
             app:layout_constraintTop_toTopOf="@+id/negativeBtn"
-            app:strokeColor="@color/grey"
-            app:strokeWidth="1dp" />
+            tools:visibility="visible" />
 
         <Button
             android:id="@+id/negativeBtn"
@@ -86,10 +87,11 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Small"
             android:visibility="gone"
             app:cornerRadius="0dp"
-            app:layout_constraintBottom_toBottomOf="@+id/requestContentText"
+            app:layout_constraintBottom_toBottomOf="@+id/notificationContent"
             app:layout_constraintEnd_toStartOf="@+id/positiveBtn"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/requestContentText"
-            app:layout_constraintTop_toTopOf="@+id/projectNameText" />
+            app:layout_constraintStart_toEndOf="@+id/notificationContent"
+            app:layout_constraintTop_toTopOf="@+id/notificationTitle"
+            tools:visibility="visible" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

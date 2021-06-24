@@ -71,13 +71,13 @@
         android:name="com.jamid.workconnect.profile.SavedPostsFragment"
         tools:layout="@layout/fragment_saved_posts"
         android:label="SavedPostsFragment" />
-    <dialog
+    <fragment
         android:id="@+id/followingsFragment"
         android:name="com.jamid.workconnect.profile.FollowingsFragment"
         android:label="FollowingsFragment"
         tools:layout="@layout/fragment_followings" />
 
-    <dialog
+    <fragment
         android:id="@+id/followersFragment"
         android:name="com.jamid.workconnect.profile.FollowersFragment"
         android:label="FollowersFragment"

@@ -3,167 +3,150 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/exploreRecycler"
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:clipToPadding="false"
-        android:fitsSystemWindows="true"
-        android:paddingBottom="80dp"
-        tools:context="com.jamid.workconnect.explore.ExploreHomeFragment">
+        android:layout_height="match_parent">
 
-        <!--<LinearLayout
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/exploreRefresher"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/topProjectsHeader"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:fontFamily="@font/title_semi"
-                    android:paddingStart="16dp"
-                    android:paddingTop="8dp"
-                    android:paddingEnd="16dp"
-                    android:paddingBottom="8dp"
-                    android:text="Top projects"
-                    android:textColor="@color/black"
-                    android:textSize="16sp" />
-
-                <Button
-                    android:id="@+id/seeMoreProjectsBtn"
-                    style="@style/Widget.MaterialComponents.Button.TextButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:fontFamily="@font/title_semi"
-                    android:text="See more"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Small"
-                    app:icon="@drawable/ic_round_arrow_forward_24"
-                    app:iconGravity="end"
-                    app:iconSize="16dp" />
-            </LinearLayout>
+            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
+            android:layout_height="match_parent">
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/topPostsRecycler"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:clipToPadding="false"
-                android:minHeight="200dp"
-                android:nestedScrollingEnabled="true"
-                android:paddingStart="8dp"
-                android:paddingEnd="0dp"
-                tools:itemCount="1"
-                tools:listitem="@layout/micro_project_item" />
-
-            <View
-                android:id="@+id/divider11"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="?android:attr/listDivider" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/topBlogsHeader"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:fontFamily="@font/title_semi"
-                    android:paddingStart="16dp"
-                    android:paddingTop="8dp"
-                    android:paddingEnd="16dp"
-                    android:paddingBottom="8dp"
-                    android:text="Top Blogs"
-                    android:textColor="@color/black"
-                    android:textSize="16sp" />
-
-                <Button
-                    android:id="@+id/topBlogsBtn"
-                    style="@style/Widget.MaterialComponents.Button.TextButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:fontFamily="@font/title_semi"
-                    android:text="See more"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Small"
-                    app:icon="@drawable/ic_round_arrow_forward_24"
-                    app:iconGravity="end"
-                    app:iconSize="16dp" />
-            </LinearLayout>
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/topBlogsRecycler"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@color/white"
-                android:clipToPadding="false"
-                android:minHeight="150dp"
-                android:paddingStart="8dp"
-                android:paddingEnd="0dp"
-                tools:itemCount="1"
-                tools:listitem="@layout/mini_project_item" />
-
-            <View
-                android:id="@+id/divider12"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="?android:attr/listDivider" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/peopleToConnect"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:fontFamily="@font/title_semi"
-                    android:paddingStart="16dp"
-                    android:paddingTop="8dp"
-                    android:paddingEnd="16dp"
-                    android:paddingBottom="8dp"
-                    android:text="People to connect"
-                    android:textColor="@color/black"
-                    android:textSize="16sp" />
-
-                <Button
-                    android:id="@+id/seeMorePeopleBtn"
-                    style="@style/Widget.MaterialComponents.Button.TextButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:fontFamily="@font/title_semi"
-                    android:text="See more"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Small"
-                    app:icon="@drawable/ic_round_arrow_forward_24"
-                    app:iconGravity="end"
-                    app:iconSize="16dp" />
-            </LinearLayout>
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/randomPeopleRecycler"
+                android:id="@+id/exploreRecycler"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:clipToPadding="false"
-                android:minHeight="60dp"
-                android:paddingStart="8dp"
-                android:paddingEnd="0dp"
-                tools:itemCount="1"
-                tools:listitem="@layout/user_item" />
+                android:paddingBottom="80dp"
+                tools:context="com.jamid.workconnect.explore.ExploreHomeFragment"/>
 
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-        </LinearLayout>-->
-    </androidx.recyclerview.widget.RecyclerView>
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/exploreAppBar"
+            android:layout_width="match_parent"
+            android:backgroundTint="@color/white"
+            android:stateListAnimator="@animator/app_bar_elevation"
+            android:layout_height="226dp">
+
+            <com.google.android.material.appbar.CollapsingToolbarLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                style="@style/CollapseToolbarStyle"
+                app:expandedTitleMarginBottom="72dp"
+                app:toolbarId="@id/exploreToolbar">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/searchLayout"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.Dense"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginBottom="8dp"
+                    app:boxBackgroundColor="@color/grey"
+                    app:boxBackgroundMode="filled"
+                    app:boxCornerRadiusBottomEnd="8dp"
+                    app:boxCornerRadiusBottomStart="8dp"
+                    app:boxCornerRadiusTopEnd="8dp"
+                    android:focusable="false"
+                    app:boxCornerRadiusTopStart="8dp"
+                    app:boxStrokeColor="@color/transparent"
+                    app:boxStrokeWidth="0dp"
+                    app:boxStrokeWidthFocused="0dp"
+                    app:endIconDrawable="@drawable/ic_baseline_search_24"
+                    app:endIconMode="custom"
+                    app:hintAnimationEnabled="false"
+                    app:hintEnabled="false">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/searchEditText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:focusable="false"
+                        android:clickable="true"
+                        android:hint="Search for posts, accounts ..."
+                        android:paddingTop="12dp" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.appbar.MaterialToolbar
+                    android:id="@+id/exploreToolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="?actionBarSize"
+                    android:layout_marginTop="26dp"
+                    android:background="@color/white"
+                    app:contentInsetStart="0dp"
+                    app:layout_collapseMode="pin"
+                    app:title="Explore" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/searchButton"
+                    style="@style/Theme.Button.IconOnly"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="30dp"
+                    android:layout_marginEnd="2dp"
+                    app:icon="@drawable/ic_baseline_search_24"
+                    app:iconSize="26dp"
+                    app:layout_collapseMode="pin"
+                    app:rippleColor="@color/grey" />
+
+                <com.facebook.drawee.view.SimpleDraweeView
+                    android:id="@+id/accountImg"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="36dp"
+                    android:layout_gravity="end"
+                    app:layout_collapseMode="pin"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:placeholderImage="@drawable/ic_user"
+                    app:roundAsCircle="true" />
+
+            </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+            <!--<androidx.constraintlayout.motion.widget.MotionLayout
+                android:id="@+id/exploreMotionLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layoutDescription="@xml/search_scene"
+                app:applyMotionScene="true">
+
+                <EditText
+                    android:id="@+id/searchBarText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:background="@drawable/grey_rounded_rect_edittext"
+                    android:hint="Search for posts ..."
+                    android:inputType="textPersonName"
+                    android:focusable="false"
+                    android:maxLines="1"
+                    android:minHeight="40dp"
+                    android:paddingStart="12dp"
+                    android:paddingTop="8dp"
+                    android:paddingEnd="12dp"
+                    android:paddingBottom="8dp" />
+
+                <Button
+                    android:id="@+id/cancelSearchBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_margin="8dp"
+                    android:layout_height="wrap_content"
+                    android:minWidth="60dp"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                    android:fontFamily="@font/roboto_medium"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:text="Cancel"/>
+
+            </androidx.constraintlayout.motion.widget.MotionLayout>-->
+
+        </com.google.android.material.appbar.AppBarLayout>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>

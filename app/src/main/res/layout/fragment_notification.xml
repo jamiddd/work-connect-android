@@ -5,85 +5,72 @@
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/white">
-
-        <com.google.android.material.appbar.AppBarLayout
-            android:id="@+id/appbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:backgroundTint="@color/white">
-
-            <com.google.android.material.appbar.MaterialToolbar
-                android:id="@+id/notificationToolbar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="top"
-                android:minHeight="?attr/actionBarSize"
-                android:theme="?attr/actionBarTheme"
-                app:contentInsetStart="0dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="horizontal"
-                    android:paddingStart="8dp"
-                    android:paddingEnd="8dp"
-                    tools:layout_editor_absoluteY="4dp">
-
-                    <Button
-                        android:id="@+id/cancelNotificationsBtn"
-                        style="@style/Widget.MaterialComponents.Button.TextButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentStart="true"
-                        android:fontFamily="@font/title_font"
-                        android:minWidth="60dp"
-                        android:text="Cancel"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Small" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerInParent="true"
-                        android:text="Notifications"
-                        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6" />
-
-                </RelativeLayout>
-
-            </com.google.android.material.appbar.MaterialToolbar>
-
-            <com.google.android.material.tabs.TabLayout
-                android:id="@+id/notification_tabs"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:layout_collapseMode="pin"
-                app:tabIndicator="@drawable/tab_indicator"
-                app:tabMode="auto"
-                app:tabTextAppearance="@style/Theme.TabLayoutText">
-
-                <com.google.android.material.tabs.TabItem
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="General" />
-
-                <com.google.android.material.tabs.TabItem
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Requests" />
-
-            </com.google.android.material.tabs.TabLayout>
-
-        </com.google.android.material.appbar.AppBarLayout>
+        android:layout_height="match_parent">
 
         <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/notificationPager"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior" />
+            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
+            android:backgroundTint="@color/white" />
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/notificationAppBar"
+            android:layout_width="match_parent"
+            android:layout_height="218dp"
+            android:backgroundTint="@color/white">
+
+            <com.google.android.material.appbar.CollapsingToolbarLayout
+                android:layout_width="match_parent"
+                style="@style/CollapseToolbarStyle"
+                android:layout_height="170dp"
+                app:toolbarId="@id/notificationFragmentToolbar">
+
+                <com.google.android.material.appbar.MaterialToolbar
+                    android:id="@+id/notificationFragmentToolbar"
+                    android:layout_width="match_parent"
+                    app:title="Notifications"
+                    app:titleCentered="true"
+                    android:layout_marginTop="26dp"
+                    app:layout_collapseMode="pin"
+                    app:titleTextColor="@color/black"
+                    android:layout_height="?actionBarSize"/>
+
+                <com.facebook.drawee.view.SimpleDraweeView
+                    android:id="@+id/accountImg"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_marginEnd="16dp"
+                    app:layout_collapseMode="pin"
+                    android:layout_gravity="end"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:placeholderImage="@drawable/ic_user"
+                    app:roundAsCircle="true" />
+
+            </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/notificationTabLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/TabLayoutTheme">
+
+                <com.google.android.material.tabs.TabItem
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="General"/>
+
+                <com.google.android.material.tabs.TabItem
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="Requests"/>
+
+            </com.google.android.material.tabs.TabLayout>
+
+        </com.google.android.material.appbar.AppBarLayout>
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+
 </layout>

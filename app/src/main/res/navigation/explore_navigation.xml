@@ -9,7 +9,7 @@
         android:id="@+id/exploreFragment"
         android:name="com.jamid.workconnect.explore.ExploreFragment"
         tools:layout="@layout/fragment_explore"
-        android:label="ExploreFragment" />
+        android:label="" />
     <fragment
         android:id="@+id/projectFragment"
         android:name="com.jamid.workconnect.ProjectFragment"
@@ -37,6 +37,72 @@
         android:name="com.jamid.workconnect.search.SearchFragment"
         android:label="SearchFragment"
         tools:layout="@layout/fragment_search" />
+
+    <fragment
+        android:id="@+id/interestFragment"
+        android:name="com.jamid.workconnect.auth.InterestFragment"
+        android:label="InterestFragment"
+        tools:layout="@layout/fragment_interest" />
+
+    <fragment
+        android:id="@+id/userDetailFragment"
+        android:name="com.jamid.workconnect.auth.UserDetailFragment"
+        android:label="UserDetailFragment"
+        tools:layout="@layout/fragment_user_detail" />
+
+    <fragment
+        android:id="@+id/signInFragment"
+        android:name="com.jamid.workconnect.auth.SignInFragment"
+        android:label="SignInFragment"
+        tools:layout="@layout/fragment_sign_in" />
+
+    <fragment
+        android:id="@+id/randomUsersFragment"
+        android:name="com.jamid.workconnect.explore.RandomUsersFragment"
+        android:label="Users to Follow"
+        tools:layout="@layout/fragment_random_users" />
+
+    <fragment
+        android:id="@+id/topProjectsFragment"
+        android:name="com.jamid.workconnect.explore.TopProjectsFragment"
+        android:label="Top projects"
+        tools:layout="@layout/fragment_top_projects" />
+
+    <fragment
+        android:id="@+id/topBlogsFragment"
+        android:name="com.jamid.workconnect.explore.TopBlogsFragment"
+        android:label="Top blogs"
+        tools:layout="@layout/fragment_top_blogs" />
+
+    <fragment
+        android:id="@+id/followingsFragment"
+        android:name="com.jamid.workconnect.profile.FollowingsFragment"
+        android:label="FollowingsFragment"
+        tools:layout="@layout/fragment_followings" />
+
+    <fragment
+        android:id="@+id/followersFragment"
+        android:name="com.jamid.workconnect.profile.FollowersFragment"
+        android:label="FollowersFragment"
+        tools:layout="@layout/fragment_followers" />
+
+    <fragment
+        android:id="@+id/tagPostsFragment"
+        android:name="com.jamid.workconnect.TagPostsFragment"
+        android:label=""
+        tools:layout="@layout/fragment_tag_posts" />
+
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.jamid.workconnect.settings.SettingsFragment"
+        android:label=""
+        tools:layout="@layout/fragment_settings" />
+
+    <fragment
+        android:id="@+id/savedPostsFragment"
+        android:name="com.jamid.workconnect.profile.SavedPostsFragment"
+        tools:layout="@layout/fragment_saved_posts"
+        android:label="SavedPostsFragment" />
 
 
 </navigation>

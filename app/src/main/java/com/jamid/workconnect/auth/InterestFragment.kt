@@ -1,221 +1,412 @@
 package com.jamid.workconnect.auth
 
 import android.app.Activity
-import android.content.Context
-import android.content.DialogInterface
-import android.content.res.ColorStateList
-import android.graphics.Color
+import android.graphics.Typeface
+import android.os.Build
 import android.os.Bundle
+import android.text.Editable
+import android.text.SpannableString
+import android.text.TextWatcher
+import android.text.style.StyleSpan
+import android.view.LayoutInflater
 import android.view.View
+import android.view.View.FIND_VIEWS_WITH_TEXT
 import android.view.ViewGroup
-import android.view.inputmethod.EditorInfo
-import android.widget.Button
-import android.widget.ScrollView
-import android.widget.Toast
-import androidx.core.content.ContextCompat
+import android.widget.TextView
 import androidx.core.view.children
 import androidx.core.widget.doAfterTextChanged
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.chip.Chip
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.jamid.workconnect.MainActivity
-import com.jamid.workconnect.MainViewModel
-import com.jamid.workconnect.R
+import com.google.android.material.chip.ChipGroup
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+import com.jamid.workconnect.*
+import com.jamid.workconnect.adapter.paging2.GenericComparator
 import com.jamid.workconnect.databinding.FragmentInterestBinding
-import com.jamid.workconnect.getWindowHeight
+import com.jamid.workconnect.interfaces.OnChipClickListener
+import com.jamid.workconnect.model.InterestItem
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import me.everything.android.ui.overscroll.OverScrollDecoratorHelper
+import kotlinx.coroutines.tasks.await
+import java.util.*
 
-class InterestFragment : Fragment(R.layout.fragment_interest) {
+class InterestFragment : SupportFragment(R.layout.fragment_interest, TAG, false) {
+
+    // TODO("While selecting any interest, also increase searchRank")
 
     private lateinit var binding: FragmentInterestBinding
-    private val viewModel: MainViewModel by activityViewModels()
-    private val checkChangeListener = MutableLiveData<List<Int>>()
+    private val checkedCount = MutableLiveData<Int>().apply { value = 0 }
+    private var initialized = false
+    private lateinit var onChipClickListener: OnChipClickListener
+    private var job: Job? = null
+    private var searchAdapter: SearchAdapter? = null
+
+    private fun search(query: String) {
+        job?.cancel()
+        job = viewLifecycleOwner.lifecycleScope.launch {
+            val task = Firebase.firestore.collection("interests")
+                .whereArrayContainsAny("indices", listOf(
+                    query,
+                    query.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() },
+                    query.replaceFirstChar { it.lowercase(Locale.ROOT) },
+                    query.uppercase(Locale.ROOT), query.lowercase(Locale.ROOT)
+                ))
+                .orderBy("interest")
+                .limit(5)
+                .get()
+            val result = task.await()
+            val interests = result.toObjects(InterestItem::class.java)
+
+            searchAdapter?.submitList(interests)
+        }
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentInterestBinding.bind(view)
-        var dialog: DialogInterface? = null
-        var job: Job? = null
+        onChipClickListener = activity
 
-        val activity = requireActivity() as MainActivity
-        val primaryBtn = activity.findViewById<Button>(R.id.primaryBtn)
+        val isSignInFragment = arguments?.getBoolean(ARG_IS_SIGN_IN) ?: false
 
-        binding.addTagBtn.isEnabled = false
+        binding.interestToolbar.setNavigationOnClickListener {
+            findNavController().navigateUp()
+        }
+
+        activity.mainBinding.apply {
+            bottomNavBackground.visibility = View.GONE
+            if (isSignInFragment) {
+                bottomCard.visibility = View.GONE
+            } else {
+                binding.skipInterestBtn.visibility = View.INVISIBLE
+                binding.signInLayout.visibility = View.GONE
+                bottomCard.visibility = View.VISIBLE
+            }
+        }
+
+        binding.interestsSearchResultRecycler.layoutManager = LinearLayoutManager(activity)
+
+        binding.interestEditText.doAfterTextChanged { s ->
+            if (s.isNullOrBlank()) {
+                binding.searchResultCardView.visibility = View.GONE
+            } else {
+                binding.searchResultCardView.visibility = View.VISIBLE
+                val query = s.toString()
+                search(query)
+            }
+        }
+
+        binding.interestEditText.setOnFocusChangeListener { v, hasFocus ->
+            if (hasFocus) {
+                binding.interestAppBar.setExpanded(false, true)
+            }
+        }
+
+        binding.interestEditText.setOnClickListener {
+            binding.interestAppBar.setExpanded(false, true)
+        }
+
+
+//        binding.addTagBtn.isEnabled = false
 
         viewModel.user.observe(viewLifecycleOwner) {
             if (it != null) {
-                dialog?.dismiss()
-                job?.cancel()
-                activity.bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+                initialized = true
+                activity.hideBottomSheet()
             }
         }
 
-        checkChangeListener.observe(viewLifecycleOwner) {
-            if (!it.isNullOrEmpty()) {
-                binding.totalSelectedText.text = "${it.size} Selected"
-                primaryBtn.isEnabled = it.size > 2
-            } else {
-                primaryBtn.isEnabled = false
-                binding.totalSelectedText.text = "0 Selected"
-            }
-        }
+        viewModel.primaryBottomSheetState.observe(viewLifecycleOwner) {
+            if (initialized) {
+                if (it == BottomSheetBehavior.STATE_HIDDEN) {
 
-        binding.addTagBtn.setOnClickListener {
-            val tag = binding.customInterestText.text.toString()
-            addChip(tag, requireActivity(), false)
-            binding.customInterestText.text.clear()
-        }
+                    if (findNavController().findDestination(R.id.signInFragment) != null) {
+                        findNavController().popBackStack(R.id.signInFragment, true)
+                    } else {
+                        findNavController().popBackStack(R.id.userDetailFragment, true)
+                    }
 
-        binding.customInterestText.doAfterTextChanged {
-            binding.addTagBtn.isEnabled = !it.isNullOrBlank()
-        }
-
-        primaryBtn.setOnClickListener {
-            val interests = mutableListOf<String>()
-
-            for (child in binding.interestsList.children) {
-                val chip = child as Chip
-                if (chip.isChecked) {
-                    interests.add(chip.text.toString())
+                    /*if (viewModel.fragmentTagStack.contains(SignInFragment.TAG)) {
+                        for (i in 0..2) {
+                            viewModel.fragmentTagStack.pop()
+                        }
+                        viewModel.setCurrentFragmentTag(viewModel.fragmentTagStack.peek())
+                        activity.supportFragmentManager.popBackStack(SignInFragment.TAG, 1)
+                    } else {
+                        for (i in 0..1) {
+                            viewModel.fragmentTagStack.pop()
+                        }
+                        viewModel.setCurrentFragmentTag(viewModel.fragmentTagStack.peek())
+                        activity.supportFragmentManager.popBackStack(UserDetailFragment.TAG, 1)
+                    }*/
                 }
             }
-            /*
-            for (ch in binding.interestsList.checkedChipIds) {
-                val chip = binding.interestsList.getChildAt(ch) as Chip
-
-            }*/
-            dialog = MaterialAlertDialogBuilder(activity)
-                .setView(R.layout.creating_user_progress_dialog)
-                .setCancelable(false)
-                .show()
-
-            viewModel.createNewUser(interests)
-
-            job = lifecycleScope.launch {
-                delay(15000)
-                dialog?.dismiss()
-
-                Toast.makeText(activity, "Some unknown error occurred", Toast.LENGTH_SHORT).show()
-            }
         }
 
-        binding.customInterestText.setOnEditorActionListener { v, actionId, event ->
+        viewModel.windowInsets.observe(viewLifecycleOwner) { (top, _) ->
+            binding.interestToolbar.updateLayout(marginTop = top)
+        }
+
+        /*binding.addTagBtn.setOnClickListener {
+            val tag = binding.customInterestText.text.toString()
+            checkedCount.postValue(checkedCount.value!! + 1)
+            addChip(tag, binding.interestsList.childCount, activity, false)
+            binding.customInterestText.text.clear()
+        }
+*/
+        /*binding.customInterestText.doAfterTextChanged {
+            binding.addTagBtn.isEnabled = !it.isNullOrBlank()
+        }*/
+
+        /*binding.customInterestText.setOnEditorActionListener { v, actionId, event ->
             when (actionId) {
                 EditorInfo.IME_ACTION_DONE -> {
                     val t = binding.customInterestText.text
                     if (!t.isNullOrBlank()) {
-                        addChip(t.toString(), activity, false)
+                        addChip(t.toString(), binding.interestsList.childCount, activity, false)
+                        checkedCount.postValue(checkedCount.value!! + 1)
                         binding.customInterestText.text.clear()
                     }
                 }
             }
             true
-        }
+        }*/
 
-
-        val someRandomInterests = arrayOf(
-            "Google",
+        // TODO("make a collection of tags with rankings")
+        val someRandomInterests = mutableListOf(
+            "Artificial Intelligence",
+            "Science",
             "Android",
-            "Material Design",
-            "Design",
-            "React",
-            "iOS",
-            "Swift",
-            "Web Development",
-            "Objective-C"
+            "Vector",
+            "Computer Science",
+            "Machine Learning",
+            "Google",
+            "Projects",
+            "Physics",
+            "Chemistry",
+            "iOS Development",
+            "Github",
+            "Culinary",
+            "Fashion Technology",
+            "Neural Network",
+            "Deep Learning",
+            "Cryptocurrency",
+            "Blockchain",
+            "Artificial Intelligence",
+            "Science",
+            "Android",
+            "Vector",
+            "Computer Science",
+            "Machine Learning",
+            "Google",
+            "Projects",
+            "Physics",
+            "Chemistry",
+            "iOS Development",
+            "Github",
+            "Culinary",
+            "Fashion Technology",
+            "Neural Network",
+            "Deep Learning",
+            "Cryptocurrency",
+            "Blockchain",
+            "Artificial Intelligence",
+            "Science",
+            "Android",
+            "Vector",
+            "Computer Science",
+            "Machine Learning",
+            "Google",
+            "Projects",
+            "Physics",
+            "Chemistry",
+            "iOS Development",
+            "Github",
+            "Culinary",
+            "Fashion Technology",
+            "Neural Network",
+            "Deep Learning",
+            "Cryptocurrency",
+            "Blockchain"
         )
 
-        for (interest in someRandomInterests) {
-            addChip(interest, activity, true)
-        }
-
-        binding.skipBtn.setOnClickListener {
-            dialog = MaterialAlertDialogBuilder(activity)
-                .setView(R.layout.creating_user_progress_dialog)
-                .setCancelable(false)
-                .show()
-
-            viewModel.createNewUser(emptyList())
-
-            job = lifecycleScope.launch {
-                delay(15000)
-                dialog?.dismiss()
-
-                Toast.makeText(activity, "Some unknown error occurred", Toast.LENGTH_SHORT).show()
+        val currentUser = viewModel.user.value
+        if (currentUser != null) {
+            val interests = currentUser.userPrivate.interests
+            if (Build.VERSION.SDK_INT <= 23) {
+                for (int in interests) {
+                    if (someRandomInterests.contains(int)) {
+                        someRandomInterests.remove(int)
+                    }
+                }
+            } else {
+                for (int in interests) {
+                    someRandomInterests.removeIf {
+                        int == it
+                    }
+                }
             }
         }
 
-        viewModel.windowInsets.observe(viewLifecycleOwner) { (top, bottom) ->
-            val windowHeight = getWindowHeight()
-//            val rect = windowHeight - top
-
-            val params = binding.root.layoutParams as ViewGroup.LayoutParams
-            params.height = windowHeight
-            params.width = ViewGroup.LayoutParams.MATCH_PARENT
-
-            binding.root.layoutParams = params
-
+        val shownList = someRandomInterests./*distinct().*/shuffled()
+        shownList.forEachIndexed { index, s ->
+            addNewChip(s, binding.interestsList)
         }
 
-        OverScrollDecoratorHelper.setUpOverScroll(binding.root as ScrollView)
+        searchAdapter = SearchAdapter(shownList)
+        binding.interestsSearchResultRecycler.apply {
+            adapter = searchAdapter
+            layoutManager = LinearLayoutManager(activity)
+        }
+
+        viewModel.windowInsets.observe(viewLifecycleOwner) {
+            binding.signInCompleteBtn.updateLayout(marginLeft = convertDpToPx(32), marginRight = convertDpToPx(32), marginBottom = it.second)
+        }
+
+        /*binding.interestScroller.setOnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY ->
+            if (scrollY > binding.interestsFragmentHeader.measuredHeight - convertDpToPx(32)) {
+                activity.setFragmentTitle("Add Interests")
+            } else {
+                activity.setFragmentTitle("")
+            }
+        }*/
+
+        binding.signInCompleteBtn.setOnClickListener {
+            /*if (viewModel.fragmentTagStack.contains(SignInFragment.TAG)) {
+                for (i in 0..2) {
+                    viewModel.fragmentTagStack.pop()
+                }
+                viewModel.setCurrentFragmentTag(viewModel.fragmentTagStack.peek())
+                activity.supportFragmentManager.popBackStack(SignInFragment.TAG, 1)
+            } else {
+                for (i in 0..1) {
+                    viewModel.fragmentTagStack.pop()
+                }
+                viewModel.setCurrentFragmentTag(viewModel.fragmentTagStack.peek())
+                activity.supportFragmentManager.popBackStack(UserDetailFragment.TAG, 1)
+            }*/
+            createUser()
+        }
+
+        /*binding.skipBtn.setOnClickListener {
+            createUser()
+        }*/
+
+//        binding.interestsDoneBtn.updateLayout(marginBottom = viewModel.windowInsets.value!!.second)
 
     }
 
-    private fun addChip(interest: String, context: Activity, initial: Boolean = true) {
-        val chip = Chip(context)
-        chip.text = interest
-        chip.isCloseIconVisible = true
-        chip.isCheckedIconVisible = true
-        chip.closeIcon = ContextCompat.getDrawable(context, R.drawable.ic_baseline_close_24)
-        chip.isCheckable = true
+    private inner class SearchAdapter(val existingList: List<String>): ListAdapter<InterestItem, SearchAdapter.SearchViewHolder>(GenericComparator(InterestItem::class.java)) {
 
-        if (initial) {
-            chip.isChecked = false
-            chip.toSecondary(context)
-        } else {
-            chip.isChecked = true
-            chip.toPrimary(context)
+        private inner class SearchViewHolder(view: View): RecyclerView.ViewHolder(view) {
+
+            private val itemText: TextView = view.findViewById(R.id.search_menu_text)
+
+            fun bind(item: InterestItem) {
+                itemText.text = item.interest
+
+                itemText.setOnClickListener {
+                    if (!existingList.contains(item.interest)) {
+                        // make sure that the interest from the search is not an interest already in users interests
+                        addNewChip(item.interest, binding.interestsList, true)
+//                        onChipClickListener.onInterestSelect(item.interest)
+                    } else {
+                        val vs = arrayListOf<View>()
+                        binding.interestsList.findViewsWithText(vs, item.interest, FIND_VIEWS_WITH_TEXT)
+                        if (vs.isNotEmpty()) {
+                            for (v in vs) {
+                                (v as Chip).isChecked = true
+                            }
+//                            onChipClickListener.onInterestSelect(item.interest)
+                        }
+                    }
+                    binding.interestEditText.text?.clear()
+                }
+
+            }
         }
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SearchViewHolder {
+            return SearchViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.menu_item, parent, false))
+        }
+
+        override fun onBindViewHolder(holder: SearchViewHolder, position: Int) {
+            holder.bind(getItem(position))
+        }
+
+    }
+
+    private fun createUser() {
+        val interests = mutableListOf<String>()
+
+        for (child in binding.interestsList.children) {
+            val chip = child as Chip
+            if (chip.isChecked) {
+                interests.add(chip.text.toString())
+            }
+        }
+
+        activity.showBottomSheet(
+            GenericDialogFragment.newInstance(
+                CREATING_USER,
+                "Creating your account",
+                "Creating your account. Please wait for a while ... ",
+                isProgressing = true
+            ), GenericDialogFragment.TAG)
+
+        viewModel.uploadUser(interests)
+    }
+
+    private fun addNewChip(s: String, group: ChipGroup, isChecked: Boolean = false) {
+        val chip = LayoutInflater.from(activity).inflate(R.layout.chip, null) as Chip
+
+        chip.text = s
+        chip.isChecked = isChecked
+
+        chip.setOnClickListener {
+            if (chip.isChecked) {
+                onChipClickListener.onInterestSelect(chip.text.toString())
+            } else {
+                onChipClickListener.onInterestRemoved(chip.text.toString())
+            }
+        }
+        group.addView(chip)
+    }
+
+    private fun addChip(interest: String, index: Int, context: Activity, initial: Boolean = true) {
+        val chip = LayoutInflater.from(context).inflate(R.layout.chip, null) as Chip
+        chip.text = interest
+        chip.id = index
+
+        chip.isChecked = !initial
 
         chip.setOnCloseIconClickListener {
             binding.interestsList.removeView(chip)
         }
 
-        chip.setOnCheckedChangeListener { buttonView, isChecked ->
-            if (isChecked) {
-                chip.toPrimary(context)
-            } else {
-                chip.toSecondary(context)
-            }
-            checkChangeListener.postValue(binding.interestsList.checkedChipIds)
+        chip.setOnClickListener {
+            checkedCount.postValue(binding.interestsList.checkedChipIds.size)
         }
 
         binding.interestsList.addView(chip)
     }
 
-    private fun Chip.toPrimary(context: Context) {
-        closeIconTint = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.white))
-        chipBackgroundColor =
-            ColorStateList.valueOf(ContextCompat.getColor(context, R.color.blue_500))
-        setTextColor(ContextCompat.getColor(context, R.color.white))
-    }
-
-    private fun Chip.toSecondary(context: Context) {
-        closeIconTint = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.black))
-        chipBackgroundColor = ColorStateList.valueOf(Color.parseColor("#e3e3e3"))
-        setTextColor(ContextCompat.getColor(context, R.color.black))
-    }
-
     companion object {
 
+        const val TAG = "InterestFragment"
+        const val TITLE = ""
+        const val ARG_IS_SIGN_IN = "ARG_IS_SIGN_IN"
+
         @JvmStatic
-        fun newInstance() = InterestFragment()
+        fun newInstance(isSignInFragment: Boolean = false) = InterestFragment().apply {
+            arguments = Bundle().apply {
+                putBoolean(ARG_IS_SIGN_IN, isSignInFragment)
+            }
+        }
     }
 }

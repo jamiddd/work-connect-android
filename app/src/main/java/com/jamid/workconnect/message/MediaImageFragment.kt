@@ -1,91 +1,66 @@
 package com.jamid.workconnect.message
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.app.SharedElementCallback
+import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
-import androidx.paging.PagedList
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.facebook.drawee.view.SimpleDraweeView
-import com.firebase.ui.firestore.paging.FirestorePagingAdapter
-import com.firebase.ui.firestore.paging.FirestorePagingOptions
-import com.google.firebase.firestore.Query
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
-import com.jamid.workconnect.*
+import com.google.android.material.transition.platform.MaterialContainerTransform
+import com.jamid.workconnect.IMAGE
+import com.jamid.workconnect.InsetControlFragment
+import com.jamid.workconnect.MainViewModel
+import com.jamid.workconnect.R
+import com.jamid.workconnect.adapter.paging2.MessageAdapter
 import com.jamid.workconnect.databinding.FragmentMediaImageBinding
-import com.jamid.workconnect.model.SimpleMedia
+import com.jamid.workconnect.model.ChatChannel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class MediaImageFragment : Fragment(R.layout.fragment_media_image) {
 
     private lateinit var binding: FragmentMediaImageBinding
+    private val viewModel: MainViewModel by activityViewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         binding = FragmentMediaImageBinding.bind(view)
 
-        val chatChannelId = arguments?.getString("chatChannelId") ?: return
-        val query = Firebase.firestore
-            .collection(CHAT_CHANNELS)
-            .document(chatChannelId)
-            .collection(MEDIA)
-            .whereEqualTo(TYPE, IMAGE)
-            .orderBy(CREATED_AT, Query.Direction.DESCENDING)
-
-        val config = PagedList.Config.Builder()
-            .setPageSize(25)
-            .setPrefetchDistance(10)
-            .setInitialLoadSizeHint(30)
-            .setEnablePlaceholders(false)
-            .build()
-
-        val option = FirestorePagingOptions.Builder<SimpleMedia>()
-            .setQuery(query, config, SimpleMedia::class.java)
-            .setLifecycleOwner(viewLifecycleOwner)
-            .build()
-
-        val gridImageAdapter = GridImageAdapter(option)
-        val manager = GridLayoutManager(requireContext(), 3)
-        binding.mediaImageRecycler.apply {
-            adapter = gridImageAdapter
-            layoutManager = manager
-        }
+        val chatChannel = arguments?.getParcelable<ChatChannel>(ARG_CHAT_CHANNEL) ?: return
+        initImageAdapter(chatChannel)
 
     }
 
-    inner class GridImageAdapter(options: FirestorePagingOptions<SimpleMedia>): FirestorePagingAdapter<SimpleMedia, GridImageAdapter.GridImageViewHolder>(options){
-        inner class GridImageViewHolder(val view: View): RecyclerView.ViewHolder(view) {
-            fun bind(media: SimpleMedia?) {
-                if (media != null) {
-                    val imageView = view.findViewById<SimpleDraweeView>(R.id.square_image_grid_item)
-                    val width = getWindowWidth() / 3
-                    imageView.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, width)
-                    imageView.setImageURI(media.mediaLocation)
-                }
-            }
+    private fun initImageAdapter(chatChannel: ChatChannel) {
+        val messageAdapter = MessageAdapter(viewModel)
+
+        binding.mediaImageRecycler.apply {
+            adapter = messageAdapter
+            layoutManager = GridLayoutManager(activity, 3)
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GridImageViewHolder {
-            return GridImageViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.square_image_grid, parent, false))
+        viewLifecycleOwner.lifecycleScope.launch {
+            val images = viewModel.localMessages(IMAGE, chatChannel.chatChannelId)
+            messageAdapter.submitList(images)
         }
 
-        override fun onBindViewHolder(
-            holder: GridImageViewHolder,
-            position: Int,
-            model: SimpleMedia
-        ) {
-            holder.bind(getItem(position)?.toObject(model::class.java))
-        }
     }
 
     companion object {
 
+        const val ARG_CHAT_CHANNEL = "ARG_CHAT_CHANNEL"
+
         @JvmStatic
-        fun newInstance(chatChannelId: String) = MediaImageFragment().apply {
+        fun newInstance(chatChannel: ChatChannel) = MediaImageFragment().apply {
             arguments = Bundle().apply {
-                putString("chatChannelId", chatChannelId)
+                putParcelable(ARG_CHAT_CHANNEL, chatChannel)
             }
         }
     }

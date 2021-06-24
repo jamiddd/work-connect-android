@@ -4,7 +4,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/chatDocLeftParent"
+        android:id="@+id/docMessageRoot"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:animateLayoutChanges="true">
@@ -13,22 +13,22 @@
             android:id="@+id/tailAnchor"
             android:layout_width="60dp"
             android:layout_height="1dp"
-            app:layout_constraintEnd_toEndOf="@+id/otherUserDocMessage"
+            app:layout_constraintEnd_toEndOf="@+id/docMessage"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="@+id/otherUserDocMsgPhoto"
-            app:layout_constraintTop_toBottomOf="@+id/otherUserDocMessage" />
+            app:layout_constraintTop_toBottomOf="@+id/docMessage" />
 
         <com.facebook.drawee.view.SimpleDraweeView
             android:id="@+id/otherUserDocMsgPhoto"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:layout_marginStart="4dp"
-            app:layout_constraintBottom_toBottomOf="@+id/otherUserDocMessage"
-            app:layout_constraintEnd_toStartOf="@+id/otherUserDocMessage"
+            app:layout_constraintBottom_toBottomOf="@+id/docMessage"
+            app:layout_constraintEnd_toStartOf="@+id/docMessage"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintHorizontal_chainStyle="packed"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/otherUserDocMessage"
+            app:layout_constraintTop_toTopOf="@+id/docMessage"
             app:layout_constraintVertical_bias="1.0"
             app:placeholderImage="@drawable/ic_user"
             app:roundAsCircle="true"
@@ -45,39 +45,44 @@
             android:textSize="10sp"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/otherUserDocMessage"
-            app:layout_constraintTop_toBottomOf="@+id/otherUserDocMessage"
+            app:layout_constraintStart_toStartOf="@+id/docMessage"
+            app:layout_constraintTop_toBottomOf="@+id/docMessage"
             tools:visibility="visible" />
 
         <ImageView
             android:id="@+id/leftDocMsgTail"
+            style="@style/ChatBalloonLeftTail"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:rotation="-14"
             android:visibility="invisible"
             app:layout_constraintBottom_toBottomOf="@+id/tailAnchor"
             app:layout_constraintEnd_toEndOf="@+id/tailAnchor"
-            app:layout_constraintHorizontal_bias="0.60"
+            app:layout_constraintHorizontal_bias="0.74"
             app:layout_constraintStart_toStartOf="@+id/tailAnchor"
-            app:layout_constraintTop_toTopOf="@+id/otherUserDocMessage"
+            app:layout_constraintTop_toTopOf="@+id/docMessage"
             app:layout_constraintVertical_bias="1.0"
-            app:srcCompat="@drawable/ic_chat_tail" />
+            app:srcCompat="@drawable/ic_chat_tail"
+            tools:visibility="visible" />
 
         <LinearLayout
-            android:id="@+id/otherUserDocMessage"
+            android:id="@+id/docMessage"
+            style="@style/ChatBalloonLeftDoc"
             android:layout_width="150dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginBottom="4dp"
-            android:padding="16dp"
-            android:orientation="vertical"
-            android:translationY="2dp"
             android:background="@drawable/chat_doc_background"
+            android:clickable="true"
+            android:focusable="true"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:translationY="2dp"
             app:layout_constraintBottom_toTopOf="@+id/otherUserDocMessageTime"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/otherUserDocMsgPhoto"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/senderName"
             app:layout_constraintVertical_chainStyle="packed"
             tools:visibility="visible">
 
@@ -88,7 +93,7 @@
                 app:srcCompat="@drawable/ic_document" />
 
             <TextView
-                android:id="@+id/otherUserDocName"
+                android:id="@+id/docMessageName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
@@ -97,14 +102,67 @@
                 android:text="Document" />
 
             <TextView
-                android:id="@+id/otherUserDocSize"
+                android:id="@+id/docMessageSize"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:text="Size"
                 android:textSize="12sp" />
 
+            <ProgressBar
+                android:id="@+id/docProgress"
+                style="?android:attr/progressBarStyle"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:layout_gravity="center"
+                android:indeterminate="true"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+            <Button
+                android:id="@+id/downloadBtn"
+                style="@style/Theme.Button.IconOnly"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:visibility="gone"
+                app:icon="@drawable/ic_round_arrow_downward_24"
+                app:iconTint="@color/blue_500"
+                app:strokeColor="@color/blue_500"
+                app:strokeWidth="2dp"
+                tools:visibility="visible" />
+
+            <Button
+                android:id="@+id/downloadTextButton"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:fontFamily="@font/title_semi"
+                android:minWidth="60dp"
+                android:minHeight="36dp"
+                android:text="Download"
+                android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/senderName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:fontFamily="@font/roboto_medium"
+            android:text="Jamid Deka"
+            android:textColor="@color/blue_500"
+            android:textSize="12sp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@+id/docMessage"
+            app:layout_constraintEnd_toEndOf="@+id/docMessage"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/docMessage"
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

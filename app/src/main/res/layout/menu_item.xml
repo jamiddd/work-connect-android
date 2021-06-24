@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/search_menu_text"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true"
+    android:gravity="center_vertical"
+    android:minHeight="48dp"
+    android:paddingStart="32dp"
+    android:paddingEnd="32dp"
+    android:text="Menu Item"
+    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+    android:textColor="@color/darkestGrey" />

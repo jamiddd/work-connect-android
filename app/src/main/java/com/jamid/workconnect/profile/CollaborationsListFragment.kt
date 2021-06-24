@@ -2,58 +2,104 @@ package com.jamid.workconnect.profile
 
 import android.os.Bundle
 import android.view.View
-import androidx.paging.PagedList
+import androidx.lifecycle.lifecycleScope
+import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.firebase.ui.firestore.paging.FirestorePagingOptions
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
-import com.jamid.workconnect.*
-import com.jamid.workconnect.adapter.PostAdapter
+import com.jamid.workconnect.InsetControlFragment
+import com.jamid.workconnect.R
+import com.jamid.workconnect.adapter.paging3.PostAdapter
 import com.jamid.workconnect.databinding.FragmentCollaborationsListBinding
-import com.jamid.workconnect.interfaces.PostItemClickListener
-import com.jamid.workconnect.interfaces.PostsLoadStateListener
-import com.jamid.workconnect.message.ProjectDetailContainer
-import com.jamid.workconnect.model.Post
 import com.jamid.workconnect.model.User
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
-class CollaborationsListFragment : BaseFeedFragment(R.layout.fragment_collaborations_list) {
+@OptIn(androidx.paging.ExperimentalPagingApi::class)
+class CollaborationsListFragment : InsetControlFragment(R.layout.fragment_collaborations_list) {
 
     private lateinit var postAdapter: PostAdapter
     private lateinit var binding: FragmentCollaborationsListBinding
+    private var job: Job? = null
+
+    private fun getUserCollaborations(user: User) {
+        job?.cancel()
+        job = viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.otherUserCollaborationsFlow(user).collectLatest {
+                postAdapter.submitData(it)
+            }
+        }
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         binding = FragmentCollaborationsListBinding.bind(view)
+        /*setInsetView(binding.collaborationsRecycler, mapOf(INSET_TOP to 8, INSET_BOTTOM to 48))*/
+
         val user = arguments?.getParcelable<User>(ARG_USER)
-        setRecyclerView(binding.collaborationsRecycler)
-        setDeleteListeners()
 
         if (user != null) {
-            val query = FirebaseFirestore.getInstance()
-                .collection(POSTS)
-                .orderBy(CREATED_AT, Query.Direction.DESCENDING)
-                .whereArrayContains(CONTRIBUTORS, user.id)
-                .whereEqualTo(TYPE, PROJECT)
 
-            val config = PagedList.Config.Builder().setPageSize(10).setEnablePlaceholders(false).setPrefetchDistance(5).build()
+            initAdapter()
 
-            val options = FirestorePagingOptions.Builder<Post>()
-                .setLifecycleOwner(viewLifecycleOwner)
-                .setQuery(query, config, Post::class.java)
-                .build()
-
-            val parent = activity.currentBottomFragment
-            postAdapter = if (parent is ProjectDetailContainer) {
-                PostAdapter(viewModel, options, viewLifecycleOwner, parent as PostItemClickListener, parent as PostsLoadStateListener)
-            } else {
-                PostAdapter(viewModel, options, viewLifecycleOwner, activity, activity)
+            if (user.id != viewModel.user.value?.id) {
+                binding.noCollaborationsText.text = "No collaborations"
             }
 
-            binding.collaborationsRecycler.apply {
-                adapter = postAdapter
-                layoutManager = LinearLayoutManager(activity)
+            setCollaborationsRefresher(user)
+
+            getUserCollaborations(user)
+
+        }
+    }
+
+    private fun setCollaborationsRefresher(user: User) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            postAdapter.loadStateFlow.collectLatest { loadStates ->
+                binding.collaborationsRefresher.isRefreshing = true
+                if (loadStates.refresh is LoadState.NotLoading) {
+                    delay(1000)
+                    binding.collaborationsRefresher.isRefreshing = false
+                    if (postAdapter.itemCount == 0) {
+                        showEmptyNotificationsUI()
+                    } else {
+                        hideEmptyNotificationsUI()
+                    }
+                }
             }
+        }
+
+        binding.collaborationsRefresher.setOnRefreshListener {
+
+            getUserCollaborations(user)
+
+            viewLifecycleOwner.lifecycleScope.launch {
+                delay(2000)
+                binding.collaborationsRefresher.isRefreshing = false
+            }
+        }
+    }
+
+    private fun hideEmptyNotificationsUI() {
+        binding.collaborationsRecycler.visibility = View.VISIBLE
+        binding.noCollaborationsLayoutScroll.visibility = View.GONE
+    }
+
+    private fun showEmptyNotificationsUI() {
+        binding.collaborationsRecycler.visibility = View.GONE
+        binding.noCollaborationsLayoutScroll.visibility = View.VISIBLE
+    }
+
+
+    private fun initAdapter() {
+        postAdapter = PostAdapter()
+
+        binding.collaborationsRecycler.apply {
+            adapter = postAdapter
+            itemAnimator = null
+            setRecycledViewPool(activity.recyclerViewPool)
+            layoutManager = LinearLayoutManager(activity)
         }
     }
 

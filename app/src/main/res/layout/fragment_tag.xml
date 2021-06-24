@@ -5,22 +5,23 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/tagLayoutRoot"
+        style="@style/DialogBackground"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/transparent">
+        android:background="@drawable/bottom_sheet_background">
 
-        <com.github.mmin18.widget.RealtimeBlurView
+        <!--<com.fivehundredpx.android.blur.BlurringView
+            android:id="@+id/tagLayoutBlur"
             android:layout_width="0dp"
             android:layout_height="0dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:realtimeBlurRadius="40dp"
-            app:realtimeDownsampleFactor="5" />
+            app:layout_constraintTop_toTopOf="parent" />-->
 
         <EditText
             android:id="@+id/tagEditText"
+            style="@style/EditTextStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"

@@ -1,49 +1,66 @@
 package com.jamid.workconnect
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.navOptions
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.google.android.material.tabs.TabLayoutMediator
 import com.jamid.workconnect.databinding.FragmentNotificationBinding
+import com.jamid.workconnect.profile.ProfileFragment
 
-class NotificationFragment : BaseBottomSheetFragment() {
+class NotificationFragment : SupportFragment(R.layout.fragment_notification, TAG, true) {
 
     private lateinit var binding: FragmentNotificationBinding
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_notification, container, false)
-        // Inflate the layout for this fragment
-        return binding.root
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding = FragmentNotificationBinding.bind(view)
+        binding.notificationPager.adapter = NotificationPager(activity)
 
-        binding.notificationPager.adapter = NotificationPager(requireActivity())
 
-        TabLayoutMediator(binding.notificationTabs, binding.notificationPager) { t, p ->
+        val options = navOptions {
+            anim {
+                enter = R.anim.slide_in_right
+                exit = R.anim.slide_out_left
+                popEnter = R.anim.slide_in_left
+                popExit = R.anim.slide_out_right
+            }
+        }
+
+        viewModel.user.observe(viewLifecycleOwner) {
+            if (it != null) {
+                binding.accountImg.setImageURI(it.photo)
+                binding.accountImg.setOnClickListener { _ ->
+                    findNavController().navigate(R.id.profileFragment, Bundle().apply { putParcelable(ProfileFragment.ARG_USER, it) }, options)
+                }
+            } else {
+                binding.accountImg.setOnClickListener {
+                    findNavController().navigate(R.id.signInFragment, null, options)
+                }
+            }
+        }
+
+        TabLayoutMediator(binding.notificationTabLayout, binding.notificationPager) { t, p ->
             when (p) {
                 0 -> t.text = "General"
                 1 -> t.text = "Requests"
             }
         }.attach()
 
-        binding.cancelNotificationsBtn.setOnClickListener {
-            findNavController().navigateUp()
+        viewModel.windowInsets.observe(viewLifecycleOwner) { (top, _) ->
+            binding.notificationFragmentToolbar.updateLayout(marginTop = top)
+            binding.accountImg.updateLayout(marginTop = top + convertDpToPx(10), marginRight = convertDpToPx(16))
+//            binding.notificationAppBar.setPadding(0, top, 0, 0)
         }
 
     }
 
     companion object {
+        const val TITLE = "Notifications"
+        const val TAG = "NotificationFragment"
 
         @JvmStatic
         fun newInstance() = NotificationFragment()
