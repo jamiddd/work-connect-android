@@ -14,5 +14,6 @@
     android:paddingEnd="16dp"
     android:paddingBottom="8dp"
     android:text="Menu item"
-    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+    android:textAppearance="@style/TextAppearance.AppCompat.Small"
+    android:textSize="16sp"
     app:drawableEndCompat="@drawable/bookmark_selector" />

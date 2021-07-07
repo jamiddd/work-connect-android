@@ -9,12 +9,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.jamid.workconnect.R
 import com.jamid.workconnect.SupportFragment
 import com.jamid.workconnect.adapter.GenericAdapter
+import com.jamid.workconnect.convertDpToPx
 import com.jamid.workconnect.databinding.FragmentSavedPostsBinding
 import com.jamid.workconnect.model.Post
 import com.jamid.workconnect.model.Result
 import com.jamid.workconnect.updateLayout
 import kotlinx.coroutines.launch
-import me.everything.android.ui.overscroll.OverScrollDecoratorHelper
 
 class SavedPostsFragment : SupportFragment(R.layout.fragment_saved_posts, TAG, false) {
 
@@ -55,10 +55,6 @@ class SavedPostsFragment : SupportFragment(R.layout.fragment_saved_posts, TAG, f
 
         binding = FragmentSavedPostsBinding.bind(view)
 
-        /*binding.toolb.setNavigationOnClickListener {
-            findNavController().navigateUp()
-        }*/
-
         binding.savedPostsToolbar.setNavigationOnClickListener {
             findNavController().navigateUp()
         }
@@ -68,7 +64,11 @@ class SavedPostsFragment : SupportFragment(R.layout.fragment_saved_posts, TAG, f
         setListeners()
 
         viewModel.windowInsets.observe(viewLifecycleOwner) { (top, bottom) ->
-            binding.savedPostsNestedScroll.setPadding(0, 0, 0, bottom)
+            if (activity.mainBinding.bottomCard.translationY != 0f) {
+                binding.savedPostsNestedScroll.setPadding(0, convertDpToPx(8), 0, bottom)
+            } else {
+                binding.savedPostsNestedScroll.setPadding(0, convertDpToPx(8), 0, bottom + convertDpToPx(56))
+            }
             binding.savedPostsToolbar.updateLayout(marginTop = top)
         }
 

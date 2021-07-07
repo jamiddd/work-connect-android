@@ -59,11 +59,11 @@ class UserRemoteMediator(private val userSource: UserSource, private val reposit
 
 				return if (userSnapshot.size() < state.config.pageSize) {
 					Log.d(FOLLOWERS, "User remote mediator .. user snapshot has reached end with size ${userSnapshot.size()}")
-					repository.insertUsers(users, userSource)
+//					repository.insertUsers(users, userSource)
 					MediatorResult.Success(endOfPaginationReached = true)
 				} else {
 					Log.d(FOLLOWERS, "User remote mediator .. user snapshot has not reached end with size ${userSnapshot.size()}")
-					repository.insertUsers(users, userSource)
+//					repository.insertUsers(users, userSource)
 					MediatorResult.Success(endOfPaginationReached = false)
 				}
 			}

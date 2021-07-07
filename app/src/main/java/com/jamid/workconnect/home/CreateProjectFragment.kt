@@ -1,26 +1,21 @@
 package com.jamid.workconnect.home
 
-import android.graphics.Rect
 import android.os.Bundle
 import android.util.Log
 import android.view.*
 import android.view.View.FOCUS_DOWN
+import android.widget.EditText
 import android.widget.Toast
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.coordinatorlayout.widget.CoordinatorLayout
-import androidx.core.content.ContextCompat
 import androidx.core.view.children
 import androidx.core.widget.doAfterTextChanged
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.chip.Chip
 import com.jamid.workconnect.*
 import com.jamid.workconnect.databinding.FragmentCreateProjectBinding
 import com.jamid.workconnect.model.*
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -28,15 +23,15 @@ class CreateProjectFragment : SupportFragment(R.layout.fragment_create_project, 
 
     private lateinit var binding: FragmentCreateProjectBinding
     private var imageUri: String? = null
-    private var positionFromBottom = 0
-    private var prevLineCount = 0
     private var isInitialized = false
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentCreateProjectBinding.bind(view)
 
-        binding.addProjectImageBtn.setOnClickListener {
+        showKeyboard()
+
+        binding.addImageBtn.setOnClickListener {
             openImageSelectMenu()
         }
 
@@ -47,7 +42,7 @@ class CreateProjectFragment : SupportFragment(R.layout.fragment_create_project, 
         viewModel.primaryBottomSheetState.observe(viewLifecycleOwner) {
             if (isInitialized) {
                 if (it == BottomSheetBehavior.STATE_HIDDEN) {
-                    activity.onBackPressed()
+                    findNavController().navigateUp()
                 }
             }
         }
@@ -65,7 +60,6 @@ class CreateProjectFragment : SupportFragment(R.layout.fragment_create_project, 
                         "Project created successfully",
                         Toast.LENGTH_SHORT
                     ).show()
-
                 }
                 is Result.Error -> {
                     Toast.makeText(requireContext(), "Something went wrong - " + result.exception.localizedMessage, Toast.LENGTH_SHORT).show()
@@ -73,52 +67,23 @@ class CreateProjectFragment : SupportFragment(R.layout.fragment_create_project, 
             }
         }
 
-//        OverScrollDecoratorHelper.setUpOverScroll(binding.createProjectScroll)
-
-        val screenHeight = getWindowHeight()
-
         viewModel.windowInsets.observe(viewLifecycleOwner) { (top, bottom) ->
             binding.createProjectScroll.setPadding(0, convertDpToPx(8), 0, bottom + convertDpToPx(100))
-
             binding.createProjectFragmentToolbar.updateLayout(marginTop = top)
 
-            val params = binding.cardView3.layoutParams as CoordinatorLayout.LayoutParams
+            if (binding.projectContentText.hasFocus()) {
+                checkCursorVisibility(binding.projectContentText)
+            }
+
+            val params = binding.bottomActions.layoutParams as CoordinatorLayout.LayoutParams
             params.height = bottom + convertDpToPx(48)
             params.width = CoordinatorLayout.LayoutParams.MATCH_PARENT
-            binding.cardView3.layoutParams = params
+            binding.bottomActions.layoutParams = params
 
-//            val params1 = binding.bottomCardBlur.layoutParams as ViewGroup.LayoutParams
-//            params1.height = bottom + convertDpToPx(48)
-//            params1.width = ViewGroup.LayoutParams.MATCH_PARENT
-//            binding.bottomCardBlur.layoutParams = params1
+        }
 
-            if (binding.projectContentText.hasFocus()) {
-                val child = binding.projectContentText
-                val r = Rect()
-                child.getGlobalVisibleRect(r)
-
-                val p = child.selectionStart
-                val layout = child.layout
-                if (layout != null) {
-                    val line = layout.getLineForOffset(p)
-                    val baseline = layout.getLineBaseline(line)
-                    val ascent = layout.getLineAscent(line)
-//                    val cursorX = layout.getPrimaryHorizontal(p) + r.left
-                    // with respect to global rect
-                    val cursorY = baseline + ascent + r.top
-
-                    positionFromBottom = screenHeight - (bottom + convertDpToPx(48))
-
-                    if (cursorY > positionFromBottom) {
-                        // when the cursor is below the keyboard
-                        val diff = cursorY - positionFromBottom
-                        binding.createProjectScroll.scrollY = binding.createProjectScroll.scrollY + diff
-                    } else {
-                        // when the cursor is above the keyboard
-                    }
-
-                }
-            }
+        binding.projectContentText.setOnClickListener {
+            checkCursorVisibility(binding.projectContentText)
         }
 
         viewModel.postPhotoUploadResult.observe(viewLifecycleOwner) {
@@ -138,78 +103,35 @@ class CreateProjectFragment : SupportFragment(R.layout.fragment_create_project, 
 
         viewModel.currentCroppedImageUri.observe(viewLifecycleOwner) {
             if (it != null) {
-                binding.projectThumnailImg.setImageURI(it.toString())
-                binding.addProjectImageBtn.visibility = View.GONE
+                binding.projectImg.visibility = View.VISIBLE
+                Glide.with(activity)
+                    .load(it)
+                    .into(binding.projectImg)
+
                 viewModel.uploadPostImage(it, PROJECT)
                 viewModel.setCurrentImage(null)
             } else {
                 val s: String? = null
-                binding.projectThumnailImg.setImageURI(s)
-                binding.addProjectImageBtn.visibility = View.VISIBLE
-                binding.removeProjectImgBtn.visibility = View.GONE
+                binding.projectImg.visibility = View.GONE
+                binding.projectImg.setImageDrawable(null)
                 imageUri = s
             }
         }
 
-        binding.projectThumnailImg.isClickable = true
-        binding.projectThumnailImg.isLongClickable = true
-
-        var removeMode = false
-        var job: Job? = null
-
-        binding.projectThumnailImg.setOnClickListener {
-            if (removeMode) {
-                removeMode = false
-                job?.cancel()
-                binding.removeProjectImgBtn.visibility = View.GONE
-                binding.projectThumnailImg.colorFilter = null
-            } else {
-                openImageSelectMenu()
-            }
+        binding.projectImg.setOnClickListener {
+            openRemoveImageMenu()
         }
 
-        /*ViewCompat.setOnApplyWindowInsetsListener(
-            binding.cardView3
-        ) { _: View?, insets: WindowInsetsCompat ->
-            ViewCompat.onApplyWindowInsets(
-                binding.cardView3,
-                insets.replaceSystemWindowInsets(
-                    insets.systemWindowInsetLeft, 0,
-                    insets.systemWindowInsetRight, 0
-                )
-            )
-        }*/
-
-        binding.projectThumnailImg.setOnLongClickListener {
-            if (viewModel.currentCroppedImageUri.value != null) {
-                removeMode = true
-                job = lifecycleScope.launch {
-                    delay(5000)
-                    removeMode = false
-                    binding.removeProjectImgBtn.visibility = View.GONE
-                    binding.projectThumnailImg.colorFilter = null
-                }
-
-                binding.projectThumnailImg.setColorFilter(ContextCompat.getColor(requireContext(), R.color.semiTransparentDark))
-                binding.removeProjectImgBtn.visibility = View.VISIBLE
-            } else {
-                openImageSelectMenu()
-                /*val fragment = ImageSelectFragment.newInstance()
-                activity.showBottomSheet(fragment, ImageSelectFragment.TAG)*/
-            }
+        binding.projectImg.setOnLongClickListener {
+            openRemoveImageMenu()
             true
-        }
-
-        binding.removeProjectImgBtn.setOnClickListener {
-            viewModel.setCurrentCroppedImageUri(null)
-            binding.projectThumnailImg.colorFilter = null
         }
 
         viewModel.user.observe(viewLifecycleOwner) {
             if (it != null) {
-                binding.projectAdminPhoto.setImageURI(it.photo)
+                binding.adminImg.setImageURI(it.photo)
                 val nameAndTime = it.name + " • " + SimpleDateFormat("hh:mm a", Locale.UK).format(Date())
-                binding.projectAdminNameAndTime.text = nameAndTime
+                binding.adminInfo.text = nameAndTime
             }
         }
         
@@ -221,20 +143,16 @@ class CreateProjectFragment : SupportFragment(R.layout.fragment_create_project, 
 
         viewModel.currentPlace.observe(viewLifecycleOwner) {
             if (it != null) {
-                val t = binding.projectAdminNameAndTime.text.toString() + " • "
-                binding.projectAdminNameAndTime.text = t
                 binding.projectLocation.text = it
+                binding.projectLocation.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_baseline_location_on_24, 0, 0, 0)
+
                 val location = viewModel.currentLocation.value
                 if (location != null) {
                     viewModel.setCurrentLocation(SimpleLocation(location.latitude, location.latitude, it))
                 }
             } else {
-                val user = viewModel.user.value
-                if (user != null) {
-                    val nameAndTime = user.name + " • " + SimpleDateFormat("hh:mm a", Locale.UK).format(Date())
-                    binding.projectAdminNameAndTime.text = nameAndTime
-                }
-                binding.projectLocation.text = null
+                binding.projectLocation.text = getString(R.string.add_location)
+                binding.projectLocation.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_baseline_add_location_alt_24, 0, 0, 0)
             }
         }
 
@@ -247,60 +165,76 @@ class CreateProjectFragment : SupportFragment(R.layout.fragment_create_project, 
             activity.showBottomSheet(fragment, TagFragment.TAG)
         }
 
-        /*binding.projectContentText.setOnFocusChangeListener { v, hasFocus ->
-            if (hasFocus) {
-                binding.scrollView3.smoothScrollTo(0, binding.scrollView3.measuredHeight)
+        binding.createProjectBtn.setOnClickListener {
+            if (!binding.projectTitleText.text.isNullOrBlank() && !binding.projectContentText.text.isNullOrBlank() && imageUri != null) {
+                val tags = mutableListOf<String>()
+
+                for (child in binding.tagsGroup.children) {
+                    tags.add((child as Chip).text.toString())
+                }
+
+                val postTitle = binding.projectTitleText.text.toString()
+                val postContent = binding.projectContentText.text.toString()
+                val image = imageUri.toString()
+
+                val currentUser = viewModel.user.value
+                if (currentUser != null) {
+                    val post = Post("", postTitle, currentUser, currentUser.id, "", content = postContent, thumbnail = image, tags = tags)
+                    viewModel.uploadPost(post)
+
+                    val instance = GenericDialogFragment.newInstance(CREATING_PROJECT, "Creating Project", "Creating your project. Please wait ...", isCancelable = false, isProgressing = true)
+                    activity.showBottomSheet(instance, TAG)
+                }
+            } else {
+                if (binding.projectTitleText.text.isNullOrBlank()) {
+                    Toast.makeText(activity, "Title cannot be empty.", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+
+                if (binding.projectContentText.text.isNullOrBlank()) {
+                    Toast.makeText(activity, "Content cannot be empty.", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+
+                if (imageUri == null) {
+                    Toast.makeText(activity, "Must contain an image.", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
             }
-        }*/
+        }
 
         binding.projectLocation.setOnClickListener {
-            val instance = GenericDialogFragment.newInstance(REMOVING_LOCATION, "Remove location", "Are you sure you want to remove the given location for this project?", isActionOn = true, isCancelable = true)
-            activity.showBottomSheet(instance, TAG)
+            if (viewModel.currentLocation.value != null) {
+                val instance = GenericDialogFragment.newInstance(REMOVING_LOCATION, "Remove location", "Are you sure you want to remove the given location for this project?", isActionOn = true, isCancelable = true)
+                activity.showBottomSheet(instance, TAG)
+            } else {
+                activity.invokeLocationFragment()
+            }
         }
-
-//        OverScrollDecoratorHelper.setUpOverScroll(binding.scrollView3)
 
         binding.projectContentText.doAfterTextChanged {
-            if (prevLineCount != binding.projectContentText.lineCount) {
-                adjustments()
+            if (!it.isNullOrEmpty()) {
+                checkCursorVisibility(binding.projectContentText)
             }
-            prevLineCount = binding.projectContentText.lineCount
         }
 
-        /*activity.mainBinding.primaryMenuBtn.setOnClickListener {
-            // check if the title is empty, title is must
-            if (binding.projectTitleText.text.isNullOrBlank()) return@setOnClickListener
+    }
 
-            // check if both the image and content are empty, at least one needs to be there
-            if (binding.projectContentText.text.isNullOrBlank()) return@setOnClickListener
+    private fun checkCursorVisibility(child: EditText) {
+        val threshold =
+            calculateThreshold(viewModel.windowInsets.value!!.second + convertDpToPx(80))
+        Log.d(BUG_TAG, "Threshold $threshold")
 
-            activity.showBottomSheet(GenericDialogFragment.newInstance(CREATING_PROJECT,"Creating Project", "Creating your project. Please wait for a while ... ", isProgressing = true), GenericDialogFragment.TAG)
-*//*
-            val dialog = MaterialAlertDialogBuilder(activity)
-                .setView(R.layout.creating_project_progress_dialog)
-                .setCancelable(false)
-                .show()
-
-            lifecycleScope.launch {
-                delay(10000)
-                dialog.dismiss()
-            }*//*
-
-            val title = binding.projectTitleText.text.trim().toString()
-            val content =  binding.projectContentText.text.trim().toString()
-
-            val tags = mutableListOf<String>()
-            val links = emptyList<String>()
-
-            for (ch in binding.tagsGroup.children) {
-                val tag = (ch as Chip).text.toString()
-                tags.add(tag)
-            }
-
-            val post = Post("", title, User(), "", content = content, type = PROJECT, thumbnail = imageUri, tags = tags)
-            viewModel.uploadPost(post)
-        }*/
-
+        // get cursor position
+        val cursorPosition = findCursorPositionOnScreen(child)
+        Log.d(BUG_TAG, "Cursor position - $cursorPosition")
+        if (cursorPosition > threshold) {
+            binding.createProjectScroll.scrollY =
+                binding.createProjectScroll.scrollY + (cursorPosition - threshold) + convertDpToPx(8)
+            Log.d(BUG_TAG, "The keyboard is hiding the cursor - ${cursorPosition - threshold}")
+        } else {
+            Log.d(BUG_TAG, "The keyboard is not hiding the cursor - ${threshold - cursorPosition}")
+        }
     }
 
     private fun openImageSelectMenu() {
@@ -308,35 +242,19 @@ class CreateProjectFragment : SupportFragment(R.layout.fragment_create_project, 
         val tag = SELECT_IMAGE_MENU_POST
         val item1 = GenericMenuItem(tag, "Select from gallery", R.drawable.ic_baseline_add_photo_alternate_24, 0)
         val item2 = GenericMenuItem(tag, "Take a photo", R.drawable.ic_baseline_camera_alt_24, 1)
-        val item3 = GenericMenuItem(tag, "Remove image", R.drawable.ic_baseline_delete_24, 2)
 
-        val fragment = GenericMenuFragment.newInstance(tag, "Add Image ...", arrayListOf(item1, item2, item3))
+        val fragment = GenericMenuFragment.newInstance(tag, "Add Image ...", arrayListOf(item1, item2))
         activity.showBottomSheet(fragment, tag)
     }
 
-    private fun adjustments() {
-        val child = binding.projectContentText
-        val r = Rect()
-        child.getGlobalVisibleRect(r)
+    private fun openRemoveImageMenu() {
+        hideKeyboard()
+        val tag = REMOVE_IMAGE_MENU
+        val item1 = GenericMenuItem(tag, "Remove image", R.drawable.ic_baseline_delete_24, 0)
 
-        Log.d("Editor", "Rect - " + r.toShortString())
-        val p = child.selectionStart
-        val layout = child.layout
-        if (layout != null) {
-            val line = layout.getLineForOffset(p)
-            val baseline = layout.getLineBaseline(line)
-            val ascent = layout.getLineAscent(line)
-            val cursorY = baseline + ascent + r.top
-
-            if (cursorY > positionFromBottom) {
-                // when the cursor is below the keyboard
-                Log.d("Editor", "cursorY - $cursorY, cursorNext - ${cursorY + convertDpToPx(50)}")
-                binding.createProjectScroll.scrollTo(0, cursorY + convertDpToPx(50))
-            } else {
-                // when the cursor is above the keyboard
-            }
-        }
-
+        val fragment = GenericMenuFragment.newInstance(tag, "", arrayListOf(item1))
+        fragment.shouldHideTitle = true
+        activity.showBottomSheet(fragment, tag)
     }
 
     private fun addNewChip(s: String) {
@@ -353,32 +271,49 @@ class CreateProjectFragment : SupportFragment(R.layout.fragment_create_project, 
         binding.createProjectScroll.fullScroll(FOCUS_DOWN)
     }
 
-    /*override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == Activity.RESULT_OK) {
-            when (requestCode) {
-                REQUEST_GET_IMAGE -> {
-                    val image = data?.data
-                    viewModel.setCurrentImage(image)
+    private fun calculateThreshold(bottomInset: Int): Int {
+        val totalHeight = binding.createProjectScroll.measuredHeight
+        val partialTop = binding.createProjectScroll.scrollY
+        val screenHeight = getFullScreenHeight()
+        val usableScreenHeight = screenHeight - bottomInset - binding.createProjectFragmentAppBar.measuredHeight
+        val partialBottom = totalHeight - (partialTop + usableScreenHeight + bottomInset)
+        return totalHeight - (partialBottom + bottomInset)
+    }
 
-                    val bundle = Bundle().apply {
-                        putInt("x", 4)
-                        putInt("y", 3)
-                        putInt("height", 300)
-                        putInt("width", 400)
-                        putString("shape", "RECTANGLE")
-                    }
-//                    findNavController().navigate(R.id.imageCropFragment, bundle)
-                }
+    private fun findCursorPositionOnScreen(e: EditText): Int {
+        /*fun getHeightForMultipleViews(
+            container: ViewGroup,
+            inclusiveStartIndex: Int = 0,
+            exclusiveEndIndex: Int
+        ): Int {
+            var totalHeight = 0
+            for (i in inclusiveStartIndex until exclusiveEndIndex) {
+                totalHeight += container.getChildAt(i).measuredHeight
             }
+            return totalHeight
+        }*/
+
+        fun getHeightForMultipleViews(container: ViewGroup, exclusiveEndIndex: Int): Int {
+            var totalHeight = 0
+            for (i in 0 until exclusiveEndIndex) {
+                totalHeight += container.getChildAt(i).measuredHeight
+            }
+            return totalHeight
         }
-    }*/
+        val constantHeight = getHeightForMultipleViews(
+            binding.itemsContainer,
+            3
+        )
+        val textLayout = e.layout ?: return 0
+        val line = textLayout.getLineForOffset(e.selectionStart)
+
+        return constantHeight + maxOf(textLayout.getLineBaseline(line), convertDpToPx(48))
+    }
 
 
     companion object {
         const val TITLE = "Create Project"
         const val TAG = "CreateProjectFragment"
-        private const val REQUEST_GET_IMAGE = 12
 
         @JvmStatic
         fun newInstance() = CreateProjectFragment()

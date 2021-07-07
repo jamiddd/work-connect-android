@@ -1,17 +1,24 @@
 package com.jamid.workconnect.profile
 
 import android.os.Bundle
+import android.util.Log
+import android.view.Gravity
 import android.view.View
+import android.widget.FrameLayout
+import android.widget.Toast
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.jamid.workconnect.InsetControlFragment
-import com.jamid.workconnect.R
+import com.jamid.workconnect.*
 import com.jamid.workconnect.adapter.paging3.PostAdapter
+import com.jamid.workconnect.databinding.ErrorNoOutputLayoutBinding
 import com.jamid.workconnect.databinding.FragmentProjectListBinding
 import com.jamid.workconnect.home.CreateProjectFragment
+import com.jamid.workconnect.model.Post
 import com.jamid.workconnect.model.User
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -19,11 +26,12 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @OptIn(androidx.paging.ExperimentalPagingApi::class)
-class ProjectListFragment : InsetControlFragment(R.layout.fragment_project_list) {
+class ProjectListFragment : PagingListFragment(R.layout.fragment_project_list) {
 
     private lateinit var postAdapter: PostAdapter
     private lateinit var binding: FragmentProjectListBinding
-    private var job: Job? = null
+    private var errorView: View? = null
+    private lateinit var user: User
 
     private fun getUserProjects(user: User) {
         job?.cancel()
@@ -38,81 +46,71 @@ class ProjectListFragment : InsetControlFragment(R.layout.fragment_project_list)
         super.onViewCreated(view, savedInstanceState)
 
         binding = FragmentProjectListBinding.bind(view)
-        val user = arguments?.getParcelable<User>(ARG_USER)
+        user = arguments?.getParcelable(ARG_USER) ?: return
+        binding.projectsListRefresher.isRefreshing = true
 
-        if (user != null) {
-
-            initAdapter()
-
-            if (user.id == viewModel.user.value?.id) {
-                binding.noUserPostsCreatePost.visibility = View.VISIBLE
-            } else {
-                binding.noUserPostsText.text = "No projects"
-                binding.noUserPostsCreatePost.visibility = View.GONE
-            }
-
-            val options = navOptions {
-                anim {
-                    enter = R.anim.slide_in_right
-                    exit = R.anim.slide_out_left
-                    popEnter = R.anim.slide_in_left
-                    popExit = R.anim.slide_out_right
-                }
-            }
-
-            binding.noUserPostsCreatePost.setOnClickListener {
-//                activity.toFragment(CreateProjectFragment.newInstance(), CreateProjectFragment.TAG)
-                findNavController().navigate(R.id.createProjectFragment, null, options)
-            }
-
-            setRefresher(user)
-
-            getUserProjects(user)
-
-        }
-    }
-
-    private fun initAdapter() {
         postAdapter = PostAdapter()
+        binding.projectsRecycler.setListAdapter(pagingAdapter = postAdapter, clazz = Post::class.java,
+        onComplete = {
+            getUserProjects(user)
+        },
+        onEmptySet = {
+            binding.projectsListRefresher.isRefreshing = false
+            showEmptyNotificationsUI()
+        }, onNonEmptySet = {
+            binding.projectsListRefresher.isRefreshing = false
+            hideEmptyNotificationsUI()
+        })
 
-        binding.projectsRecycler.apply {
-            adapter = postAdapter
-            itemAnimator = null
-            setRecycledViewPool(activity.recyclerViewPool)
-            layoutManager = LinearLayoutManager(activity)
-        }
-
-    }
-
-    private fun setRefresher(user: User) {
-        binding.projectsListRefresher.setOnRefreshListener {
+        binding.projectsListRefresher.setSwipeRefresher {
             getUserProjects(user)
         }
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            postAdapter.loadStateFlow.collectLatest { loadStates ->
-                binding.projectsListRefresher.isRefreshing = true
-                if (loadStates.refresh is LoadState.NotLoading) {
-                    delay(1000)
-                    binding.projectsListRefresher.isRefreshing = false
-                    if (postAdapter.itemCount == 0) {
-                        showEmptyNotificationsUI()
-                    } else {
-                        hideEmptyNotificationsUI()
-                    }
-                }
+        viewModel.windowInsets.observe(viewLifecycleOwner) { (_, bottom) ->
+            if (activity.mainBinding.bottomCard.translationY != 0f) {
+                binding.projectsRecycler.setPadding(0, convertDpToPx(8), 0, bottom)
+            } else {
+                binding.projectsRecycler.setPadding(0, convertDpToPx(8), 0, bottom + convertDpToPx(56))
             }
         }
+
     }
 
     private fun hideEmptyNotificationsUI() {
+        if (errorView != null) {
+            binding.projectListRoot.removeView(errorView)
+        }
         binding.projectsListRefresher.visibility = View.VISIBLE
-        binding.noUserPostsLayoutScroll.visibility = View.GONE
     }
 
     private fun showEmptyNotificationsUI() {
         binding.projectsListRefresher.visibility = View.GONE
-        binding.noUserPostsLayoutScroll.visibility = View.VISIBLE
+
+        if (errorView != null) {
+            binding.projectListRoot.removeView(errorView)
+            errorView = null
+        }
+
+        val errorViewBinding = if (viewModel.user.value != null) {
+            if (user.id == viewModel.user.value!!.id) {
+                setErrorLayout(binding.projectListRoot, "No projects yet.\nYour projects will show up here.", errorActionLabel = "Create Project", margin = convertDpToPx(120)) { b, p ->
+                    b.visibility = View.VISIBLE
+                    p.visibility = View.GONE
+                    findNavController().navigate(R.id.createProjectFragment, null, options)
+                }
+            } else {
+                setErrorLayout(binding.projectListRoot, "No projects yet.", errorActionEnabled = false, margin = convertDpToPx(120))
+            }
+        } else {
+            setErrorLayout(binding.projectListRoot, "No projects yet.\nYour projects will show up here.", errorActionEnabled = false, margin = convertDpToPx(120))
+        }
+
+        val errorViewParams = errorViewBinding.errorItemsContainer.layoutParams as FrameLayout.LayoutParams
+        errorViewParams.gravity = Gravity.TOP
+        errorViewBinding.errorItemsContainer.layoutParams = errorViewParams
+
+        errorView = errorViewBinding.root
+
     }
 
     companion object {

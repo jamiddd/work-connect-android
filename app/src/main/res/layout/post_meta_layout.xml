@@ -7,7 +7,23 @@
         android:id="@+id/post_meta_root"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:animateLayoutChanges="true">z
+        android:animateLayoutChanges="true"
+        android:clickable="true"
+        android:focusable="true">
+
+        <TextView
+            android:id="@+id/generic_menu_handle"
+            android:layout_width="40dp"
+            android:layout_height="8dp"
+            android:layout_marginTop="16dp"
+            app:layout_constraintVertical_chainStyle="packed"
+            android:background="@drawable/light_grey_rounded_rect"
+            android:backgroundTint="#919191"
+            app:layout_constraintBottom_toTopOf="@+id/likeDislikeText"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.0" />
 
 
         <LinearLayout
@@ -17,35 +33,33 @@
             android:layout_marginStart="8dp"
             android:gravity="center"
             android:orientation="horizontal"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/divider20"
             app:layout_constraintEnd_toStartOf="@+id/postJoinBtn"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintHorizontal_chainStyle="spread_inside"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toBottomOf="@+id/likeDislikeText">
 
             <Button
                 android:id="@+id/postMetaLikeBtn"
                 style="@style/GenericButton"
                 android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:backgroundTint="#E1EEF9"
-                android:text="124"
-                app:icon="@drawable/thumb_up_selector"
-                app:iconPadding="8dp" />
+                android:layout_height="wrap_content"
+                app:icon="@drawable/thumb_up_selector" />
 
             <Button
                 android:id="@+id/postMetaDislikeBtn"
                 style="@style/GenericButton"
                 android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginEnd="8dp"
-                android:backgroundTint="#E1EEF9"
-                android:text="849"
-                app:icon="@drawable/thumb_down_selector"
-                app:iconPadding="8dp" />
+                android:layout_height="wrap_content"
+                app:icon="@drawable/thumb_down_selector" />
 
+            <Button
+                android:id="@+id/postMetaCommentBtn"
+                style="@style/GenericButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:icon="@drawable/ic_comment" />
 
             <Button
                 android:id="@+id/postMetaSaveBtn"
@@ -60,6 +74,7 @@
             android:id="@+id/postJoinBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
             android:layout_marginEnd="8dp"
             android:fontFamily="@font/roboto_medium"
             android:text="Join"
@@ -69,7 +84,57 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/linearLayout"
-            app:layout_constraintTop_toTopOf="@+id/linearLayout" />
+            app:layout_constraintTop_toTopOf="@+id/likeDislikeText" />
+
+        <TextView
+            android:id="@+id/likeDislikeText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:maxLines="2"
+            android:text="124 Likes • 325 Dislikes • 124 Likes • 325 Dislikes"
+            android:textColor="#6E6D6D"
+            app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+            app:layout_constraintEnd_toEndOf="@id/linearLayout"
+            app:layout_constraintStart_toStartOf="@+id/linearLayout"
+            app:layout_constraintTop_toBottomOf="@+id/generic_menu_handle"
+            app:layout_constraintVertical_bias="0.0" />
+
+        <TextView
+            android:id="@+id/commentsHeader"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            app:layout_constraintBottom_toTopOf="@+id/commentsRecyclerAlt"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHeight_min="48dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/divider20" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/commentsRecyclerAlt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:focusable="true"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/commentsHeader"
+            app:layout_constraintVertical_bias="0.0" />
+
+        <View
+            android:id="@+id/divider20"
+            android:layout_width="391dp"
+            android:layout_height="1dp"
+            android:background="?android:attr/listDivider"
+            app:layout_constraintBottom_toTopOf="@id/commentsHeader"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

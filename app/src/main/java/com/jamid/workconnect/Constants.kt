@@ -1,7 +1,10 @@
 package com.jamid.workconnect
 
+const val POSTED_AT = "postedAt"
 const val POST = "post"
-
+const val COMMENTS = "comments"
+const val REMOVE_IMAGE_MENU = "REMOVE_IMAGE_MENU"
+const val EDITOR = "EDITOR"
 const val PROJECT = "Project"
 const val BLOG = "Blog"
 const val IMAGE = "Image"
@@ -10,6 +13,9 @@ const val TYPE = "type"
 const val TAGS = "tags"
 const val USERS = "users"
 const val USER = "User"
+const val FILE_IMAGES = "FILE_IMAGES"
+const val FILE_DOCUMENTS = "FILE_DOCUMENTS"
+const val GUIDELINES = "guidelines"
 const val CREATED_AT = "createdAt"
 const val UPDATED_AT = "updatedAt"
 const val NOTIFICATIONS = "notifications"
@@ -19,6 +25,7 @@ const val CONTRIBUTORS = "contributors"
 const val PROJECT_IDS = "projectIds"
 const val BLOG_IDS = "blogIds"
 const val CHAT_CHANNELS = "chat_channels"
+const val COMMENT_CHANNELS = "comment_channels"
 const val UPDATE_USER = "UPDATE_USER"
 const val END_OF_CAT = "END_OF_CAT"
 const val USER_MINIMALS = "userMinimals"
@@ -37,6 +44,17 @@ const val SEARCH_RANK = "searchRank"
 const val RANK = "rank"
 const val WEIGHTAGE = "weightage"
 const val SIGNING_USER = "SIGNING_USER"
+
+const val PARAGRAPH = "Paragraph"
+const val QUOTE = "Quote"
+const val CODE = "Code"
+
+const val SUB_HEADING = "SubHeading"
+const val HEADING = ""
+const val BOLD = "BOLD"
+const val STRIKETHROUGH = "STRIKETHROUGH"
+const val ITALIC = "ITALIC"
+const val UNDERLINE = "UNDERLINE"
 
 const val IS_INTERESTED_DURATION = 8000
 
@@ -69,6 +87,8 @@ const val NOTIFICATION_IDS = "notificationIds"
 const val SENDER = "sender"
 const val LINKS = "Links"
 
+const val UPLOAD_DOCUMENT = "UPLOAD_DOCUMENT"
+const val SIGN_IN_WITH_GOOGLE = "SIGN_IN_WITH_GOOGLE"
 const val WORK_CONNECT_SHARED_PREF = "WORK_CONNECT_SHARED_PREF"
 
 const val IS_FIRST_TIME = "IS_FIRST_TIME"
@@ -107,6 +127,15 @@ const val NOTIFICATION_INTENT = "NOTIFICATION_INTENT"
 const val NOTIFICATION_CONTENT = "notificationContent"
 
 const val CHAT_NOTIFICATION = "CHAT_NOTIFICATION"
+const val COMMENT_MENU = "COMMENT_MENU"
+
+const val ADMINISTRATORS = "administrators"
+const val COMMENT_COUNT = "commentCount"
+
+const val COMMENT = "COMMENT"
+const val LAST_COMMENT = "lastComment"
+const val REPLIES_COUNT = "repliesCount"
+const val IS_MINIMIZED = "isMinimized"
 
 // post related
 const val CONTRIBUTORS_COUNT = "contributorsCount"

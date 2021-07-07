@@ -31,7 +31,7 @@
                 android:clipToPadding="false"
                 app:itemTextAppearanceActive="@style/Theme.TabLayoutText"
                 app:itemTextAppearanceInactive="@style/Theme.TabLayoutText"
-                app:labelVisibilityMode="auto"
+                app:labelVisibilityMode="unlabeled"
                 app:menu="@menu/main_navigation_menu" />
 
             <View

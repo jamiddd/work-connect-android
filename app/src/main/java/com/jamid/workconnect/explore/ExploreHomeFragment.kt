@@ -1,16 +1,24 @@
 package com.jamid.workconnect.explore
 
+import android.content.Context
 import android.content.res.Configuration
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.view.View
+import android.view.animation.AccelerateDecelerateInterpolator
+import android.widget.TextView
 import android.widget.Toast
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.transition.platform.MaterialContainerTransform
 import com.jamid.workconnect.*
 import com.jamid.workconnect.adapter.paging2.ExploreAdapter
 import com.jamid.workconnect.databinding.FragmentExploreHomeBinding
@@ -19,6 +27,7 @@ import com.jamid.workconnect.profile.ProfileFragment
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 
 class ExploreHomeFragment : InsetControlFragment(R.layout.fragment_explore_home) {
@@ -31,6 +40,10 @@ class ExploreHomeFragment : InsetControlFragment(R.layout.fragment_explore_home)
 
         binding = FragmentExploreHomeBinding.bind(view)
 
+        if (savedInstanceState != null) {
+
+        }
+
         val options = navOptions {
             anim {
                 enter = R.anim.slide_in_right
@@ -39,6 +52,7 @@ class ExploreHomeFragment : InsetControlFragment(R.layout.fragment_explore_home)
                 popExit = R.anim.slide_out_right
             }
         }
+
 
         job = initAdapter()
 
@@ -135,7 +149,24 @@ class ExploreHomeFragment : InsetControlFragment(R.layout.fragment_explore_home)
             is Result.Success -> {
                 val topProjectsSnapshot = topProjectsResult.data
                 val topProjects = viewModel.filterPosts(topProjectsSnapshot.toObjects(Post::class.java))
-                exploreAdapter.projectsAdapterHorizontal?.submitList(topProjects)
+
+                if (topProjects.isEmpty()) {
+                    val parentView = binding.exploreRecycler.getChildAt(0)?.findViewById<ConstraintLayout>(R.id.childRecyclerRoot)
+                    val textView = TextView(activity)
+                    textView.text = "No projects found"
+                    textView.setTextColor(ContextCompat.getColor(activity, R.color.darkerGrey))
+                    parentView?.addView(textView)
+                    val params = textView.layoutParams as ConstraintLayout.LayoutParams
+                    val parentId = parentView?.id ?: 0
+                    params.startToStart = parentId
+                    params.endToEnd = parentId
+                    params.topToTop = parentId
+                    params.bottomToBottom = parentId
+                    textView.layoutParams = params
+                    parentView?.findViewById<MaterialButton>(R.id.seeMoreBtn)?.isEnabled = false
+                } else {
+                    exploreAdapter.projectsAdapterHorizontal?.submitList(topProjects)
+                }
             }
         }
 
@@ -146,7 +177,23 @@ class ExploreHomeFragment : InsetControlFragment(R.layout.fragment_explore_home)
             is Result.Success -> {
                 val topBlogsSnapshot = topBlogsResult.data
                 val topBlogs = viewModel.filterPosts(topBlogsSnapshot.toObjects(Post::class.java))
-                exploreAdapter.blogsAdapter?.submitList(topBlogs)
+                if (topBlogs.isEmpty()) {
+                    val parentView = binding.exploreRecycler.getChildAt(1)?.findViewById<ConstraintLayout>(R.id.childRecyclerRoot)
+                    val textView = TextView(activity)
+                    textView.text = "No blogs found"
+                    textView.setTextColor(ContextCompat.getColor(activity, R.color.darkerGrey))
+                    parentView?.addView(textView)
+                    val params = textView.layoutParams as ConstraintLayout.LayoutParams
+                    val parentId = parentView?.id ?: 0
+                    params.startToStart = parentId
+                    params.endToEnd = parentId
+                    params.topToTop = parentId
+                    params.bottomToBottom = parentId
+                    textView.layoutParams = params
+                    parentView?.findViewById<MaterialButton>(R.id.seeMoreBtn)?.isEnabled = false
+                } else {
+                    exploreAdapter.blogsAdapter?.submitList(topBlogs)
+                }
             }
         }
 
@@ -154,9 +201,25 @@ class ExploreHomeFragment : InsetControlFragment(R.layout.fragment_explore_home)
         when (val usersSnapshotResult = viewModel.randomTopUsers()) {
             is Result.Success -> {
                 val snapshot = usersSnapshotResult.data
-                val users = viewModel.filterUsers(snapshot.toObjects(User::class.java))
+                val users = viewModel.filterUsers(snapshot.toObjects(User::class.java)).filter { !it.isCurrentUser }
 
-                exploreAdapter.userAdapter?.submitList(users.filter { !it.isCurrentUser })
+                if (users.isEmpty()) {
+                    val parentView = binding.exploreRecycler.getChildAt(2)?.findViewById<ConstraintLayout>(R.id.childRecyclerRoot)
+                    val textView = TextView(activity)
+                    textView.text = "No users found"
+                    textView.setTextColor(ContextCompat.getColor(activity, R.color.darkerGrey))
+                    parentView?.addView(textView)
+                    val params = textView.layoutParams as ConstraintLayout.LayoutParams
+                    val parentId = parentView?.id ?: 0
+                    params.startToStart = parentId
+                    params.endToEnd = parentId
+                    params.topToTop = parentId
+                    params.bottomToBottom = parentId
+                    textView.layoutParams = params
+                    parentView?.findViewById<MaterialButton>(R.id.seeMoreBtn)?.isEnabled = false
+                } else {
+                    exploreAdapter.userAdapter?.submitList(users)
+                }
             }
             is Result.Error -> {
                 Toast.makeText(activity, usersSnapshotResult.exception.localizedMessage, Toast.LENGTH_LONG).show()
@@ -200,7 +263,6 @@ class ExploreHomeFragment : InsetControlFragment(R.layout.fragment_explore_home)
             exploreAdapter.tagsAdapter?.submitList(tagsHolderList)
 
         }
-
     }
 
     companion object {

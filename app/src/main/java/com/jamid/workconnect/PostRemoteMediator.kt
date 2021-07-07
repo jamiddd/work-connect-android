@@ -55,10 +55,10 @@ class PostRemoteMediator(
 				val posts = postSnapshot.toObjects(Post::class.java)
 
 				return if (postSnapshot.size() < state.config.pageSize) {
-					repository.insertPosts(posts, source)
+					repository.insertPosts(posts)
 					MediatorResult.Success(endOfPaginationReached = true)
 				} else {
-					repository.insertPosts(posts, source)
+					repository.insertPosts(posts)
 					MediatorResult.Success(endOfPaginationReached = false)
 				}
 			}

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/projectLikeBtn"
+        style="@style/GenericButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="8dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        app:icon="@drawable/thumb_up_selector"
+        app:iconSize="24dp"
+        app:iconTint="#000000"
+        app:layout_constraintBottom_toTopOf="@+id/textView17"
+        app:layout_constraintEnd_toStartOf="@+id/projectDislikeBtn"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/projectDislikeBtn"
+        style="@style/GenericButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        app:icon="@drawable/thumb_down_selector"
+        app:iconSize="24dp"
+        app:iconTint="#000000"
+        app:layout_constraintBottom_toBottomOf="@+id/projectLikeBtn"
+        app:layout_constraintEnd_toStartOf="@+id/projectCommentBtn"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/projectLikeBtn"
+        app:layout_constraintTop_toTopOf="@+id/projectLikeBtn" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/projectCommentBtn"
+        style="@style/GenericButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        app:icon="@drawable/ic_round_chat_bubble_outline_24"
+        app:iconSize="24dp"
+        app:iconTint="#000000"
+        app:layout_constraintBottom_toBottomOf="@+id/projectDislikeBtn"
+        app:layout_constraintStart_toEndOf="@+id/projectDislikeBtn"
+        app:layout_constraintTop_toTopOf="@+id/projectDislikeBtn" />
+
+    <TextView
+        android:id="@+id/textView17"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="1 Likes • 0 Dislikes • 2 Comments • 4 Contributors"
+        android:textColor="#959292"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/projectLikeBtn"
+        app:layout_constraintTop_toBottomOf="@+id/projectLikeBtn" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

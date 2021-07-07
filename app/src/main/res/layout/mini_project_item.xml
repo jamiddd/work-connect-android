@@ -8,16 +8,16 @@
         style="@style/PostCardStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
+        app:cardCornerRadius="0dp"
         app:cardElevation="0dp"
-        app:rippleColor="#1B000000">
+        app:contentPaddingBottom="8dp"
+        app:contentPaddingTop="8dp"
+        app:rippleColor="#1B000000"
+        app:strokeWidth="0dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
-
 
             <TextView
                 android:id="@+id/projectTitle"
@@ -26,9 +26,9 @@
                 android:layout_marginStart="12dp"
                 android:layout_marginTop="12dp"
                 android:layout_marginEnd="12dp"
-                android:fontFamily="@font/roboto_medium"
-                android:text="The title of the Blog that is too long"
-                android:textSize="18sp"
+                android:fontFamily="@font/roboto_black"
+                android:text="@string/sample_title"
+                android:textSize="20sp"
                 app:layout_constraintBottom_toTopOf="@+id/projectAdminImg"
                 app:layout_constraintEnd_toStartOf="@+id/projectSaveBtn"
                 app:layout_constraintHorizontal_bias="0.5"
@@ -38,8 +38,8 @@
 
             <com.facebook.drawee.view.SimpleDraweeView
                 android:id="@+id/projectAdminImg"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="8dp"
                 app:layout_constraintBottom_toTopOf="@id/projectThumb"
@@ -53,10 +53,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
-                android:fontFamily="@font/roboto_medium"
+                android:text="@string/sample_name"
                 app:layout_constraintBottom_toBottomOf="@+id/projectAdminImg"
                 app:layout_constraintStart_toEndOf="@+id/projectAdminImg"
-                app:layout_constraintTop_toTopOf="@+id/projectAdminImg" />
+                app:layout_constraintTop_toTopOf="@+id/projectAdminImg"
+                app:layout_constraintVertical_bias="0.0" />
 
             <com.facebook.drawee.view.SimpleDraweeView
                 android:id="@+id/projectThumb"
@@ -83,6 +84,7 @@
                 android:maxLines="5"
                 android:minHeight="70dp"
                 android:text="@string/large_text"
+                android:textColor="#535353"
                 app:layout_constraintBottom_toTopOf="@+id/projectLikeBtn"
                 app:layout_constraintEnd_toStartOf="@+id/projectBlogImage"
                 app:layout_constraintHorizontal_chainStyle="packed"
@@ -111,7 +113,7 @@
                 android:layout_marginBottom="8dp"
                 android:textAppearance="@style/TextAppearance.AppCompat.Small"
                 app:icon="@drawable/thumb_up_selector"
-                app:iconSize="20dp"
+                app:iconSize="24dp"
                 app:layout_constraintBottom_toTopOf="@+id/meta"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/projectMiniContent" />
@@ -123,10 +125,22 @@
                 android:layout_height="wrap_content"
                 android:textAppearance="@style/TextAppearance.AppCompat.Small"
                 app:icon="@drawable/thumb_down_selector"
-                app:iconSize="20dp"
+                app:iconSize="24dp"
                 app:layout_constraintBottom_toBottomOf="@+id/projectLikeBtn"
                 app:layout_constraintStart_toEndOf="@+id/projectLikeBtn"
                 app:layout_constraintTop_toTopOf="@+id/projectLikeBtn" />
+
+            <Button
+                android:id="@+id/projectCommentBtn"
+                style="@style/GenericButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                app:icon="@drawable/ic_comment"
+                app:iconSize="26dp"
+                app:layout_constraintBottom_toBottomOf="@+id/projectDislikeBtn"
+                app:layout_constraintStart_toEndOf="@+id/projectDislikeBtn"
+                app:layout_constraintTop_toTopOf="@+id/projectDislikeBtn" />
 
             <Button
                 android:id="@+id/projectOptionsBtn"
@@ -144,14 +158,14 @@
                 android:id="@+id/projectMetaText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:layout_marginBottom="12dp"
-                android:text="a few moments ago ● Gumoria Pathar"
+                android:layout_marginStart="12dp"
+                android:text="@string/sample_time_and_date_text"
                 android:textColor="#777575"
                 android:textSize="12sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="@+id/projectLikeBtn"
-                app:layout_constraintTop_toBottomOf="@+id/meta" />
+                app:layout_constraintBottom_toBottomOf="@+id/projectAdminImg"
+                app:layout_constraintStart_toEndOf="@+id/projectAdminImg"
+                app:layout_constraintTop_toTopOf="@+id/projectAdminImg"
+                app:layout_constraintVertical_bias="1.0" />
 
             <ProgressBar
                 android:id="@+id/miniProjectProgressBar"
@@ -186,12 +200,45 @@
                 android:id="@+id/meta"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
-                android:text="135 Likes ● 43 Dislikes ● 54 Contributors"
+                android:layout_marginStart="18dp"
+                android:layout_marginBottom="8dp"
+                android:text="@string/sample_likes_text"
+                android:textColor="#777575"
                 android:textSize="12sp"
-                app:layout_constraintBottom_toTopOf="@id/projectMetaText"
+                app:layout_constraintBottom_toTopOf="@id/post_comments_recycler"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/projectLikeBtn" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/post_comments_recycler"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:layout_constraintBottom_toTopOf="@id/more_comments"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/meta"
+                tools:itemCount="2"
+                tools:listitem="@layout/comment_item" />
+
+            <TextView
+                android:id="@+id/more_comments"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="?selectableItemBackground"
+                android:focusable="true"
+                android:paddingStart="12dp"
+                android:paddingTop="8dp"
+                android:paddingEnd="12dp"
+                android:paddingBottom="8dp"
+                android:text="@string/more_comments"
+                android:textColor="#757575"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/post_comments_recycler" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

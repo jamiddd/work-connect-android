@@ -35,7 +35,7 @@ class MediaDocumentFragment : InsetControlFragment(R.layout.fragment_media_docum
             addItemDecoration(DividerItemDecoration(activity, LinearLayoutManager.VERTICAL))
         }
 
-        viewModel.messagesByType(chatChannel.chatChannelId, DOCUMENT).observe(viewLifecycleOwner) {
+        /*viewModel.messagesByType(chatChannel.chatChannelId, DOCUMENT).observe(viewLifecycleOwner) {
             if (it.isNotEmpty()) {
                 job?.cancel()
 //                activity.mainBinding.primaryProgressBar.visibility = View.GONE
@@ -51,7 +51,7 @@ class MediaDocumentFragment : InsetControlFragment(R.layout.fragment_media_docum
                     binding.mediaDocumentRecycler.visibility = View.GONE
                 }
             }
-        }
+        }*/
 
     }
 

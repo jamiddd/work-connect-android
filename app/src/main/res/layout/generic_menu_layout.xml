@@ -36,7 +36,7 @@
                 android:layout_width="40dp"
                 android:layout_height="8dp"
                 android:layout_marginTop="16dp"
-                android:layout_marginBottom="8dp"
+                android:layout_marginBottom="16dp"
                 android:background="@drawable/light_grey_rounded_rect"
                 android:backgroundTint="#919191" />
 
@@ -54,7 +54,7 @@
                 android:paddingEnd="12dp"
                 android:paddingBottom="8dp"
                 android:text="Menu Heading"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6" />
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/generic_menu_item_recycler"
@@ -62,6 +62,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
                 android:background="@drawable/light_grey_rounded_rect"
                 android:overScrollMode="never"
                 tools:itemCount="4"
@@ -69,7 +71,7 @@
 
             <Button
                 android:id="@+id/generic_menu_dismiss"
-                style="@style/GenericMenuDismissBtn"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
@@ -81,7 +83,7 @@
                 android:insetBottom="0dp"
                 android:minHeight="48dp"
                 android:text="Dismiss"
-                android:textSize="18sp"
+                android:textSize="16sp"
                 app:cornerRadius="10dp" />
 
         </LinearLayout>

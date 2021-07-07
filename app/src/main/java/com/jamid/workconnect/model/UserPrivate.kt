@@ -7,6 +7,7 @@ import kotlinx.parcelize.Parcelize
 data class UserPrivate(
 	var interests: List<String> = emptyList(),
     var likedPosts: List<String> = emptyList(),
+    var likedComments: List<String> = emptyList(),
     var dislikedPosts: List<String> = emptyList(),
     var savedPosts: List<String> = emptyList(),
     var collaborationIds: List<String> = emptyList(),

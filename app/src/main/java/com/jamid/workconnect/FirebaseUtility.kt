@@ -2,71 +2,59 @@ package com.jamid.workconnect
 
 import android.net.Uri
 import com.google.firebase.auth.AuthCredential
-import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import com.jamid.workconnect.model.*
 import java.io.File
 
 interface FirebaseUtility {
+
+    val auth: FirebaseAuth
+    val db: FirebaseFirestore
+    val storage: FirebaseStorage
+
+
     // user related
-    fun getToken()
     fun signIn(email: String, password: String)
     fun register(email: String, password: String)
     fun checkIfEmailExists(email: String)
     fun signInWithGoogle(credential: AuthCredential)
-    fun getCurrentUser(userId: String)
-    fun uploadCurrentUser(user: User)
     fun updateFirebaseUser(firebaseUserMap: MutableMap<String, Any?>)
-    fun uploadCurrentUser(userMap: MutableMap<String, Any?>)
-    fun updateCurrentUser(userMap: Map<String, Any?>)
-    fun updateRegistrationToken(token: String)
+    fun updateRegistrationToken(currentUser: User, token: String)
     fun uploadProfilePhoto(image: Uri?)
     fun signOut()
+    fun createNewUser(tags: List<String>? = null): User?
+    suspend fun checkIfUsernameExists(currentUser: User, username: String? = null)
+    suspend fun getToken(): String?
+    suspend fun getCurrentUser(): User?
+    suspend fun uploadCurrentUser(user: User): User?
+    suspend fun updateCurrentUser(currentUser: User, userMap: Map<String, Any?>): User?
+
 
     // post related
-    fun uploadPost(post: Post)
-    fun joinProject(post: Post)
     fun uploadPostImage(image: Uri, type: String)
-
-    fun onLikePressed(post: Post): Post
-    fun onLikePressedWithoutCaching(post: Post): Post
-    fun onDislikePressed(post: Post): Post
-    fun onDislikePressedWithoutCaching(post: Post): Post
-    fun onPostSaved(post: Post): Post
-    fun onPostSavedWithoutCaching(post: Post): Post
-    fun onFollowPressed(post: Post): Post
-
-
-    fun updatePost(post: Post, postMap: Map<String, Any?>)
-    fun getContributorsForPost(channelId: String)
-    fun updateGuidelines(postId: String, guidelines: String)
-
-
+    suspend fun getPost(postId: String): Post?
+    suspend fun uploadPost(currentUser: User, post: Post): Pair<Post, ChatChannel>?
+    suspend fun undoProjectRequest(currentUser: User, request: SimpleRequest): Pair<User, SimpleRequest>?
+    suspend fun acceptProjectRequest(currentUser: User, notification: SimpleNotification)
+    suspend fun denyProjectRequest(currentUser: User, notification: SimpleNotification)
+    suspend fun joinProject(currentUser: User, post: Post): Pair<User, SimpleRequest>?
+    suspend fun onLikePressedWithoutCaching(currentUser: User, post: Post): Pair<User, Post>?
+    suspend fun onDislikePressedWithoutCaching(currentUser: User, post: Post): Pair<User, Post>?
+    suspend fun onPostSavedWithoutCaching(currentUser: User, post: Post): Pair<User, Post>?
+    suspend fun onFollowPressed(currentUser: User, post: Post): Pair<User, Post>?
+    suspend fun updatePost(post: Post, postMap: Map<String, Any?>): Post?
 
     // message related
-    suspend fun setUpChannels(user: User)
-    fun sendMessage(message: SimpleMessage, chatChannel: ChatChannel)
-    fun uploadMessageMedia(message: SimpleMessage, chatChannel: ChatChannel)
-    suspend fun updateChatChannels(channels: List<ChatChannel>)
-    suspend fun setMessagesListener(externalImagesDir: File, externalDocumentsDir: File, chatChannel: ChatChannel)
-    fun onNewMessagesFromBackground(chatChannelId: String, onComplete: (chatChannel: ChatChannel) -> Unit)
+    suspend fun sendMessage(currentUser: User, message: SimpleMessage, chatChannel: ChatChannel): Pair<ChatChannel, SimpleMessage>?
+    suspend fun uploadMessageMedia(currentUser: User, message: SimpleMessage, chatChannel: ChatChannel): Pair<ChatChannel, SimpleMessage>?
+    suspend fun onNewMessagesFromBackground(chatChannelId: String): ChatChannel?
 
-    fun downloadMedia(externalDir: File?, message: SimpleMessage)
-    fun getMedia(chatChannelId: String, messageId: String, onComplete: (simpleMedia: SimpleMedia) -> Unit)
-
-
+    suspend fun downloadMedia(destinationFile: File, message: SimpleMessage): SimpleMessage?
     // extras
-    fun getPopularInterests(onComplete: (interests: List<PopularInterest>) -> Unit)
-
-    fun getChannelContributors(chatChannelId: String, pageSize: Long, extra: DocumentSnapshot? = null, ahead: Boolean = false, onComplete: (contributors: QuerySnapshot) -> Unit)
-
-    fun getContributorSnapshot(channelId: String, id: String, onComplete: (doc: DocumentSnapshot) -> Unit)
     fun clearSignInChanges()
-
-    fun getPost(postId: String)
-
-    fun checkIfAlreadySentRequest(post: Post, onComplete: (requests: List<SimpleRequest>) -> Unit)
-
-    // paging
+    suspend fun removeInterest(currentUser: User, interest: String): User?
+    suspend fun addInterest(currentUser: User, interest: String): User?
 
 }

@@ -23,6 +23,7 @@ import com.facebook.drawee.generic.GenericDraweeHierarchyInflater
 import com.facebook.drawee.interfaces.DraweeController
 import com.facebook.drawee.view.DraweeView
 import com.jamid.workconnect.BUG_TAG
+import com.jamid.workconnect.interfaces.OnScaleListener
 
 
 /**
@@ -36,12 +37,19 @@ class ZoomableDraweeView : DraweeView<GenericDraweeHierarchy?>, ScrollingView {
 	private val mImageBounds = RectF()
 	private val mViewBounds = RectF()
 
+	private var onScaleListener: OnScaleListener? = null
 	private var mHugeImageController: DraweeController? = null
 	private var mZoomableController: ZoomableController? = null
 	private var mTapGestureDetector: GestureDetector? = null
 	private var mAllowTouchInterceptionWhileZoomed = true
 	private var mIsDialtoneEnabled = false
 	private var mZoomingEnabled = true
+
+	fun setScaleListener(scaleListener: OnScaleListener) {
+		onScaleListener = scaleListener
+	}
+
+
 	private val mControllerListener: ControllerListener<*> =
 		object : BaseControllerListener<Any?>() {
 			override fun onFinalImageSet(
@@ -255,6 +263,7 @@ class ZoomableDraweeView : DraweeView<GenericDraweeHierarchy?>, ScrollingView {
 
 	override fun onDraw(canvas: Canvas) {
 		val saveCount = canvas.save()
+		onScaleListener?.onImageChange(mZoomableController!!.scaleFactor)
 		canvas.concat(mZoomableController!!.transform)
 		try {
 			super.onDraw(canvas)

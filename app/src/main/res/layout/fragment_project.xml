@@ -10,17 +10,9 @@
         android:layout_height="match_parent"
         tools:context=".ProjectFragment">
 
-        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-            android:id="@+id/projectRefresher"
-            android:layout_width="match_parent"
-            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
-            android:layout_height="match_parent">
-
-            <include
-                android:id="@+id/projectContent"
-                layout="@layout/project_fragment_content" />
-
-        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+        <include
+            android:id="@+id/projectContent"
+            layout="@layout/project_fragment_content" />
 
 
         <com.google.android.material.card.MaterialCardView
@@ -28,8 +20,13 @@
             style="@style/PostMetaCardStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            app:cardElevation="3dp">
+            app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
+            app:behavior_hideable="false"
+            app:behavior_peekHeight="100dp"
+            android:clickable="true"
+            android:focusable="true"
+            app:cardElevation="3dp"
+            app:rippleColor="@color/transparent">
 
             <include
                 android:id="@+id/projectMetadata"
@@ -49,6 +46,7 @@
                 app:collapsedTitleGravity="center_horizontal"
                 app:contentScrim="@color/white"
                 app:expandedTitleTextAppearance="@style/WhiteToolbarText"
+                app:collapsedTitleTextAppearance="@style/TitleCollapsedPost"
                 app:layout_scrollFlags="scroll|exitUntilCollapsed|snap|snapMargins"
                 app:titleEnabled="false">
 
@@ -61,9 +59,11 @@
                 <com.google.android.material.appbar.MaterialToolbar
                     android:id="@+id/projectFragmentToolbar"
                     android:layout_width="match_parent"
-                    android:layout_height="?actionBarSize"
+                    android:layout_height="wrap_content"
                     app:contentInsetStartWithNavigation="0dp"
                     app:layout_collapseMode="pin"
+                    app:titleTextAppearance="@style/TitleCollapsedPost"
+                    app:subtitleTextAppearance="@style/SubTitleCollapsedPost"
                     app:navigationIcon="@drawable/ic_round_arrow_back_24"
                     app:navigationIconTint="@color/white"
                     app:subtitle="- Jamid Deka"

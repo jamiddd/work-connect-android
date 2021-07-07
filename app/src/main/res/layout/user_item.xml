@@ -36,7 +36,7 @@
             android:text="Jamid Deka"
             android:textAppearance="@style/TextAppearance.AppCompat.Small" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/user_follow_btn"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="wrap_content"

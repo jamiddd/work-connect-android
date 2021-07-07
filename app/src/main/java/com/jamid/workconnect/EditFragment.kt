@@ -15,15 +15,14 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.children
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.canhub.cropper.CropImageOptions
+import com.canhub.cropper.CropImageView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.chip.Chip
 import com.jamid.workconnect.databinding.FragmentEditBinding
 import com.jamid.workconnect.model.GenericMenuItem
 import com.jamid.workconnect.model.Result
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 
 class EditFragment : SupportFragment(R.layout.fragment_edit, TAG, false) {
@@ -181,7 +180,7 @@ class EditFragment : SupportFragment(R.layout.fragment_edit, TAG, false) {
                 usernameExists = false
                 binding.usernameTextLayout.isErrorEnabled = false
                 binding.usernameTextLayout.error = null
-                Log.d(TAG, usernameExistsResult.exception.localizedMessage)
+                Log.d(TAG, usernameExistsResult.exception.localizedMessage!!)
             }
         }
 
@@ -261,7 +260,16 @@ class EditFragment : SupportFragment(R.layout.fragment_edit, TAG, false) {
         val item2 = GenericMenuItem(tag, "Take a photo", R.drawable.ic_baseline_camera_alt_24, 1)
         val item3 = GenericMenuItem(tag, "Remove image", R.drawable.ic_baseline_delete_24, 2)
 
-        val fragment = GenericMenuFragment.newInstance(tag, "Add Image ...", arrayListOf(item1, item2, item3))
+        val cropOptions = CropImageOptions().apply {
+            aspectRatioX = 1
+            aspectRatioY = 1
+            fixAspectRatio = true
+            cropShape = CropImageView.CropShape.OVAL
+            maxCropResultWidth = 200
+            maxCropResultHeight = 200
+        }
+
+        val fragment = GenericMenuFragment.newInstance(tag, "Add Image ...", arrayListOf(item1, item2, item3), cropOptions)
         activity.showBottomSheet(fragment, tag)
     }
 
@@ -285,7 +293,7 @@ class EditFragment : SupportFragment(R.layout.fragment_edit, TAG, false) {
             binding.interestsGroup.removeView(chip)
         }
 
-        chip.setOnCheckedChangeListener { buttonView, isChecked ->
+        chip.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 chip.toPrimary(context)
             } else {

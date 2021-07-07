@@ -34,6 +34,7 @@
         android:name="com.jamid.workconnect.views.zoomable.ImageViewFragment"
         android:label="ImageViewFragment"
         tools:layout="@layout/fragment_image_view" />
+
     <fragment
         android:id="@+id/projectDetailFragment"
         android:name="com.jamid.workconnect.message.ProjectDetailFragment"
@@ -137,6 +138,12 @@
         android:name="com.jamid.workconnect.auth.InterestFragment"
         android:label="InterestFragment"
         tools:layout="@layout/fragment_interest" />
+
+    <fragment
+        android:id="@+id/commentsFragment"
+        android:name="com.jamid.workconnect.CommentsFragment"
+        tools:layout="@layout/fragment_comments"
+        android:label="Comments"/>
 
 
 </navigation>

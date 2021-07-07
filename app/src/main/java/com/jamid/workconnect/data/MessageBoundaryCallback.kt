@@ -62,10 +62,10 @@ class MessageBoundaryCallback(private val chatChannelId: String, private val rep
                     keys.add(MessageKey(prev, current, next))
                 }
 
-                scope.launch (Dispatchers.IO) {
+                /*scope.launch (Dispatchers.IO) {
                     repository.updateMessage(messages)
 //                    repository.insertKeys(keys)
-                }
+                }*/
 
                 if (!it.isEmpty) {
                     firstDoc = it.first()
@@ -129,9 +129,9 @@ class MessageBoundaryCallback(private val chatChannelId: String, private val rep
             .get()
             .addOnSuccessListener {
                 val messages = it.toObjects(SimpleMessage::class.java)
-                scope.launch (Dispatchers.IO) {
+                /*scope.launch (Dispatchers.IO) {
                     repository.updateMessage(messages)
-                }
+                }*/
             }.addOnFailureListener {
                 networkErrors.postValue(it)
             }
@@ -147,10 +147,10 @@ class MessageBoundaryCallback(private val chatChannelId: String, private val rep
             .addOnSuccessListener {
                 val messages = it.toObjects(SimpleMessage::class.java)
                 scope.launch (Dispatchers.IO) {
-                    repository.updateMessage(messages)
+                    /*repository.updateMessage(messages)
                     if (messages.size < PAGE_SIZE) {
                         hasReachedEnd = true
-                    }
+                    }*/
                 }
             }.addOnFailureListener {
                 networkErrors.postValue(it)

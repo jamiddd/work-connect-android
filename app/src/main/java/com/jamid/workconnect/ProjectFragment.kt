@@ -5,6 +5,7 @@ import android.os.Build
 import android.os.Bundle
 import android.view.*
 import android.widget.Toast
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -12,7 +13,6 @@ import androidx.navigation.navOptions
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.chip.Chip
-import com.google.android.material.snackbar.Snackbar
 import com.jamid.workconnect.adapter.GenericAdapter
 import com.jamid.workconnect.databinding.FragmentProjectBinding
 import com.jamid.workconnect.interfaces.OnChipClickListener
@@ -20,7 +20,6 @@ import com.jamid.workconnect.model.Post
 import com.jamid.workconnect.model.Result
 import com.jamid.workconnect.model.User
 import com.jamid.workconnect.profile.ProfileFragment
-import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -53,8 +52,8 @@ class ProjectFragment : BasePostFragment(R.layout.fragment_project, TAG, false) 
             setPost()
             initProject(post!!)
         } else {
-           /* TODO("Posts are not cached in database anymore. Download the post directly from firebase. Since it came from an id, most probably" +
-                    "it doesn't require back propagation")
+            /*TODO("Posts are not cached in database anymore. Download the post directly from firebase. Since it came from an id, most probably" +
+                    "it doesn't require back propagation")*/
             viewModel.getCachedPost(postId ?: "").observe(viewLifecycleOwner) { p0 ->
                 if (p0 != null) {
                     post = p0
@@ -63,7 +62,7 @@ class ProjectFragment : BasePostFragment(R.layout.fragment_project, TAG, false) 
                 } else {
                     viewModel.getPost(postId ?: "")
                 }
-            }*/
+            }
         }
 
         viewModel.requestSentResult.observe(viewLifecycleOwner) {
@@ -71,10 +70,14 @@ class ProjectFragment : BasePostFragment(R.layout.fragment_project, TAG, false) 
 
             when (result) {
                 is Result.Success -> {
+                    binding.projectMetadata.postJoinBtn.text = "Sent Request"
                     binding.projectMetadata.postJoinBtn.isEnabled = false
+
+                    Toast.makeText(requireContext(), "Sent request to join project!", Toast.LENGTH_SHORT).show()
+                    /*
                     Snackbar.make(binding.root, "Sent request to join project!", Snackbar.LENGTH_LONG)
                         .setAnchorView(binding.projectData)
-                        .show()
+                        .show()*/
                 }
                 is Result.Error -> {
                     binding.projectMetadata.postJoinBtn.isEnabled = true
@@ -85,6 +88,21 @@ class ProjectFragment : BasePostFragment(R.layout.fragment_project, TAG, false) 
         }
     }
 
+    private fun adjustLikeText(joinBtnVisibility: Boolean = true) {
+
+        val params = binding.projectMetadata.likeDislikeText.layoutParams as ConstraintLayout.LayoutParams
+
+        if (joinBtnVisibility) {
+            params.endToEnd = binding.projectMetadata.postJoinBtn.id
+        } else {
+            params.endToEnd = binding.projectMetadata.linearLayout.id
+        }
+
+        params.startToStart = binding.projectMetadata.linearLayout.id
+        params.topToBottom = binding.projectMetadata.genericMenuHandle.id
+        params.bottomToTop = binding.projectMetadata.divider20.id
+        binding.projectMetadata.likeDislikeText.layoutParams = params
+    }
 
     private fun initProject(post: Post) {
         viewModel.extras[ARG_POST] = post
@@ -98,16 +116,22 @@ class ProjectFragment : BasePostFragment(R.layout.fragment_project, TAG, false) 
             when {
                 post.uid == currentUser.id -> {
                     joinBtn.visibility = View.GONE
+                    adjustLikeText(false)
                 }
                 currentUser.userPrivate.collaborationIds.contains(post.id) -> {
                     joinBtn.visibility = View.GONE
+                    adjustLikeText(false)
                 }
                 currentUser.userPrivate.activeRequests.contains(post.id) -> {
+                    joinBtn.visibility = View.VISIBLE
+                    joinBtn.text = getString(R.string.sent_request)
                     joinBtn.isEnabled = false
+                    adjustLikeText()
                 }
                 else -> {
                     joinBtn.visibility = View.VISIBLE
                     joinBtn.isEnabled = true
+                    adjustLikeText()
                 }
             }
 
@@ -117,8 +141,6 @@ class ProjectFragment : BasePostFragment(R.layout.fragment_project, TAG, false) 
 
         joinBtn.setOnClickListener {
             viewModel.joinProject(post)
-
-//                Toast.makeText(activity, "Not implemented yet.", Toast.LENGTH_SHORT).show()
         }
 
         binding.projectImg.setImageURI(post.thumbnail)
@@ -139,10 +161,6 @@ class ProjectFragment : BasePostFragment(R.layout.fragment_project, TAG, false) 
                 popEnter = R.anim.slide_in_left
                 popExit = R.anim.slide_out_right
             }
-            popUpTo(findNavController().findDestination(R.id.projectFragment)!!.id) {
-                saveState = true
-            }
-            restoreState = true
         }
 
         binding.projectAdminImg.setOnClickListener {
@@ -151,7 +169,7 @@ class ProjectFragment : BasePostFragment(R.layout.fragment_project, TAG, false) 
 
         binding.projectContent.projectTitle.text = post.title
 
-        binding.projectFragmentAppBar.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { appBarLayout, verticalOffset ->
+        binding.projectFragmentAppBar.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { _, verticalOffset ->
             if (verticalOffset == 0) {
                 binding.projectFragmentToolbar.setNavigationIconTint(ContextCompat.getColor(activity, R.color.white))
                 binding.projectFragmentToolbar.setTitleTextColor(ContextCompat.getColor(activity, R.color.white))
@@ -186,26 +204,15 @@ class ProjectFragment : BasePostFragment(R.layout.fragment_project, TAG, false) 
 
             if (Build.VERSION.SDK_INT <= 27) {
                 binding.projectContent.projectAuthorName.setTextColor(ContextCompat.getColor(activity, R.color.black))
+                binding.projectContent.projectTitle.setTextColor(ContextCompat.getColor(activity, R.color.black))
             }
 
         }
-
-        binding.projectRefresher.setOnRefreshListener {
-            viewLifecycleOwner.lifecycleScope.launchWhenCreated {
-                delay(3000)
-                binding.projectRefresher.isRefreshing = false
-            }
-        }
-
-        binding.projectRefresher.setColorSchemeColors(ContextCompat.getColor(activity, R.color.blue_500))
 
         binding.projectContent.apply {
 
-//            projectTitle.text = post.title
             projectContent.text = post.content
-
             if (Build.VERSION.SDK_INT <= 27) {
-//                projectTitle.setTextColor(ContextCompat.getColor(activity, R.color.black))
                 projectContent.setTextColor(ContextCompat.getColor(activity, R.color.black))
             }
 
@@ -215,7 +222,6 @@ class ProjectFragment : BasePostFragment(R.layout.fragment_project, TAG, false) 
                 val metaText = SimpleDateFormat("hh:mm a", Locale.UK).format(post.updatedAt) + " • " + post.location!!.place
                 projectMetaText.text = metaText
             }
-
 
             val tags = post.tags
             if (!tags.isNullOrEmpty()) {
@@ -241,17 +247,15 @@ class ProjectFragment : BasePostFragment(R.layout.fragment_project, TAG, false) 
 
         binding.projectContent.projectAuthorName.setOnClickListener {
             findNavController().navigate(R.id.profileFragment, Bundle().apply { putParcelable(ProfileFragment.ARG_USER, post.admin) }, options)
-//            activity.toFragment(ProfileFragment.newInstance(user=post.admin), ProfileFragment.TAG)
         }
 
         binding.projectContent.projectAuthorPhoto.setOnClickListener {
             findNavController().navigate(R.id.profileFragment, Bundle().apply { putParcelable(ProfileFragment.ARG_USER, post.admin) }, options)
-//            activity.toFragment(ProfileFragment.newInstance(user=post.admin), ProfileFragment.TAG)
         }
     }
 
     private fun initContributors() {
-        val contributorsAdapter = GenericAdapter(User::class.java, mapOf("administrators" to listOf(post!!.uid)))
+        val contributorsAdapter = GenericAdapter(User::class.java, mapOf(ADMINISTRATORS to listOf(post!!.uid)))
         binding.projectContent.projectContributorsList.apply {
             itemAnimator = null
             layoutManager = LinearLayoutManager(

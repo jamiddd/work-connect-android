@@ -48,14 +48,35 @@
         <item name="titleEnabled">true</item>
     </style>
 
+    <style name="HomeCollapseToolbarStyle">
+        <item name="collapsedTitleTextAppearance">@style/HomeCollapsedTitle</item>
+        <item name="expandedTitleTextAppearance">@style/TitleExpanded</item>
+        <item name="collapsedTitleGravity">center_horizontal</item>
+        <item name="titleCollapseMode">fade</item>
+        <item name="layout_scrollFlags">scroll|exitUntilCollapsed|snap|snapMargins</item>
+        <item name="layout_scrollInterpolator">@android:anim/accelerate_decelerate_interpolator</item>
+        <item name="titleEnabled">true</item>
+    </style>
+
+    <style name="HomeCollapsedTitle" parent="@style/TextAppearance.MaterialComponents.Headline6">
+        <item name="fontFamily">@font/playfair_display_bold</item>
+    </style>
+
     <style name="TitleExpanded" parent="TextAppearance.MaterialComponents.Headline4">
-        <item name="android:fontFamily">@font/roboto_medium</item>
-        <item name="android:textStyle">bold</item>
-        <item name="android:textAllCaps">false</item>
+        <item name="fontFamily">@font/playfair_display_bold</item>
     </style>
 
     <style name="TitleCollapsed" parent="TextAppearance.MaterialComponents.Headline6">
+        <item name="fontFamily">@font/roboto_medium</item>
+    </style>
 
+    <style name="TitleCollapsedPost" parent="TextAppearance.AppCompat.Body1">
+        <item name="fontFamily">@font/roboto_medium</item>
+    </style>
+
+    <style name="SubTitleCollapsedPost" parent="TextAppearance.AppCompat.Body1">
+        <item name="fontFamily">@font/roboto_medium</item>
+        <item name="android:textSize">12sp</item>
     </style>
 
     <style name="ToolbarTitlePrimary" parent="TextAppearance.MaterialComponents.Headline6">

@@ -12,11 +12,10 @@ import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.jamid.workconnect.MainActivity
-import com.jamid.workconnect.MainViewModel
+import com.jamid.workconnect.*
 import com.jamid.workconnect.databinding.FragmentLocationBinding
+import com.jamid.workconnect.databinding.GenericMenuItemBinding
 import com.jamid.workconnect.databinding.LocationListItemBinding
-import com.jamid.workconnect.getWindowHeight
 
 class LocationFragment : Fragment() {
 
@@ -45,13 +44,13 @@ class LocationFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.addressList.observe(viewLifecycleOwner, { list ->
+        viewModel.addressList.observe(viewLifecycleOwner){ list ->
             if (list != null) {
                 binding.locationProgressBar.visibility = View.GONE
                 binding.locationList.layoutManager = LinearLayoutManager(context)
                 binding.locationList.adapter = LocationItemAdapter(list)
             }
-        })
+        }
 
         binding.locationProgressBar.visibility = View.VISIBLE
 
@@ -67,23 +66,14 @@ class LocationFragment : Fragment() {
             activity.bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
         }
 
-        viewModel.windowInsets.observe(viewLifecycleOwner) { (top, bottom) ->
-            val windowHeight = getWindowHeight()
-//            val rect = windowHeight - top
-
-            val params = binding.root.layoutParams as ViewGroup.LayoutParams
-            params.height = windowHeight
-            params.width = ViewGroup.LayoutParams.MATCH_PARENT
-
-            binding.root.layoutParams = params
-        }
+        binding.root.updateLayout(getWindowHeight())
     }
 
 
-    private inner class ViewHolder(binding: LocationListItemBinding) :
+    private inner class ViewHolder(binding: GenericMenuItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        val text: TextView = binding.text
+        val text: TextView = binding.menuItem
     }
 
     private inner class LocationItemAdapter(private val places: List<String>) : RecyclerView.Adapter<ViewHolder>() {
@@ -91,7 +81,7 @@ class LocationFragment : Fragment() {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 
             return ViewHolder(
-                LocationListItemBinding.inflate(
+                GenericMenuItemBinding.inflate(
                     LayoutInflater.from(parent.context),
                     parent,
                     false
@@ -101,6 +91,7 @@ class LocationFragment : Fragment() {
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             holder.text.text = places[position]
+            holder.text.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, R.drawable.ic_baseline_location_on_24, 0)
             holder.text.setOnClickListener {
                 viewModel.setCurrentPlace(places[position])
                 activity.bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN

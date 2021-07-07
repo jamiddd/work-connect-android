@@ -3,27 +3,30 @@ package com.jamid.workconnect
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Configuration
-import android.graphics.Color
 import android.graphics.Typeface
+import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
 import android.text.Editable
-import android.text.InputType
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.StrikethroughSpan
 import android.text.style.StyleSpan
 import android.text.style.UnderlineSpan
-import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
+import com.facebook.drawee.backends.pipeline.Fresco
+import com.facebook.drawee.interfaces.DraweeController
 import com.facebook.drawee.view.SimpleDraweeView
+import com.facebook.imagepipeline.request.ImageRequest
 import com.google.android.material.chip.Chip
 import com.jamid.workconnect.databinding.BlogExtraLayoutBinding
 import com.jamid.workconnect.databinding.FragmentBlogBinding
@@ -32,17 +35,22 @@ import com.jamid.workconnect.model.BlogItemConverter
 import com.jamid.workconnect.model.Post
 import com.jamid.workconnect.model.SpanItem
 import com.jamid.workconnect.profile.ProfileFragment
+import com.jamid.workconnect.views.zoomable.ImageControllerListener
+import com.jamid.workconnect.views.zoomable.ImageViewFragment
+
 
 class BlogFragment : BasePostFragment(R.layout.fragment_blog, TAG, false) {
 
     private lateinit var binding: FragmentBlogBinding
     private var time: Long = 0
     private lateinit var onChipClickListener: OnChipClickListener
+    private val imageControllerListenerList = mutableMapOf<String, ImageControllerListener>()
 
     @SuppressLint("Recycle")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentBlogBinding.bind(view)
+
         time = System.currentTimeMillis()
         postId = arguments?.getString(ARG_POST_ID)
         bottomBinding = binding.blogMetadata
@@ -81,13 +89,12 @@ class BlogFragment : BasePostFragment(R.layout.fragment_blog, TAG, false) {
         }
 
         viewModel.extras[ProjectFragment.ARG_POST] = post
-//        activity.setFragmentTitle(post.title)
 
         binding.blogMetadata.postJoinBtn.visibility = View.GONE
 
         val titleEditable = SpannableStringBuilder(post.title)
 
-        val title = getNewTextField(activity, "Heading", titleEditable, null)
+        val title = getNewTextField(activity, HEADING, titleEditable, null)
         (title.layoutParams as LinearLayout.LayoutParams).setMargins(0, convertDpToPx(4), 0, convertDpToPx(4))
         binding.blogItemContainer.addView(title)
 
@@ -136,7 +143,7 @@ class BlogFragment : BasePostFragment(R.layout.fragment_blog, TAG, false) {
             findNavController().navigate(R.id.profileFragment, Bundle().apply { putParcelable(ProfileFragment.ARG_USER, post.admin) }, options)
         }
 
-        binding.blogScroller.setOnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY ->
+        binding.blogScroller.setOnScrollChangeListener { _, _, scrollY, _, _ ->
 
             if (scrollY > binding.blogItemContainer.getChildAt(0).measuredHeight) {
                 binding.blogFragmentToolbar.title = post.title
@@ -194,6 +201,25 @@ class BlogFragment : BasePostFragment(R.layout.fragment_blog, TAG, false) {
             }
             (child.layoutParams as LinearLayout.LayoutParams).setMargins(0, convertDpToPx(4), 0, convertDpToPx(4))
             binding.blogItemContainer.addView(child)
+
+            if (child is SimpleDraweeView) {
+
+                child.setOnClickListener {
+                    val extras = FragmentNavigatorExtras(child to blogItem.content)
+                    val bundle = Bundle().apply {
+                        putString(ImageViewFragment.ARG_TRANSITION_NAME, blogItem.content)
+                        putString(ImageViewFragment.ARG_IMAGE, blogItem.content)
+                        putInt(ImageViewFragment.ARG_WIDTH, imageControllerListenerList[blogItem.content]!!.params.first)
+                        putInt(ImageViewFragment.ARG_HEIGHT, imageControllerListenerList[blogItem.content]!!.params.second)
+                    }
+                    findNavController().navigate(
+                        R.id.imageViewFragment,
+                        bundle,
+                        null,
+                        extras
+                    )
+                }
+            }
         }
 
 
@@ -267,11 +293,10 @@ class BlogFragment : BasePostFragment(R.layout.fragment_blog, TAG, false) {
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
         )
+
         textView.apply {
             minHeight = convertDpToPx(48)
             setPadding(convertDpToPx(12), 0, convertDpToPx(12), 0)
-            isSingleLine = false
-            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE
             text = initialText
             hint = hintText
             gravity = Gravity.CENTER_VERTICAL
@@ -291,86 +316,113 @@ class BlogFragment : BasePostFragment(R.layout.fragment_blog, TAG, false) {
             }
 
         }
-
+        textView.setTextIsSelectable(true)
         setEditTextType(textView, type)
-
         return textView
     }
+
     private fun setEditTextType(textView: TextView, type: String) {
+
+        textView.setTextIsSelectable(true)
+
         when (type) {
-            "Heading" -> {
-                textView.textSize = convertDpToPx(13f)
+            HEADING -> {
+                textView.setTextAppearance(R.style.TextAppearance_AppCompat_Display1)
                 textView.typeface = Typeface.create(Typeface.SERIF, Typeface.BOLD)
-                textView.background = null
-                textView.setBackgroundColor(Color.TRANSPARENT)
+                textView.setTextColor(ContextCompat.getColor(textView.context, R.color.black))
             }
-            "SubHeading" -> {
-                textView.textSize = convertDpToPx(10f)
+            SUB_HEADING -> {
+                textView.setTextAppearance(R.style.TextAppearance_AppCompat_Large)
                 textView.typeface = Typeface.create(Typeface.SERIF, Typeface.BOLD)
-                textView.background = null
-                textView.setBackgroundColor(Color.TRANSPARENT)
+                textView.setTextColor(ContextCompat.getColor(textView.context, R.color.black))
             }
-            "Paragraph" -> {
-                textView.textSize = convertDpToPx(6f)
-                textView.typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL)
-                textView.background = null
-                textView.setBackgroundColor(Color.TRANSPARENT)
+            PARAGRAPH -> {
+                textView.setTextAppearance(R.style.TextAppearance_AppCompat_Medium)
+                textView.setTextColor(ContextCompat.getColor(textView.context, R.color.black))
             }
-            "Code" -> {
+            CODE -> {
                 textView.textSize = convertDpToPx(5f)
                 textView.typeface = Typeface.create(Typeface.MONOSPACE, Typeface.BOLD)
                 textView.background = null
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    if (activity.resources?.configuration?.isNightModeActive == true) {
-                        textView.setBackgroundColor(ContextCompat.getColor(activity, R.color.darkestGrey))
-                    } else {
-                        textView.setBackgroundColor(ContextCompat.getColor(activity, R.color.grey))
-                    }
-                } else {
-                    if (activity.resources?.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES) {
-                        textView.setBackgroundColor(ContextCompat.getColor(activity, R.color.darkestGrey))
-                    } else {
-                        textView.setBackgroundColor(ContextCompat.getColor(activity, R.color.grey))
-                    }
-                }
-
-
+                textView.setBackgroundColor(getColorBasedOnTheme(textView.context))
                 textView.setPadding(convertDpToPx(16), convertDpToPx(12), convertDpToPx(16), convertDpToPx(12))
             }
-            "Image" -> {
+            IMAGE -> {
                 throw Exception("Cannot create edittext of type image")
             }
-            "Quote" -> {
-                textView.textSize = convertDpToPx(7f)
+            QUOTE -> {
+                textView.setTextAppearance(R.style.TextAppearance_AppCompat_Small)
                 textView.typeface = Typeface.create(Typeface.SERIF, Typeface.ITALIC)
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    if (activity.resources?.configuration?.isNightModeActive == true) {
-                        textView.background = ContextCompat.getDrawable(textView.context, R.drawable.quote_background_night)
-                    } else {
-                        textView.background = ContextCompat.getDrawable(textView.context, R.drawable.quote_background)
-                    }
-                } else {
-                    if (activity.resources?.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES) {
-                        textView.background = ContextCompat.getDrawable(textView.context, R.drawable.quote_background_night)
-                    } else {
-                        textView.background = ContextCompat.getDrawable(textView.context, R.drawable.quote_background)
-                    }
-                }
+                textView.background = getDrawableBasedOnTheme(textView.context)
             }
         }
     }
-    private fun getNewImage(context: Context, imgContent: String?): SimpleDraweeView {
+
+
+    private fun getDrawableBasedOnTheme(context: Context): Drawable? {
+
+        val quoteBackgroundNight = ContextCompat.getDrawable(context, R.drawable.quote_background_night)
+        val quoteBackgroundDay = ContextCompat.getDrawable(context, R.drawable.quote_background)
+
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (activity.resources?.configuration?.isNightModeActive == true) {
+                quoteBackgroundNight
+            } else {
+                quoteBackgroundDay
+            }
+        } else {
+            if (activity.resources?.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES) {
+                quoteBackgroundNight
+            } else {
+                quoteBackgroundDay
+            }
+        }
+    }
+
+    private fun getColorBasedOnTheme(context: Context): Int {
+
+        val colorDay = ContextCompat.getColor(context, R.color.grey)
+        val colorNight = ContextCompat.getColor(context, R.color.darkestGrey)
+
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (activity.resources?.configuration?.isNightModeActive == true) {
+                colorNight
+            } else {
+                colorDay
+            }
+        } else {
+            if (activity.resources?.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES) {
+                colorNight
+            } else {
+                colorDay
+            }
+        }
+    }
+
+
+    private fun getNewImage(context: Context, imgContent: String): SimpleDraweeView {
         val img = SimpleDraweeView(context)
         img.layoutParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             convertDpToPx(300)
         )
+        img.setBackgroundColor(ContextCompat.getColor(context, R.color.grey))
         img.isLongClickable = true
         img.isClickable = true
         img.adjustViewBounds = true
-        img.setImageURI(imgContent)
+        val imageControllerListener = ImageControllerListener()
+
+        val imageRequest = ImageRequest.fromUri(imgContent)
+        val controller: DraweeController = Fresco.newDraweeControllerBuilder()
+            .setImageRequest(imageRequest)
+            .setControllerListener(imageControllerListener)
+            .build()
+
+        imageControllerListenerList[imgContent] = imageControllerListener
+
+        img.controller = controller
+
+        ViewCompat.setTransitionName(img, imgContent)
 
         return img
     }

@@ -52,7 +52,7 @@ class UserPagingSource(private val userSource: UserSource, private val repositor
 				val lastSnapshot = userSnapshot.last()
 				repository.mapOfDocumentSnapshots[lastSnapshot.id] = lastSnapshot
 
-				val users = userSnapshot.toObjects(User::class.java)
+				val users = repository.filterUsers(userSnapshot.toObjects(User::class.java), userSource)
 
 				return if (userSnapshot.size() < params.loadSize) {
 					LoadResult.Page(users, PageKey(null, firstSnapshot), PageKey(null, null))

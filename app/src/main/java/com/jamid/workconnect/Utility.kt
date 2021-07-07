@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.res.Resources
 import android.graphics.Typeface
+import android.os.Build
 import android.text.Spannable
 import android.text.style.CharacterStyle
 import android.text.style.StrikethroughSpan
@@ -15,17 +16,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.inputmethod.InputMethodManager
-import android.widget.ProgressBar
-import android.widget.ScrollView
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.setMargins
 import androidx.core.view.setPadding
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.RecyclerView
+import androidx.navigation.NavOptions
+import androidx.navigation.navOptions
 import com.google.android.material.appbar.AppBarLayout
-import me.everything.android.ui.overscroll.IOverScrollState
-import me.everything.android.ui.overscroll.OverScrollDecoratorHelper
 
 const val START_TO_START = ""
 const val START_TO_END = ""
@@ -39,6 +37,25 @@ const val BOTTOM_TO_TOP = ""
 fun getWindowHeight() = Resources.getSystem().displayMetrics.heightPixels
 
 fun getWindowWidth() = Resources.getSystem().displayMetrics.widthPixels
+
+fun Activity.getFullScreenHeight(): Int {
+    return if (Build.VERSION.SDK_INT > 29) {
+        val rect = windowManager.maximumWindowMetrics.bounds
+        rect.bottom - rect.top
+    } else {
+        getWindowHeight()
+    }
+}
+
+fun Fragment.getFullScreenHeight(): Int {
+    return requireActivity().getFullScreenHeight()
+}
+
+
+/*fun Activity.getUsableScreenHeight(): Int {
+    val rect = windowManager.currentWindowMetrics.bounds
+    return rect.bottom - rect.top
+}*/
 
 fun AppBarLayout.hide() {
     val animator = ObjectAnimator.ofFloat(this, View.TRANSLATION_Y, -convertDpToPx(this.measuredHeight, this.context).toFloat())
@@ -93,6 +110,11 @@ fun Fragment.convertDpToPx(dp: Int) = TypedValue.applyDimension(
     this.requireContext().resources.displayMetrics
 ).toInt()
 
+/*fun Fragment.convertPxToDP(px: Float): Int {
+    return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX, px, this.requireContext().resources.displayMetrics).toInt()
+}*/
+
+
 fun Fragment.convertDpToPx(dp: Float) = TypedValue.applyDimension(
     TypedValue.COMPLEX_UNIT_DIP,
     dp,
@@ -106,10 +128,10 @@ fun Context.convertDpToPx(dp: Int) = TypedValue.applyDimension(
 ).toInt()
 
 fun Fragment.showKeyboard() {
-    view?.let { activity?.showKeyboard(it) }
+    view?.let { activity?.showKeyboard() }
 }
 
-private fun Context.showKeyboard(view: View) {
+private fun Context.showKeyboard() {
     val inputMethodManager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
     inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0)
 }
@@ -152,7 +174,7 @@ fun setSpanRelatively(spannable: Spannable, start: Int, end: Int, newSpan: Any) 
     }
 
     if (newSpan::class == UnderlineSpan::class) {
-        val span = newSpan as UnderlineSpan
+//        val span = newSpan as UnderlineSpan
 
         val list = spannable.getSpans(start, end, UnderlineSpan::class.java)
 
@@ -161,7 +183,7 @@ fun setSpanRelatively(spannable: Spannable, start: Int, end: Int, newSpan: Any) 
 
     if (newSpan::class == StrikethroughSpan::class) {
 
-        val span = newSpan as StrikethroughSpan
+//        val span = newSpan as StrikethroughSpan
 
         val list = spannable.getSpans(start, end, StrikethroughSpan::class.java)
 
@@ -417,6 +439,30 @@ fun View.updateLayout(
     }
 }
 
+fun slideRightNavOptions(): NavOptions {
+    return navOptions {
+        anim {
+            enter = R.anim.slide_in_right
+            exit = R.anim.slide_out_left
+            popEnter = R.anim.slide_in_left
+            popExit = R.anim.slide_out_right
+        }
+    }
+}
+
+/*fun Fragment.slideRightNavOptions(): NavOptions {
+    return navOptions {
+        anim {
+            enter = R.anim.slide_in_right
+            exit = R.anim.slide_out_left
+            popEnter = R.anim.slide_in_left
+            popExit = R.anim.slide_out_right
+        }
+    }
+}*/
+
+
+/*
 fun View.attachOverScrollWithProgressListener(progress: ProgressBar) {
     var isProgressing = false
     val iDecor = when (this) {
@@ -463,4 +509,4 @@ fun View.attachOverScrollWithProgressListener(progress: ProgressBar) {
         animator.start()
     }
 
-}
+}*/

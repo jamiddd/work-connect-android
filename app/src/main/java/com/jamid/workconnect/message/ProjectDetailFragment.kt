@@ -58,10 +58,18 @@ class ProjectDetailFragment : SupportFragment(R.layout.fragment_project_detail, 
                 }
 
                 if (it.guidelines.isNullOrBlank()) {
-                    binding.projectDetailContent.guidelinesBtn.isEnabled = false
-                    binding.projectDetailContent.projectGuidelinesPreview.visibility = View.GONE
+                    if (it.uid == viewModel.user.value?.id) {
+                        binding.projectDetailContent.guidelinesBtn.text = "Create Project Guidelines"
+                        binding.projectDetailContent.guidelinesBtn.isEnabled = true
+                        binding.projectDetailContent.projectGuidelinesPreview.text = "Create guidelines for other contributors for the appropriate code of conduct for this purpose."
+                        binding.projectDetailContent.projectGuidelinesPreview.visibility = View.VISIBLE
+                    } else {
+                        binding.projectDetailContent.guidelinesBtn.isEnabled = false
+                        binding.projectDetailContent.projectGuidelinesPreview.visibility = View.GONE
+                    }
                 } else {
                     binding.projectDetailContent.projectGuidelinesPreview.text = it.guidelines
+                    binding.projectDetailContent.projectGuidelinesPreview.visibility = View.VISIBLE
                 }
 
             } else {

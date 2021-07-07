@@ -27,12 +27,12 @@ class GenericBoundaryCallback<T : Any>(
 
     private fun fetchItemsAndCache(query: Query, extras: Map<String, Any?>?) {
         Log.d(BUG_TAG, "Before fetching posts .. ")
-        repo.getItems(lim, query, clazz, extras) { doc1, doc2, e ->
+        /*repo.getItems(lim, query, clazz, extras) { doc1, doc2, e ->
             Log.d(BUG_TAG, "After fetching posts .. ")
             firstSnapshot = doc1
             lastSnapshot = doc2
             isEnd = e
-        }
+        }*/
     }
 
     override fun onZeroItemsLoaded() {
@@ -46,10 +46,10 @@ class GenericBoundaryCallback<T : Any>(
             if (lastSnapshot != null) {
                 fetchItemsAndCache(initialQuery.startAfter(lastSnapshot).limit(lim), extras)
             } else {
-                repo.getSnapshot(itemAtEnd, clazz) { doc ->
+                /*repo.getSnapshot(itemAtEnd, clazz) { doc ->
                     lastSnapshot = doc
                     fetchItemsAndCache(initialQuery.startAfter(lastSnapshot).limit(lim), extras)
-                }
+                }*/
             }
         }
     }
@@ -60,10 +60,10 @@ class GenericBoundaryCallback<T : Any>(
             if (firstSnapshot != null) {
                 fetchItemsAndCache(initialQuery.endAt(firstSnapshot).limit(lim), extras)
             } else {
-                repo.getSnapshot(itemAtFront, clazz) { doc ->
+                /*repo.getSnapshot(itemAtFront, clazz) { doc ->
                     firstSnapshot = doc
                     fetchItemsAndCache(initialQuery.endAt(firstSnapshot).limit(lim), extras)
-                }
+                }*/
             }
         }
     }

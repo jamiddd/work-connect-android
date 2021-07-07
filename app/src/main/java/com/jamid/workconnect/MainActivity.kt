@@ -1,7 +1,6 @@
 package com.jamid.workconnect
 
 import android.Manifest
-import android.R.attr
 import android.R.attr.*
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -9,103 +8,71 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.*
 import android.content.pm.PackageManager
-import android.content.res.ColorStateList
 import android.graphics.Color
 import android.location.Geocoder
 import android.location.Location
 import android.location.LocationManager
-import android.nfc.Tag
 import android.os.*
 import android.util.Log
 import android.view.*
-import android.widget.Button
-import android.widget.EditText
-import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.annotation.ColorInt
-import androidx.annotation.ColorRes
-import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.coordinatorlayout.widget.CoordinatorLayout
-import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.view.WindowCompat
-import androidx.core.view.children
-import androidx.core.widget.doAfterTextChanged
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import androidx.navigation.NavController
-import androidx.navigation.NavDeepLinkBuilder
-import androidx.navigation.ui.setupActionBarWithNavController
+import androidx.navigation.*
+import androidx.navigation.fragment.FragmentNavigatorExtras
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.navigateUp
+import androidx.navigation.ui.setupWithNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.facebook.drawee.view.SimpleDraweeView
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
-import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.ListenerRegistration
+import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import com.jamid.workconnect.adapter.paging2.PostViewHolderHorizontal
-import com.jamid.workconnect.adapter.paging3.PostAdapter
-import com.jamid.workconnect.adapter.paging3.PostFragmentTest
+import com.jamid.workconnect.adapter.paging2.SimpleMessageViewHolder
 import com.jamid.workconnect.adapter.paging3.PostViewHolder
 import com.jamid.workconnect.auth.InterestFragment
-import com.jamid.workconnect.auth.SignInFragment
-import com.jamid.workconnect.auth.UserDetailFragment
 import com.jamid.workconnect.databinding.ActivityMainBinding
+import com.jamid.workconnect.explore.*
 import com.jamid.workconnect.home.*
+import com.jamid.workconnect.home.EditorFragment.Companion.OLD_STATE
 import com.jamid.workconnect.interfaces.*
 import com.jamid.workconnect.message.*
 import com.jamid.workconnect.model.*
 import com.jamid.workconnect.profile.*
-import me.everything.android.ui.overscroll.OverScrollDecoratorHelper
-import java.io.File
-import com.jamid.workconnect.search.SearchFragment
-import com.jamid.workconnect.settings.SettingsFragment
 import com.jamid.workconnect.views.zoomable.ImageViewFragment
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.io.File
+import java.io.FileOutputStream
 import java.util.*
-import kotlin.collections.ArrayList
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.tasks.Task
-import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.auth.AuthResult
-import androidx.annotation.NonNull
-import androidx.core.content.res.ResourcesCompat
-import androidx.core.view.ViewCompat
-import androidx.navigation.NavDestination
-import androidx.navigation.fragment.FragmentNavigatorExtras
-import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.fragment.findNavController
-import androidx.navigation.navOptions
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.navigateUp
-import androidx.navigation.ui.setupWithNavController
-import com.google.android.gms.tasks.OnCompleteListener
-import com.google.android.material.button.MaterialButton
-import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.auth.AuthCredential
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
-import com.jamid.workconnect.adapter.paging2.SimpleMessageViewHolder
-import com.jamid.workconnect.explore.*
 
 
+@Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
 @OptIn(androidx.paging.ExperimentalPagingApi::class)
 class MainActivity : AppCompatActivity(),
     PostsLoadStateListener,
@@ -120,41 +87,29 @@ class MainActivity : AppCompatActivity(),
     GenericDialogListener,
     GenericMenuClickListener,
     OnChipClickListener,
-    ExploreClickListener {
-
-    // TODO("Saved posts fragment is showing error if the user has no saved posts.")
-
-    private var currentNavController: LiveData<NavController>? = null
+    ExploreClickListener,
+    CommentClickListener {
 
     private lateinit var navControllerX: NavController
     private lateinit var appBarConfiguration: AppBarConfiguration
-
-    private val viewModel: MainViewModel by viewModels()
-    lateinit var mainBinding: ActivityMainBinding
-    lateinit var bottomSheetBehavior: BottomSheetBehavior<ConstraintLayout>
-    var currentBottomFragment: Fragment? = null
-    private var currentFragmentId: Int = 0
-    private var hasPendingTransition = false
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     private lateinit var geocoder: Geocoder
     private lateinit var notificationManager: NotificationManager
-
-    val recyclerViewPool = RecyclerView.RecycledViewPool()
-    val fragmentStack = Stack<String>()
-    val titleStack = Stack<String>()
-    var currentViewHolder: Any? = null
-    var currentAdapter: Any? = null
-    var currentFeedFragment: Fragment? = null
-
-    var currentImagePosition = 0
-    private var currentMessage: SimpleMessage? = null
-    private var currentFileName: String? = null
+    private var currentFragmentId: Int = 0
+    private var hasPendingTransition = false
+    private var currentViewHolder: Any? = null
+    private var currentFeedFragment: Fragment? = null
     private var mContainerId = 0
     private var currentFragmentTag = ""
-
     private var currentCropConfig: Bundle? = null
+    private val viewModel: MainViewModel by viewModels()
+    private lateinit var navHostFragment: NavHostFragment
+    lateinit var mainBinding: ActivityMainBinding
+    lateinit var bottomSheetBehavior: BottomSheetBehavior<ConstraintLayout>
+    var currentBottomFragment: Fragment? = null
+    var currentImagePosition = 0
 
-    private var lastTagList: List<String> = emptyList()
+    private val channelMessagesListeners = mutableMapOf<String, ListenerRegistration>()
 
     private val mLocationCallback: LocationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
@@ -166,19 +121,11 @@ class MainActivity : AppCompatActivity(),
         }
     }
 
-    /*private val Context.dataStore by preferencesDataStore(name = FLAG_PREFERENCES)
-
-    private object PreferenceKeys {
-        val IS_FIRST_TIME = booleanPreferencesKey("IS_FIRST_TIME")
-
-    }*/
-
-    lateinit var navHostFragment: NavHostFragment
-
     @SuppressLint("VisibleForTests")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
@@ -188,22 +135,14 @@ class MainActivity : AppCompatActivity(),
 
         navControllerX = navHostFragment.navController
 
-        navControllerX.addOnDestinationChangedListener { controller, destination, arguments ->
+        navControllerX.addOnDestinationChangedListener { _, destination, _ ->
             currentFragmentId = destination.id
             updateUI(currentFragmentId)
-            /*when (destination.id) {
-                R.id.homeFragment, R.id.exploreFragment, R.id.messageFragment, R.id.notificationFragment -> {
-                    currentFragmentId = destination.id
-                }
-            }*/
         }
 
         fusedLocationProviderClient = FusedLocationProviderClient(this)
         geocoder = Geocoder(this)
         createNotificationChannel()
-
-//        mainBinding.primaryTopBlur.setBlurredView(mainBinding.primaryAppBar)
-//        mainBinding.bottomBlur.setBlurredView(mainBinding.bottomCard)
 
         mContainerId = R.id.navHostFragment
 
@@ -222,7 +161,7 @@ class MainActivity : AppCompatActivity(),
                 }
             }
 
-            viewModel.mediaDownloadResult.postValue(null)
+            viewModel.clearMediaDownloadResult()
         }
 
         if (Build.VERSION.SDK_INT <= 27) {
@@ -237,12 +176,9 @@ class MainActivity : AppCompatActivity(),
 
         bottomSheetBehavior = setBottomSheet(mainBinding.bottomHelperView)
 
-//        OverScrollDecoratorHelper.setUpOverScroll(mainBinding.horizontalContainer)
-
-        val statusBarHeight = statusBarHeight()
         val navigationBarHeight = navigationBarHeight()
 
-        mainBinding.root.setOnApplyWindowInsetsListener { v, insets ->
+        mainBinding.root.setOnApplyWindowInsetsListener { _, insets ->
             // should only be less than
             val (top: Int, bottom: Int) = if (Build.VERSION.SDK_INT < 30) {
                 @Suppress("DEPRECATION")
@@ -303,7 +239,6 @@ class MainActivity : AppCompatActivity(),
                     if (user == null) {
                         Snackbar.make(mainBinding.root, "You haven't created your account completely. Complete this process to go back.", Snackbar.LENGTH_INDEFINITE).show()
                         navControllerX.navigate(R.id.userDetailFragment)
-//                        toFragment(UserDetailFragment.newInstance(), UserDetailFragment.TAG)
                     }
                 }
             }
@@ -316,36 +251,6 @@ class MainActivity : AppCompatActivity(),
         }
 
         setSearchTags()
-
-        viewModel.user.observe(this) { user ->
-            Log.d(BUG_TAG, "The user observer in MainActivity is still alive.")
-            if (user != null) {
-                // the user can login from different fragments, make sure that the search tags appear only
-                // when the user is in home fragment
-                if (viewModel.currentFragmentTag.value == HomeFragment.TAG) {
-//                    mainBinding.horizontalContainer.visibility = View.VISIBLE
-                } else {
-//                    mainBinding.horizontalContainer.visibility = View.GONE
-                }
-            } else {
-                // TODO("Set up search tags dynamically from firebase database")
-                // currently the search tags are predefined, but these need to be fetched from popular interests collection
-                // once setup
-            }
-
-            // TODO("Move this function and associate functions to the respective fragment")
-            // set the search tags
-
-            // set the user icon
-            setUserIcon(user)
-
-            if (user != null) {
-                if (viewModel.miniUser.value == null) {
-                    val userMinimal = UserMinimal(user.id, user.name, user.email, user.username, user.photo)
-                    viewModel.setUserMinimal(userMinimal)
-                }
-            }
-        }
 
         LocalBroadcastManager.getInstance(this).registerReceiver(notificationReceiver, IntentFilter(
             CHAT_FRAGMENT_INTENT))
@@ -363,17 +268,19 @@ class MainActivity : AppCompatActivity(),
             } else {
                 val chatChannelId = extras.get(CHAT_CHANNEL_ID) as String?
                 if (chatChannelId != null) {
-                    viewModel.onNewMessageNotification(chatChannelId) {
-                        // TODO("Use it to navigate using navigation component")
-                        // navigateToFragmentUsingPendingIntent()
+                    lifecycleScope.launch {
+                        /*val chatChannel = viewModel.onNewMessageNotification(chatChannelId)*//* {
+                            // navigateToFragmentUsingPendingIntent()
 
-                        // since navigation component is not being used, cannot use pending intent
-                        // this is only a workaround until navigation component start can save fragment
-                        // state
+                            // since navigation component is not being used, cannot use pending intent
+                            // this is only a workaround until navigation component start can save fragment
+                            // state
 
-                        mainBinding.bottomNav.selectedItemId = R.id.message_navigation
-                        toFragment(ChatFragment.newInstance(it), ChatFragment.TAG)
+                            mainBinding.bottomNav.selectedItemId = R.id.message_navigation
+                            toFragment(ChatFragment.newInstance(it), ChatFragment.TAG)
 
+                        }*/
+                        // TODO("Do something when a new message arrives, using deeplink")
                     }
                 }
             }
@@ -390,9 +297,45 @@ class MainActivity : AppCompatActivity(),
             onBackPressed()
         }*/
 
+        setUserListener()
+
     }
 
-    private fun navigateToFragmentUsingPendingIntent(navGraphId: Int, destinationId: Int, extras: Bundle) {
+    private fun setUserListener() {
+        val auth = Firebase.auth.currentUser
+        if (auth != null) {
+            val currentUserRef = Firebase.firestore.collection(USERS).document(auth.uid)
+
+            currentUserRef.addSnapshotListener { document, error ->
+                    if (error != null) {
+                        viewModel.setCurrentError(error)
+                        return@addSnapshotListener
+                    }
+
+                    if (document != null && document.exists()) {
+                        val userHalf = document.toObject(User::class.java)!!
+                        viewModel.insertPublicUserData(userHalf)
+                    }
+                }
+
+            currentUserRef.collection(PRIVATE)
+                .document(auth.uid)
+                .addSnapshotListener { document, error ->
+                    if (error != null) {
+                        viewModel.setCurrentError(error)
+                        return@addSnapshotListener
+                    }
+
+                    if (document != null && document.exists()) {
+                        val userHalf = document.toObject(UserPrivate::class.java)!!
+                        viewModel.insertPrivateUserData(userHalf)
+                    }
+                }
+
+        }
+    }
+
+    /*private fun navigateToFragmentUsingPendingIntent(navGraphId: Int, destinationId: Int, extras: Bundle) {
         val pendingIntent = NavDeepLinkBuilder(this)
             .setGraph(navGraphId)
             .setDestination(destinationId)
@@ -400,39 +343,25 @@ class MainActivity : AppCompatActivity(),
             .createPendingIntent()
 
         pendingIntent.send()
-    }
-
-    private fun setUserIcon(user: User?) {
-        /*mainBinding.userIcon.setImageURI(user?.photo)
-        mainBinding.userIcon.setOnClickListener {
-            if (user != null) {
-                val instance = ProfileFragment.newInstance(user = user)
-                toFragment(instance, ProfileFragment.TAG)
-            } else {
-                val fragment = SignInFragment.newInstance()
-                toFragment(fragment, InterestFragment.TAG)
-            }
-        }*/
-    }
+    }*/
 
     private fun setSearchTags() {
 
         lifecycleScope.launch {
-            val tagsResult = viewModel.getTags(viewModel.user.value)
-            when (tagsResult) {
+            when (val tagsResult = viewModel.getTags(viewModel.user.value)) {
                 is Result.Error -> {
                     viewModel.setCurrentError(tagsResult.exception)
                 }
                 is Result.Success -> {
 
                     val tags = tagsResult.data
+                    Log.d(BUG_TAG, tags.toString())
 
                     /*mainBinding.popularInterestsGroup.removeViews(1, mainBinding.popularInterestsGroup.childCount - 1)
                     tags.forEachIndexed { index, popularInterest ->
                         if (index < 9) {
                             addChip(index, popularInterest)
                         } else {
-                            // TODO("Dynamically add numbers of search tags")
                             // currently the number of search tags is static, hence only 9 search tags and one random tag
                             // is used
                         }
@@ -447,22 +376,6 @@ class MainActivity : AppCompatActivity(),
                 }
             }
         }
-
-    }
-
-
-    private fun addChip(index: Int, interest: String) {
-        val chip = LayoutInflater.from(this).inflate(R.layout.chip, null) as Chip
-        chip.text = interest
-        chip.id = index + 1
-        chip.isCheckable = true
-        chip.isCheckedIconVisible = false
-
-        chip.setOnClickListener {
-            chip.isChecked = true
-        }
-
-//        mainBinding.popularInterestsGroup.addView(chip)
     }
 
     private fun setBottomSheet(bottomSheetView: ConstraintLayout): BottomSheetBehavior<ConstraintLayout> {
@@ -494,23 +407,17 @@ class MainActivity : AppCompatActivity(),
                     mainBinding.scrimForBottomSheet.isClickable = false
                     currentBottomFragment = null
 
-                    val options = navOptions {
-                        anim {
-                            enter = R.anim.slide_in_right
-                            exit = R.anim.slide_out_left
-                            popEnter = R.anim.slide_in_left
-                            popExit = R.anim.slide_out_right
-                        }
-                    }
                     if (hasPendingTransition) {
                         when (currentFragmentTag) {
                             CreateProjectFragment.TAG -> {
-                                navControllerX.navigate(R.id.createProjectFragment, null, options)
-//                                toFragment(CreateProjectFragment.newInstance(), CreateProjectFragment.TAG)
+                                navControllerX.navigate(R.id.createProjectFragment, null,
+                                    slideRightNavOptions()
+                                )
                             }
                             EditorFragment.TAG -> {
-                                navControllerX.navigate(R.id.editorFragment, null, options)
-//                                toFragment(EditorFragment.newInstance(), EditorFragment.TAG)
+                                navControllerX.navigate(R.id.editorFragment, null,
+                                    slideRightNavOptions()
+                                )
                             }
                             SIGN_IN_PROMPT -> {
 
@@ -541,26 +448,6 @@ class MainActivity : AppCompatActivity(),
         return behavior
     }
 
-    private fun ViewGroup.setToolbarIfPresent() {
-        for (v in this.children) {
-            if (v is ViewGroup) {
-                if (v is MaterialToolbar) {
-                    v.setNavigationOnClickListener {
-                        navControllerX.navigateUp()
-                    }
-                } else {
-                    v.setToolbarIfPresent()
-                }
-            } else {
-                if (v is MaterialToolbar) {
-                    v.setNavigationOnClickListener {
-                        navControllerX.navigateUp()
-                    }
-                }
-            }
-        }
-    }
-
     private fun updateUI(fragmentId: Int) {
         when (fragmentId) {
             R.id.homeFragment,
@@ -586,11 +473,18 @@ class MainActivity : AppCompatActivity(),
                 mainBinding.bottomNavBackground.visibility = View.VISIBLE
                 mainBinding.bottomCard.hide()
             }
+            R.id.commentsFragment -> {
+                mainBinding.bottomCard.hide()
+            }
+            R.id.tagPostsFragment -> {
+                mainBinding.bottomCard.hide()
+                mainBinding.bottomNavBackground.show()
+            }
         }
     }
 
 
-    fun MaterialButton.update(content: String? = null, enabledState: Boolean = true, visibilityState: Int = View.VISIBLE, @DrawableRes iconId: Int? = null, @ColorInt textColor: Int? = null, @ColorInt backgroundColor: Int? = null, cornerRadiusSize: Int = 18, onClickListener: ((v: MaterialButton) -> Unit)? = null) {
+    /*fun MaterialButton.update(content: String? = null, enabledState: Boolean = true, visibilityState: Int = View.VISIBLE, @DrawableRes iconId: Int? = null, @ColorInt textColor: Int? = null, @ColorInt backgroundColor: Int? = null, cornerRadiusSize: Int = 18, onClickListener: ((v: MaterialButton) -> Unit)? = null) {
         text = content
         isEnabled = enabledState
         visibility = visibilityState
@@ -611,7 +505,6 @@ class MainActivity : AppCompatActivity(),
         }
 
         if (textColor != null) {
-            TODO("Change this fast .. ")
             setTextColor(ContextCompat.getColor(this@MainActivity, R.color.black))
         } else {
             setTextColor(ContextCompat.getColor(this@MainActivity, R.color.blue_500))
@@ -650,14 +543,10 @@ class MainActivity : AppCompatActivity(),
             }
         }
 
-    }
-
+    }*/
 
     // Add this member function in MainActivity
     private fun setupBottomNavigationBar() {
-
-        /*val toolbar = findViewById<MaterialToolbar>(R.id.primaryToolbar)
-        setSupportActionBar(toolbar)*/
 
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottomNav)
 
@@ -672,109 +561,25 @@ class MainActivity : AppCompatActivity(),
                 )
         )
 
-        // List of nav graph for each of the fragment collection
-        /*val navGraphIds = listOf(
-            R.navigation.home_navigation,
-            R.navigation.explore_navigation,
-            R.navigation.message_navigation,
-            R.navigation.notification_navigation
-        )*/
-
-        // Setup the bottom navigation view with a list of navigation graphs
-        /*val controller = bottomNavigationView.setupWithNavController(
-            navGraphIds = navGraphIds,
-            fragmentManager = supportFragmentManager,
-            containerId = R.id.navHostFragment,
-            intent = intent
-        )*/
-
-        // Whenever the selected controller changes, setup the action bar.
-        /*controller.observe(this) { navController ->
-
-//            setupActionBarWithNavController(navController)
-
-            navController.addOnDestinationChangedListener { _, destination, _ ->
-
-            }
-
-        }
-        currentNavController = controller*/
-
         setFragmentManagerListeners()
     }
 
     private fun setFragmentManagerListeners() {
-        supportFragmentManager.addOnBackStackChangedListener {
-            viewModel.onFragmentTransactionComplete(supportFragmentManager.backStackEntryCount)
-        }
-    }
-
-    fun setFragmentTitle(title: String, isPrimary: Boolean = false) {
-        if (title.length > 20 ) {
-            val ellipsizedTitle = title.substring(0..17) + "..."
-//            mainBinding.primaryToolbar.title = ellipsizedTitle
-        } else {
-            if (isPrimary) {
-//                mainBinding.primaryToolbar.title = title.uppercase()
-            } else {
-//                mainBinding.primaryToolbar.title = title
-            }
-        }
-
-        if (!isPrimary) {
-//            mainBinding.primaryToolbar.setTitleTextAppearance(this@MainActivity, R.style.ToolbarTitleSecondary)
-        } else {
-//            mainBinding.primaryToolbar.setTitleTextAppearance(this@MainActivity, R.style.ToolbarTitlePrimary)
-        }
 
     }
 
-    /*override fun onBackPressed() {
-        if (currentBottomFragment != null) {
-            if (currentBottomFragment is GenericDialogFragment) {
-                return
-            } else {
-                bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
-            }
+    override fun onBackPressed() {
+        if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED || bottomSheetBehavior.state == BottomSheetBehavior.STATE_HALF_EXPANDED) {
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
         } else {
-            if (viewModel.fragmentTagStack.size < 2) {
-                finish()
-            } else {
-                if (viewModel.fragmentTagStack.peek() == UserDetailFragment.TAG) {
-                    Toast.makeText(this, "Finish creating your account!", Toast.LENGTH_LONG).show()
-                    return
-                }
-                viewModel.fragmentTagStack.pop()
-                viewModel.setCurrentFragmentTag(viewModel.fragmentTagStack.peek())
-                super.onBackPressed()
-            }
+            super.onBackPressed()
         }
-    }*/
+    }
 
     // For back navigation
     override fun onSupportNavigateUp(): Boolean {
         return navControllerX.navigateUp(appBarConfiguration)
     }
-
-    /*override fun onCreateBlog() {
-        if (viewModel.user.value == null) {
-            showSignInDialog(BLOG)
-        } else {
-            currentFragmentTag = EditorFragment.TAG
-            hasPendingTransition = true
-            bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
-        }
-    }
-
-    override fun onCreateProject() {
-        if (viewModel.user.value == null) {
-            showSignInDialog(PROJECT)
-        } else {
-            currentFragmentTag = CreateProjectFragment.TAG
-            hasPendingTransition = true
-            bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
-        }
-    }*/
 
     fun showSignInDialog(origin: String) {
         if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_HIDDEN) {
@@ -791,6 +596,9 @@ class MainActivity : AppCompatActivity(),
                 }
                 FOLLOW -> {
                     "You are not signed in. To follow a person, you must have an account."
+                }
+                COMMENT -> {
+                    "You are not signed in. To make any changes, you must have an account."
                 }
                 else -> {
                     ""
@@ -837,92 +645,31 @@ class MainActivity : AppCompatActivity(),
             viewModel.setCurrentImage(image)
             val fragment = ImageCropFragment.newInstance(currentCropConfig)
             showBottomSheet(fragment, ImageCropFragment.TAG)
+            currentCropConfig = null
+        }
+    }
+
+    private val selectDocumentLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        if (it.resultCode == Activity.RESULT_OK) {
+            val document = it.data?.data
+            viewModel.setCurrentDoc(document)
         }
     }
 
     private fun selectImage(extras: Bundle?) {
         currentCropConfig = extras
+
         val intent = Intent().apply {
             type = "image/*"
             action = Intent.ACTION_GET_CONTENT
         }
         selectImageLauncher.launch(intent)
-//        startActivityForResult(intent, REQUEST_GET_IMAGE)
     }
-
-//    override fun onSelectImageFromGallery() {
-//        selectImage(bundle)
-//        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
-//    }
-//
-//    override fun onCaptureEvent() {
-//        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
-//    }
-//
-//    override fun onImageRemove() {
-//        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
-//    }
-
-   /* override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == Activity.RESULT_OK) {
-            when (requestCode) {
-                REQUEST_GET_IMAGE -> {
-                    val image = data?.data
-                    viewModel.setCurrentImage(image)
-                    val fragment = ImageCropFragment.newInstance(currentCropConfig)
-                    showBottomSheet(fragment, ImageCropFragment.TAG)
-                    *//*val fragment = ImageCropFragment.newInstance(4, 3, 400, 300, "RECTANGLE")*//*
-                }
-                REQUEST_GET_DOCUMENT -> {
-                    val doc = data?.data
-                    viewModel.setCurrentDoc(doc)
-                }
-                SignInFragment.RC_SIGN_IN -> {
-                    // The Task returned from this call is always completed, no need to attach
-                    // a listener.
-                    Log.d(TAG, "Signing with google .. reached main act")
-                    val task = GoogleSignIn.getSignedInAccountFromIntent(data)
-//
-                }
-            }
-        } else {
-            if (requestCode == 13) {
-                val task = GoogleSignIn.getSignedInAccountFromIntent(data)
-                try {
-                    // Google Sign In was successful, authenticate with Firebase
-                    val account = task.getResult(ApiException::class.java)
-                    Log.d(TAG, "firebaseAuthWithGoogle:" + account.id)
-                    firebaseAuthWithGoogle(account.idToken)
-                } catch (e: ApiException) {
-                    // Google Sign In failed, update UI appropriately
-                    Log.w(TAG, "Google sign in failed", e)
-                }
-            } else {
-                Toast.makeText(this, "request code is not same - $requestCode", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }*/
 
     private fun firebaseAuthWithGoogle(idToken: String) {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
 
         viewModel.signInWithGoogle(credential)
-
-        /*Firebase.auth.signInWithCredential(credential)
-            .addOnCompleteListener(this,
-                OnCompleteListener<AuthResult?> { task ->
-                    if (task.isSuccessful) {
-                        // Sign in success, update UI with the signed-in user's information
-                        Log.d(TAG, "signInWithCredential:success")
-                        val user = Firebase.auth.currentUser
-                        updateUI(user)
-                    } else {
-                        // If sign in fails, display a message to the user.
-                        Log.w(TAG, "signInWithCredential:failure", task.exception)
-                        updateUI(null)
-                    }
-                })*/
     }
 
     private fun setAddressList(location: Location) {
@@ -957,7 +704,7 @@ class MainActivity : AppCompatActivity(),
         )
     }
 
-    val requestLocationPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+    private val requestLocationPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
         if (isGranted) {
             Toast.makeText(this, "Location permission granted.", Toast.LENGTH_LONG).show()
         } else {
@@ -967,12 +714,23 @@ class MainActivity : AppCompatActivity(),
 
     val requestGoogleSingInLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         if (it.resultCode == Activity.RESULT_OK) {
+
+            showBottomSheet(
+                GenericDialogFragment.newInstance(
+                    SIGN_IN_WITH_GOOGLE,
+                    "Signing in with Google",
+                    "Checking if you already have a Google account ..",
+                    isProgressing = true
+                ), GenericDialogFragment.TAG)
+
             val task = GoogleSignIn.getSignedInAccountFromIntent(it.data)
             try {
                 // Google Sign In was successful, authenticate with Firebase
                 val account = task.getResult(ApiException::class.java)
                 Log.d(TAG, "firebaseAuthWithGoogle:" + account.id)
-                firebaseAuthWithGoogle(account.idToken)
+                account?.idToken?.let { it1 ->
+                    firebaseAuthWithGoogle(it1)
+                }
             } catch (e: ApiException) {
                 // Google Sign In failed, update UI appropriately
                 Log.w(TAG, "Google sign in failed", e)
@@ -993,7 +751,7 @@ class MainActivity : AppCompatActivity(),
                             SimpleLocation(
                                 location.latitude,
                                 location.longitude,
-                                ""
+                                "NO_LOCATION_SPECIFIED"
                             )
                         )
                         setAddressList(location)
@@ -1008,7 +766,6 @@ class MainActivity : AppCompatActivity(),
             }
         }, {
             requestLocationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-//            requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), REQUEST_GET_LOCATION)
             onError()
         })
     }
@@ -1098,32 +855,23 @@ class MainActivity : AppCompatActivity(),
 
     override fun onItemClick(post: Post, viewHolder: Any?) {
         currentViewHolder = viewHolder
-        val options = navOptions {
-            anim {
-                enter = R.anim.slide_in_right
-                exit = R.anim.slide_out_left
-                popEnter = R.anim.slide_in_left
-                popExit = R.anim.slide_out_right
-            }
-        }
         when (post.type) {
             PROJECT -> {
-                navControllerX.navigate(R.id.projectFragment, Bundle().apply { putParcelable(ProjectFragment.ARG_POST, post) }, options)
-                /*val instance = ProjectFragment.newInstance(post = post)
-                toFragment(instance, ProjectFragment.TAG)*/
+                navControllerX.navigate(R.id.projectFragment, Bundle().apply { putParcelable(ProjectFragment.ARG_POST, post) },
+                    slideRightNavOptions()
+                )
             }
             BLOG -> {
-                navControllerX.navigate(R.id.blogFragment, Bundle().apply { putParcelable(BlogFragment.ARG_POST, post) }, options)
-                /*val instance = BlogFragment.newInstance(post=post)
-                toFragment(instance, BlogFragment.TAG)*/
+                navControllerX.navigate(R.id.blogFragment, Bundle().apply { putParcelable(BlogFragment.ARG_POST, post) },
+                    slideRightNavOptions()
+                )
             }
         }
-//        toFragment(PostFragmentTest.newInstance(post), PostFragmentTest.TAG)
     }
 
 
     // the state before changes
-    override fun onLikePressed(post: Post): Post {
+    override suspend fun onLikePressed(post: Post): Post {
         val returnedPost = viewModel.onLikePressed(post)
         when (currentViewHolder) {
             is PostViewHolder -> {
@@ -1137,7 +885,7 @@ class MainActivity : AppCompatActivity(),
     }
 
 
-    override fun onDislikePressed(post: Post): Post {
+    override suspend fun onDislikePressed(post: Post): Post {
         val returnedPost = viewModel.onDislikePressed(post)
         when (currentViewHolder) {
             is PostViewHolder -> {
@@ -1150,7 +898,7 @@ class MainActivity : AppCompatActivity(),
         return returnedPost
     }
 
-    override fun onSavePressed(post: Post): Post {
+    override suspend fun onSavePressed(post: Post): Post {
         val returnedPost = viewModel.onSavePressed(post)
         when (currentViewHolder) {
             is PostViewHolder -> {
@@ -1163,20 +911,13 @@ class MainActivity : AppCompatActivity(),
         return returnedPost
     }
 
-    override fun onFollowPressed(post: Post): Post {
+    override suspend fun onFollowPressed(post: Post): Post {
         val returnedPost = viewModel.onFollowPressed(post)
-//        currentViewHolder?.bind(returnedPost)
 
         if (currentFeedFragment is PostsFragment) {
             (currentFeedFragment as PostsFragment).getPosts(viewModel.currentHomeTag.value)
         }
 
-      /*  when (currentAdapter) {
-            is PostAdapter -> (currentAdapter as PostAdapter).refresh()
-            else -> {
-                Log.d(TAG, "Could not determine current adapter class.")
-            }
-        }*/
         return returnedPost
     }
 
@@ -1184,63 +925,96 @@ class MainActivity : AppCompatActivity(),
         showSignInDialog(POST)
     }
 
+    override fun onCommentClick(post: Post) {
+        navControllerX.navigate(R.id.commentsFragment, Bundle().apply { putParcelable(CommentsFragment.ARG_POST, post) },
+            slideRightNavOptions()
+        )
+    }
+
+    override suspend fun onFetchComments(post: Post): List<SimpleComment> {
+        val query = Firebase.firestore.collection(COMMENT_CHANNELS)
+            .document(post.commentChannelId)
+            .collection(COMMENTS)
+            .orderBy(POSTED_AT, Query.Direction.DESCENDING)
+            .limit(2)
+
+        return viewModel.getObjects(query)
+
+/*
+        return when (val commentsSnapshotResult = viewModel.getObjects(query)) {
+            is Result.Error -> {
+                viewModel.setCurrentError(commentsSnapshotResult.exception)
+                emptyList()
+            }
+            is Result.Success -> {
+                commentsSnapshotResult.data.toObjects(SimpleComment::class.java)
+            }
+        }*/
+
+    }
+
     override fun onUserPressed(post: Post) {
-        if (viewModel.uid != post.uid) {
-            val instance = ProfileFragment.newInstance(post.uid)
-            toFragment(instance, ProfileFragment.TAG)
+        if (Firebase.auth.currentUser?.uid != post.uid) {
+            navControllerX.navigate(R.id.profileFragment, Bundle().apply { putString(ProfileFragment.ARG_UID, post.uid) },
+                slideRightNavOptions()
+            )
         }
     }
 
     override fun onOptionClick(post: Post) {
         val tag = POST_MENU
-        val item1 = GenericMenuItem(tag, "Collaborate", R.drawable.ic_baseline_playlist_add_24, 0)
-        val item2 = GenericMenuItem(tag, "Share", R.drawable.ic_baseline_share_24, 1)
-        val item3 = GenericMenuItem(tag, "Report", R.drawable.ic_baseline_report_24, 2)
-        val item4 = GenericMenuItem(tag, "Unfollow ${post.admin.name}", R.drawable.ic_baseline_person_add_disabled_24, 3)
-        val item5 = GenericMenuItem(tag, "Delete", R.drawable.ic_baseline_delete_24, 4)
+        val currentUser = viewModel.user.value
+        val items = arrayListOf<GenericMenuItem>()
+        if (post.type == PROJECT) {
+            if (post.uid != currentUser?.id && currentUser?.userPrivate?.activeRequests?.contains(post.id) == false && !currentUser.userPrivate.collaborationIds.contains(post.id)) {
+                items.add(GenericMenuItem(tag, "Collaborate", R.drawable.ic_baseline_playlist_add_24, 0))
+            }
+        }
 
-        val fragment = GenericMenuFragment.newInstance(tag, post.title, arrayListOf(item1, item2, item3, item4, item5))
+        if (currentUser != null) {
+            if (currentUser.id != post.uid) {
+                if (post.postLocalData.isUserFollowed) {
+                    items.add(GenericMenuItem(tag, "Unfollow ${post.admin.name}", R.drawable.ic_baseline_person_add_disabled_24, 1))
+                } else {
+                    items.add(GenericMenuItem(tag, "Follow ${post.admin.name}", R.drawable.ic_baseline_person_add_24, 2))
+                }
+            }
+        }
+        items.add(GenericMenuItem(tag, "Share", R.drawable.ic_baseline_share_24, 3))
+        items.add(GenericMenuItem(tag, "Report", R.drawable.ic_baseline_report_24, 4))
+
+        if (post.uid == currentUser?.id) {
+            items.add(GenericMenuItem(tag, "Delete", R.drawable.ic_baseline_delete_24, 5))
+        }
+
+        val fragment = GenericMenuFragment.newInstance(tag, post.title, items, post)
         showBottomSheet(fragment, tag)
     }
 
     override fun <T> onSearchItemClick(obj: T, clazz: Class<T>) {
-
-        /*mainBinding.primarySearchLayout.transitionToStart()
-        mainBinding.primarySearchBar.text.clear()*/
-
-        val options = navOptions {
-            anim {
-                enter = R.anim.slide_in_right
-                exit = R.anim.slide_out_left
-                popEnter = R.anim.slide_in_left
-                popExit = R.anim.slide_out_right
-            }
-        }
-
         when (clazz) {
             User::class.java -> {
                 val user = obj as User
                 val recentSearch = RecentSearch(user.name, user.id, USER, recentUser = user)
                 viewModel.addRecentSearch(recentSearch)
-
-//                val instance = ProfileFragment.newInstance(user = user)
-//                toFragment(instance, ProfileFragment.TAG)
-                navControllerX.navigate(R.id.profileFragment, Bundle().apply { putParcelable(ProfileFragment.ARG_USER, user) }, options)
+                navControllerX.navigate(R.id.profileFragment, Bundle().apply { putParcelable(ProfileFragment.ARG_USER, user) },
+                    slideRightNavOptions()
+                )
             }
             Post::class.java -> {
                 val post = obj as Post
                 if (post.type == PROJECT) {
                     val recentSearch = RecentSearch(post.title, post.id, post.type, recentPost = post)
                     viewModel.addRecentSearch(recentSearch)
-
-//                    toFragment(ProjectFragment.newInstance(post = post), ProjectFragment.TAG)
-                    navControllerX.navigate(R.id.projectFragment, Bundle().apply { putParcelable(ProjectFragment.ARG_POST, post) }, options)
+                    navControllerX.navigate(R.id.projectFragment, Bundle().apply { putParcelable(ProjectFragment.ARG_POST, post) },
+                        slideRightNavOptions()
+                    )
                 } else {
                     val recentSearch = RecentSearch(post.title, post.id, post.type, recentPost = post)
                     viewModel.addRecentSearch(recentSearch)
-
-//                    toFragment(BlogFragment.newInstance(post = post), BlogFragment.TAG)
-                    navControllerX.navigate(R.id.blogFragment, Bundle().apply { putParcelable(BlogFragment.ARG_POST, post) }, options)
+                    navControllerX.navigate(R.id.blogFragment, Bundle().apply { putParcelable(BlogFragment.ARG_POST, post) },
+                        slideRightNavOptions()
+                    )
                 }
             }
         }
@@ -1297,21 +1071,6 @@ class MainActivity : AppCompatActivity(),
         }
     }
 
-//    override fun onImageSelect(bundle: Bundle) {
-//        selectImage(bundle)
-//    }
-//
-//    override fun onCameraSelect() {
-//
-//    }
-//
-//    override fun onDocumentSelect() {
-//        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
-//        intent.type = "*/*"
-//        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-//        startActivityForResult(intent, REQUEST_GET_DOCUMENT)
-//    }
-
     override fun onImageClick(
         view: SimpleDraweeView,
         message: SimpleMessage
@@ -1324,13 +1083,6 @@ class MainActivity : AppCompatActivity(),
             null,
             extras
             )
-
-        /*navHostFragment.childFragmentManager.beginTransaction()
-            .add(R.id.navHostFragment, ImageViewFragment.newInstance(message), ImageViewFragment.TAG)
-            .setReorderingAllowed(true)
-            .addSharedElement(view, message.messageId)
-            .addToBackStack(null)
-            .commit()*/
 
     }
 
@@ -1348,12 +1100,6 @@ class MainActivity : AppCompatActivity(),
         openFile(file)
     }
 
-    override fun onImageDownloadClick(message: SimpleMessage) {
-        val externalDir = getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
-        if (externalDir != null) {
-            viewModel.downloadImage(message, externalDir)
-        }
-    }
 
     override fun onUserClick(user: User) {
         val options = navOptions {
@@ -1371,12 +1117,33 @@ class MainActivity : AppCompatActivity(),
         currentViewHolder = viewHolder
         if (message.type == DOCUMENT) {
             getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)?.let {
-                viewModel.downloadMedia(it, message)
+                createNewFileAndDownload(it, message)
             }
         } else {
             getExternalFilesDir(Environment.DIRECTORY_PICTURES)?.let {
-                viewModel.downloadMedia(it, message)
+                createNewFileAndDownload(it, message)
             }
+        }
+    }
+
+    private fun createNewFileAndDownload(externalFilesDir: File, message: SimpleMessage) {
+        var name = message.metaData?.originalFileName!!
+
+        var file = File(externalFilesDir, name)
+
+        var counter = 0
+        val ext = file.extension
+        while (file.exists()) {
+            counter++
+            val actName = name.substring(0, name.length - (ext.length + 1))
+            name = "$actName($counter).$ext"
+            file = File(externalFilesDir, name)
+        }
+
+        if (file.createNewFile()) {
+            viewModel.downloadMedia(file, message)
+        } else {
+            Toast.makeText(this, "Something went wrong", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -1424,8 +1191,9 @@ class MainActivity : AppCompatActivity(),
         }
     }
 
-    private fun sendNotification(chatChannelId: String, name: String?) {
-        viewModel.onNewMessageNotification(chatChannelId) { chatChannel ->
+    /*private fun sendNotification(chatChannelId: String, name: String?) {
+        lifecycleScope.launch {
+            val chatChannel = viewModel.onNewMessageNotification(chatChannelId)*//* { chatChannel ->
             if (name != null) {
                 Snackbar.make(mainBinding.root, "$name has sent a message in ${chatChannel.postTitle}", Snackbar.LENGTH_INDEFINITE)
                     .setAnimationMode(Snackbar.ANIMATION_MODE_SLIDE)
@@ -1435,14 +1203,15 @@ class MainActivity : AppCompatActivity(),
                     }
                     .setAnchorView(mainBinding.bottomNav)
                     .show()
-            }
-
-           /* val notifyBuilder = getNotificationBuilder(it, it.postTitle, content)
-            notificationManager.notify(NOTIFICATION_ID, notifyBuilder.build())*/
+            }*//*
+            TODO("Do something with the chatChannel when new message arrives")
         }
-    }
 
-    private fun getNotificationBuilder(chatChannel: ChatChannel, title: String, content: String): NotificationCompat.Builder {
+           *//* val notifyBuilder = getNotificationBuilder(it, it.postTitle, content)
+            notificationManager.notify(NOTIFICATION_ID, notifyBuilder.build())*//*
+    }*/
+
+    /*private fun getNotificationBuilder(chatChannel: ChatChannel, title: String, content: String): NotificationCompat.Builder {
         val bundle = Bundle().apply {
             putParcelable(CHAT_CHANNEL, chatChannel)
         }
@@ -1459,7 +1228,7 @@ class MainActivity : AppCompatActivity(),
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
-    }
+    }*/
 
     private val notificationReceiver = object: BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -1475,15 +1244,15 @@ class MainActivity : AppCompatActivity(),
                 * chat
                 * */
 
-                val chatChannelId = chatNotificationBundle.get(CHAT_CHANNEL_ID) as String?
+              /*  val chatChannelId = chatNotificationBundle.get(CHAT_CHANNEL_ID) as String?
                 val senderId = chatNotificationBundle.get(SENDER_ID) as String?
-                val senderName = chatNotificationBundle.get(SENDER_NAME) as String?
+                val senderName = chatNotificationBundle.get(SENDER_NAME) as String?*/
 
-                if (fragmentStack.peek() != ChatFragment.TAG && fragmentStack.peek() != MessageFragment.TAG) {
+               /* if (fragmentStack.peek() != ChatFragment.TAG && fragmentStack.peek() != MessageFragment.TAG) {
                     if (senderId != viewModel.uid && chatChannelId != null) {
                         sendNotification(chatChannelId, senderName)
                     }
-                }
+                }*/
             } else if (acceptNotificationBundle != null){
 
                 /*
@@ -1507,10 +1276,7 @@ class MainActivity : AppCompatActivity(),
                 if (notificationId != null && postId != null && requestId != null && chatChannelId != null) {
                     deleteLocalRequest(notificationId, postId, requestId, chatChannelId)
                 }
-
-
             }
-
         }
     }
 
@@ -1529,33 +1295,20 @@ class MainActivity : AppCompatActivity(),
 
     companion object {
         const val TAG = "MainActivityDebug"
-        private const val REQUEST_GET_IMAGE = 112
-        private const val REQUEST_GET_LOCATION = 113
         private const val REQUEST_FINE_LOCATION = 114
-        private const val REQUEST_GET_DOCUMENT = 115
-        private const val CREATE_NEW_DOC = 116
-
         const val PRIMARY_CHANNEL_ID = "primary_notification_channel"
-
     }
 
     override fun onNotificationItemClick(post: Post) {
-        toFragment(ProjectFragment.newInstance(post = post), ProjectFragment.TAG)
+        navControllerX.navigate(R.id.projectFragment, Bundle().apply { putParcelable(ProjectFragment.ARG_POST, post)},
+            slideRightNavOptions()
+        )
     }
 
     override fun onNotificationItemClick(postId: String) {
-
-        val options = navOptions {
-            anim {
-                enter = R.anim.slide_in_right
-                exit = R.anim.slide_out_left
-                popEnter = R.anim.slide_in_left
-                popExit = R.anim.slide_out_right
-            }
-        }
-
-        navControllerX.navigate(R.id.projectFragment, Bundle().apply { putString(ProjectFragment.ARG_POST_ID,  postId)}, options)
-//        toFragment(ProjectFragment.newInstance(id = postId), ProjectFragment.TAG)
+        navControllerX.navigate(R.id.projectFragment, Bundle().apply { putString(ProjectFragment.ARG_POST_ID,  postId)},
+            slideRightNavOptions()
+        )
     }
 
     override fun <T> onNotificationPositiveClicked(obj: T, clazz: Class<T>) {
@@ -1583,16 +1336,10 @@ class MainActivity : AppCompatActivity(),
         }
     }
 
-    fun toFragment(instance: Fragment, tag: String) {
-        viewModel.setCurrentFragmentTag(tag)
-        supportFragmentManager.beginTransaction()
-            .add(mContainerId, instance, tag)
-            .addToBackStack(tag)
-            .commit()
-    }
-
     override fun onRequestItemClick(post: Post) {
-        toFragment(ProjectFragment.newInstance(post = post), ProjectFragment.TAG)
+        navControllerX.navigate(R.id.projectFragment, Bundle().apply { putParcelable(ProjectFragment.ARG_POST, post)},
+            slideRightNavOptions()
+        )
     }
 
     override fun onPositiveButtonClick(post: Post) {
@@ -1608,15 +1355,6 @@ class MainActivity : AppCompatActivity(),
     }
 
     override fun onDialogPositiveActionClicked(tag: String) {
-        val options = navOptions {
-            anim {
-                enter = R.anim.slide_in_right
-                exit = R.anim.slide_out_left
-                popEnter = R.anim.slide_in_left
-                popExit = R.anim.slide_out_right
-            }
-        }
-
         when (tag) {
             CREATING_PROJECT -> {
 
@@ -1629,8 +1367,42 @@ class MainActivity : AppCompatActivity(),
 
             }
             SIGN_IN_PROMPT -> {
-                navControllerX.navigate(R.id.signInFragment, null, options)
-//                toFragment(SignInFragment.newInstance(), SignInFragment.TAG)
+                navControllerX.navigate(R.id.signInFragment, null, slideRightNavOptions())
+            }
+            UPLOAD_DOCUMENT -> {
+                val externalDir = getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
+                val extras = viewModel.extras
+                val metadata = extras["file_metadata"] as MediaMetaData?
+                val chatChannel = extras["file_chat_channel"] as ChatChannel?
+                val docUri = viewModel.currentDocUri.value!!
+                val ins = contentResolver.openInputStream(docUri)!!
+                val byteArray = ByteArray(ins.available())
+                ins.read(byteArray)
+
+                if (metadata != null && chatChannel != null) {
+                    val file = File(externalDir, metadata.originalFileName)
+                    if (file.createNewFile()) {
+                        val outs = FileOutputStream(file)
+                        outs.write(byteArray)
+                        outs.flush()
+                        outs.close()
+                        val currentUser = viewModel.user.value!!
+
+                        val message = SimpleMessage("", chatChannel.chatChannelId, DOCUMENT, docUri.toString(), currentUser.id, metaData = metadata, currentUser, isDownloaded = true)
+                        viewModel.uploadMessageMedia(message, chatChannel)
+
+                    } else {
+                        Toast.makeText(
+                            this,
+                            "Could not create file.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+                viewModel.setCurrentDoc(null)
+            }
+            EDITOR -> {
+                navControllerX.navigateUp()
             }
         }
         hideBottomSheet()
@@ -1638,17 +1410,15 @@ class MainActivity : AppCompatActivity(),
 
     override fun onDialogNegativeActionClicked(tag: String) {
         hideBottomSheet()
-        /*when (tag) {
-            CREATING_PROJECT -> {
-
-            }
-            REMOVING_LOCATION -> {
-
-            }
-        }*/
+        if (tag == UPLOAD_DOCUMENT) {
+            viewModel.setCurrentDoc(null)
+        } else if (tag == EDITOR) {
+            navControllerX.navigateUp()
+            viewModel.extras.remove(OLD_STATE)
+        }
     }
 
-    fun hideBottomSheet(pendingAction: Map<String, () -> Unit>? = null) {
+    fun hideBottomSheet() {
         bottomSheetBehavior.isHideable = true
         bottomSheetBehavior.isDraggable = true
 
@@ -1690,7 +1460,30 @@ class MainActivity : AppCompatActivity(),
                 }
             }
             POST_MENU -> {
-
+                val post = bundle?.getParcelable<Post>("menu")
+                if (post != null) {
+                    when (item.id) {
+                        0 -> {
+                            // collaborate
+                            viewModel.joinProject(post)
+                        }
+                        1, 2 -> {
+                            // unfollow, follow
+                            lifecycleScope.launch {
+                                viewModel.onFollowPressed(post)
+                            }
+                        }
+                        3 -> {
+                            // share
+                            val ref = Firebase.firestore.collection(POSTS).document(post.id)
+                            Toast.makeText(this, ref.path, Toast.LENGTH_SHORT).show()
+                        }
+                        4, 5 -> {
+                            // report // delete
+                            Toast.makeText(this, "Not implemented yet", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
             }
             SELECT_IMAGE_MENU_USER, SELECT_IMAGE_MENU_POST -> {
                 when (item.id) {
@@ -1717,7 +1510,7 @@ class MainActivity : AppCompatActivity(),
                         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
                         intent.type = "*/*"
                         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                        startActivityForResult(intent, REQUEST_GET_DOCUMENT)
+                        selectDocumentLauncher.launch(intent)
                     }
                 }
             }
@@ -1737,6 +1530,21 @@ class MainActivity : AppCompatActivity(),
             OTHER_PROFILE_MENU -> {
                 when (item.id) {
                     0, 1, 2, 3 -> {
+                        Toast.makeText(this, "Not implemented yet.", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            REMOVE_IMAGE_MENU -> {
+                if (item.id == 0) {
+                    viewModel.setCurrentCroppedImageUri(null)
+                }
+            }
+            COMMENT_MENU -> {
+                val simpleComment = bundle?.getParcelable<SimpleComment>("menu")
+                if (simpleComment != null) {
+                    if (item.id == 0) {
+                        navControllerX.navigate(R.id.profileFragment, Bundle().apply { putParcelable(ProfileFragment.ARG_USER, simpleComment.sender) }, options)
+                    } else {
                         Toast.makeText(this, "Not implemented yet.", Toast.LENGTH_SHORT).show()
                     }
                 }
@@ -1796,6 +1604,127 @@ class MainActivity : AppCompatActivity(),
 //                toFragment(InterestFragment.newInstance(false), InterestFragment.TAG)
             }
         }
+    }
+
+    override suspend fun onCommentLikeClick(comment: SimpleComment): SimpleComment? {
+        val user = viewModel.user.value
+        return if (user != null) {
+            if (user.userPrivate.likedComments.contains(comment.commentId)) {
+                viewModel.dislikeComment(comment)
+            } else {
+                viewModel.likeComment(comment)
+            }
+        } else {
+            showSignInDialog(COMMENT)
+            null
+        }
+    }
+
+    override suspend fun onCommentReplyClick(comment: SimpleComment): SimpleComment {
+        viewModel.replyJobStarted.postValue(comment)
+        return comment
+    }
+
+    override fun onCommentUserClick(comment: SimpleComment) {
+        val user = comment.sender
+        val options = navOptions {
+            anim {
+                enter = R.anim.slide_in_right
+                exit = R.anim.slide_out_left
+                popEnter = R.anim.slide_in_left
+                popExit = R.anim.slide_out_right
+            }
+        }
+        navControllerX.navigate(R.id.profileFragment, Bundle().apply { putParcelable(ProfileFragment.ARG_USER, user) }, options)
+    }
+
+    override fun onCommentOptionClick(comment: SimpleComment) {
+        val tag = COMMENT_MENU
+        val f = GenericMenuFragment.newInstance(tag, "Comment by ${comment.sender.name}", arrayListOf(GenericMenuItem(tag, "Go to Profile", 0, 0), GenericMenuItem(tag, "Report comment", 0, 1)), comment)
+        showBottomSheet(f, tag)
+    }
+
+    override fun onCommentClick(post: Post, comment: SimpleComment) {
+        val options = navOptions {
+            anim {
+                enter = R.anim.slide_in_right
+                exit = R.anim.slide_out_left
+                popEnter = R.anim.slide_in_left
+                popExit = R.anim.slide_out_right
+            }
+        }
+        navControllerX.navigate(R.id.commentsFragment, Bundle().apply { putParcelable(CommentsFragment.ARG_POST, post) }, options)
+    }
+
+    override suspend fun onFetchUserData(item: SimpleComment): User? {
+        val docRef = Firebase.firestore.collection(USERS).document(item.senderId)
+        return viewModel.getObject<User>(docRef)
+        /*return when (val userDocResult = viewModel.getObject(docRef)) {
+            is Result.Error -> {
+                viewModel.setCurrentError(userDocResult.exception)
+                null
+            }
+            is Result.Success -> {
+                userDocResult.data.toObject(User::class.java)
+            }
+        }*/
+    }
+
+    override suspend fun onFetchReplies(item: SimpleComment): List<SimpleComment> {
+        val collectionRef = Firebase.firestore.collection(COMMENT_CHANNELS).document(item.threadChannelId).collection(
+            COMMENTS).orderBy(POSTED_AT, Query.Direction.DESCENDING).limit(2)
+
+        return viewModel.getObjects(collectionRef)
+
+        /*return when (val commentsCollectionResult = viewModel.getObjects(collectionRef)) {
+            is Result.Error -> {
+                viewModel.setCurrentError(commentsCollectionResult.exception)
+                emptyList()
+            }
+            is Result.Success -> {
+                commentsCollectionResult.data.toObjects(SimpleComment::class.java)
+            }
+        }*/
+    }
+
+    fun setChannelContributorsListener(chatChannel: ChatChannel) {
+        Firebase.firestore.collection(CHAT_CHANNELS).document(chatChannel.chatChannelId)
+            .collection(USERS).addSnapshotListener { v, e ->
+                if (e != null) {
+                    viewModel.setCurrentError(e)
+                }
+
+                if (v != null && !v.isEmpty) {
+                    val contributors = v.toObjects(User::class.java)
+                    viewModel.insertChannelContributors(chatChannel, contributors)
+                }
+            }
+    }
+
+    fun setChatChannelListeners(chatChannel: ChatChannel) {
+        val externalDocumentsDir = getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)!!
+        val externalImagesDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
+
+        if (!channelMessagesListeners.containsKey(chatChannel.chatChannelId)) {
+            val lr = Firebase.firestore.collection(CHAT_CHANNELS).document(chatChannel.chatChannelId)
+                .collection(MESSAGES)
+                .orderBy(CREATED_AT, Query.Direction.DESCENDING)
+                .limit(30)
+                .addSnapshotListener { value, error ->
+                    if (error != null) {
+                        viewModel.setCurrentError(error)
+                        return@addSnapshotListener
+                    }
+
+                    if (value != null && !value.isEmpty) {
+                        val messages = value.toObjects(SimpleMessage::class.java)
+                        viewModel.insertMessagesWithFilter(messages, chatChannel, externalDocumentsDir, externalImagesDir)
+                    }
+                }
+
+            channelMessagesListeners[chatChannel.chatChannelId] = lr
+        }
+
     }
 
 }

@@ -2,11 +2,11 @@ package com.jamid.workconnect.adapter
 
 import android.os.Build
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.TextView
 import androidx.annotation.LayoutRes
 import androidx.core.content.ContextCompat
 import com.facebook.drawee.view.SimpleDraweeView
+import com.google.android.material.button.MaterialButton
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.jamid.workconnect.R
@@ -18,14 +18,22 @@ class UserItemViewHolder(parent: ViewGroup, @LayoutRes layout: Int, private val 
 
 	private val userItemClickListener = itemView.context as UserItemClickListener
 	var administrators: List<String>? = null
+	val auth = Firebase.auth
 
-	private fun setFollowButton(btn: Button, otherUser: User) {
+	private fun setFollowButton(btn: MaterialButton, otherUser: User) {
+
+		if (auth.currentUser?.uid == otherUser.id) {
+			btn.text = itemView.context.getString(R.string.admin)
+			btn.icon = null
+			btn.isEnabled = false
+			return
+		}
 
 		fun setFollowText(isUserFollowed: Boolean) {
 			if (isUserFollowed) {
-				btn.text = "Unfollow"
+				btn.text = itemView.context.getString(R.string.unfollow_text)
 			} else {
-				btn.text = "Follow"
+				btn.text = itemView.context.getString(R.string.follow_text)
 			}
 		}
 
@@ -53,7 +61,7 @@ class UserItemViewHolder(parent: ViewGroup, @LayoutRes layout: Int, private val 
 			val profilePhoto: SimpleDraweeView = itemView.findViewById(R.id.user_profile_photo)
 			val displayName: TextView = itemView.findViewById(R.id.user_fullname_text)
 			val aboutText: TextView = itemView.findViewById(R.id.user_about_text)
-			val followBtn: Button = itemView.findViewById(R.id.user_follow_button)
+			val followBtn: MaterialButton = itemView.findViewById(R.id.user_follow_button)
 
 			cover.setActualImageResource(currentCover)
 
@@ -70,7 +78,7 @@ class UserItemViewHolder(parent: ViewGroup, @LayoutRes layout: Int, private val 
 		} else {
 			val img: SimpleDraweeView = itemView.findViewById(R.id.user_horiz_photo) ?: itemView.findViewById(R.id.user_img)
 			val name: TextView = itemView.findViewById(R.id.user_horiz_name) ?: itemView.findViewById(R.id.user_name)
-			val followBtn: Button = itemView.findViewById(R.id.user_horiz_btn) ?: itemView.findViewById(R.id.user_follow_btn)
+			val followBtn: MaterialButton = itemView.findViewById(R.id.user_horiz_btn) ?: itemView.findViewById(R.id.user_follow_btn)
 			val userAbout: TextView = itemView.findViewById(R.id.user_horiz_about) ?: itemView.findViewById(R.id.user_about)
 
 			administrators?.let {
@@ -95,7 +103,9 @@ class UserItemViewHolder(parent: ViewGroup, @LayoutRes layout: Int, private val 
 		}
 
 		itemView.setOnClickListener {
-			userItemClickListener.onUserPressed(item)
+			if (Firebase.auth.currentUser?.uid != item.id) {
+				userItemClickListener.onUserPressed(item)
+			}
 		}
 	}
 

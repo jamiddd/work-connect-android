@@ -3,12 +3,12 @@ package com.jamid.workconnect
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.Environment
+import android.util.Log
 import android.view.View
-import android.view.ViewGroup
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import com.canhub.cropper.CropImageView
+import com.canhub.cropper.CropImageOptions
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.jamid.workconnect.databinding.FragmentImageCropBinding
 import java.io.ByteArrayOutputStream
@@ -25,35 +25,19 @@ class ImageCropFragment : Fragment(R.layout.fragment_image_crop) {
 
         binding = FragmentImageCropBinding.bind(view)
         val activity = requireActivity() as MainActivity
+        val options = arguments?.getParcelable<CropImageOptions>("menu")
+        if (options != null) {
+            Log.d(TAG, "Options is not null")
+            binding.cropArea.apply {
+                cropShape = options.cropShape
+                setAspectRatio(options.aspectRatioX, options.aspectRatioY)
+                setFixedAspectRatio(options.fixAspectRatio)
+            }
+        } else {
+            Log.d(TAG, "Options is null")
+        }
 
         var currentDegrees = 0
-
-        val freeMode = arguments?.getBoolean(ARG_FREE_MODE) ?: false
-        var height = 0
-        var width = 0
-        val x: Int
-        val y: Int
-        val shape: String
-        if (!freeMode) {
-            shape = arguments?.getString(ARG_SHAPE) ?: ARG_SHAPE_OVAL
-            x = arguments?.getInt(ARG_X) ?: 1
-            y = arguments?.getInt(ARG_Y) ?: 1
-            height = arguments?.getInt(ARG_HEIGHT) ?: 100
-            width = arguments?.getInt(ARG_WIDTH) ?: 100
-
-            when (shape) {
-                ARG_SHAPE_OVAL -> {
-                    binding.cropArea.cropShape = CropImageView.CropShape.OVAL
-                }
-                ARG_SHAPE_RECT -> {
-                    binding.cropArea.cropShape = CropImageView.CropShape.RECTANGLE
-                }
-            }
-
-
-            binding.cropArea.setFixedAspectRatio(true)
-            binding.cropArea.setAspectRatio(x, y)
-        }
 
         viewModel.currentImageUri.observe(viewLifecycleOwner) {
             if (it != null) {
@@ -62,7 +46,7 @@ class ImageCropFragment : Fragment(R.layout.fragment_image_crop) {
             }
         }
 
-        binding.cancelCropBtn.setOnClickListener {
+        binding.cropToolbar.setNavigationOnClickListener {
             activity.bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
         }
 
@@ -76,12 +60,14 @@ class ImageCropFragment : Fragment(R.layout.fragment_image_crop) {
             currentDegrees -= 90
         }
 
-        binding.cropBtn.setOnClickListener {
-            val bitmap = if (width == 0) {
-                binding.cropArea.croppedImage
+        binding.cropButton.setOnClickListener {
+
+            val bitmap = if (options != null) {
+                binding.cropArea.getCroppedImage(options.maxCropResultWidth, options.maxCropResultHeight)
             } else {
-                binding.cropArea.getCroppedImage(width, height)
+                binding.cropArea.croppedImage
             }
+
             if (bitmap != null) {
 
                 val externalDir = activity.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
@@ -111,16 +97,11 @@ class ImageCropFragment : Fragment(R.layout.fragment_image_crop) {
 
         }
 
-        viewModel.windowInsets.observe(viewLifecycleOwner) { (top, bottom) ->
+        viewModel.windowInsets.observe(viewLifecycleOwner) { (_, bottom) ->
             val windowHeight = getWindowHeight()
-//            val rect = windowHeight - top
-
-            val params = binding.root.layoutParams as ViewGroup.LayoutParams
-            params.height = windowHeight
-            params.width = ViewGroup.LayoutParams.MATCH_PARENT
-
-            binding.root.layoutParams = params
-
+            binding.root.updateLayout(windowHeight)
+            binding.cropBottomAction.setContentPadding(0, 0, 0, bottom)
+            binding.cropArea.updateLayout(marginBottom = binding.cropBottomActionContainer.measuredHeight + bottom)
         }
 
     }
@@ -128,29 +109,11 @@ class ImageCropFragment : Fragment(R.layout.fragment_image_crop) {
     companion object {
 
         const val TAG = "ImageCropFragment"
-        const val ARG_SHAPE = "ARG_SHAPE"
-        const val ARG_X = "ARG_X"
-        const val ARG_Y = "ARG_Y"
-        const val ARG_WIDTH = "ARG_WIDTH"
-        const val ARG_HEIGHT = "ARG_HEIGHT"
-        const val ARG_SHAPE_RECT = "RECTANGLE"
-        const val ARG_SHAPE_OVAL = "OVAL"
         const val ARG_FREE_MODE = "ARG_FREE_MODE"
+        const val ARG_CROP_OPTIONS = "ARG_CROP_OPTIONS"
 
         @JvmStatic
-        fun newInstance(x: Int = 1, y: Int = 1, width: Int = 300, height: Int = 300, shape: String = ARG_SHAPE_OVAL) =
-            ImageCropFragment().apply {
-                arguments = Bundle().apply {
-                    putInt(ARG_X, x)
-                    putInt(ARG_Y, y)
-                    putInt(ARG_HEIGHT, height)
-                    putInt(ARG_WIDTH, width)
-                    putString(ARG_SHAPE, shape)
-                }
-            }
-
-        @JvmStatic
-        fun newInstance(bundle: Bundle?) : ImageCropFragment {
+        fun newInstance(bundle: Bundle? = null) : ImageCropFragment {
             return ImageCropFragment().apply {
                 arguments = bundle
             }

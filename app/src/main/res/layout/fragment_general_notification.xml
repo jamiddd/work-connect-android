@@ -4,46 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/generalNotificationRoot"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-
-        <ScrollView
-            android:id="@+id/noNotificationsLayoutScroll"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:visibility="visible">
-
-            <LinearLayout
-                android:id="@+id/noNotificationsLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:orientation="vertical">
-
-                <ImageView
-                    android:id="@+id/noNotificationsImage"
-                    android:layout_width="match_parent"
-                    android:layout_height="250dp"
-                    app:srcCompat="@drawable/ic_empty_notifications" />
-
-                <TextView
-                    android:id="@+id/noNotificationsText"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="24dp"
-                    android:layout_marginEnd="24dp"
-                    android:gravity="center"
-                    android:text="No notifications at the moment"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
-
-            </LinearLayout>
-        </ScrollView>
 
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:id="@+id/notificationsRefresher"

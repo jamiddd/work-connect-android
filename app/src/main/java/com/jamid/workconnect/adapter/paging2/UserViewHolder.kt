@@ -25,8 +25,15 @@ class UserViewHolder(val view: View): RecyclerView.ViewHolder(view) {
 
             userName.text = user.name
             userPhoto.setImageURI(user.photo)
-            val usernameText = "@${user.username}"
-            secondaryText.text = usernameText
+            secondaryText.text = user.about
+
+            if (user.about.isNullOrBlank()) {
+                secondaryText.visibility = View.GONE
+            }
+
+            if (!user.isUserFollowed && !user.isCurrentUser) {
+                primaryBtn.visibility = View.VISIBLE
+            }
 
             primaryBtn.setOnClickListener {
                 Toast.makeText(view.context, "Not implemented yet.", Toast.LENGTH_LONG).show()

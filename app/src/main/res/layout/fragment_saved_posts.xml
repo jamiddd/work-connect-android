@@ -8,43 +8,6 @@
         style="@style/NonPrimaryFragmentStyle"
         android:layout_height="match_parent">
 
-        <ScrollView
-            android:id="@+id/no_saved_posts_layout_scroll"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone"
-            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:visibility="gone">
-
-            <LinearLayout
-                android:id="@+id/no_saved_posts_layout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:orientation="vertical">
-
-                <ImageView
-                    android:id="@+id/no_saved_posts_image"
-                    android:layout_width="match_parent"
-                    android:layout_height="250dp"
-                    app:srcCompat="@drawable/ic_empty_posts" />
-
-                <TextView
-                    android:id="@+id/no_saved_posts_text"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="16dp"
-                    android:gravity="center"
-                    android:text="You have not saved any posts. Follow other people or get more interests to see more posts here. Click on the save icon to save the post."
-                    android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
-
-            </LinearLayout>
-        </ScrollView>
-
         <androidx.core.widget.NestedScrollView
             android:id="@+id/savedPostsNestedScroll"
             android:layout_width="match_parent"
@@ -62,7 +25,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:clipToPadding="false"
-                    android:paddingTop="8dp"
                     tools:itemCount="2"
                     tools:listitem="@layout/mini_project_item"
                     tools:visibility="visible" />
@@ -74,7 +36,8 @@
                     android:layout_gravity="center"
                     android:fontFamily="@font/title_semi"
                     android:text="Load More"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                    android:visibility="invisible" />
 
                 <ProgressBar
                     android:id="@+id/savedPostsProgress"

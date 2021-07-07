@@ -2,6 +2,9 @@ package com.jamid.workconnect.adapter
 
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
+import com.jamid.workconnect.ADMINISTRATORS
+import com.jamid.workconnect.IS_MINIMIZED
+import com.jamid.workconnect.POST
 import com.jamid.workconnect.R
 import com.jamid.workconnect.adapter.paging2.ChatChannelViewHolder
 import com.jamid.workconnect.adapter.paging2.GenericComparator
@@ -18,7 +21,7 @@ class GenericAdapter<T : Any>(val clazz: Class<T>, val extras: Map<String, Any>?
 				val isHorizontal = extras?.get("isHorizontal") == true
 				val isWide = extras?.get("isWide") == false
 
-				val administrators = extras?.get("administrators") as List<String>?
+				val administrators = extras?.get(ADMINISTRATORS) as List<String>?
 
 				when {
 					isHorizontal -> {
@@ -36,7 +39,27 @@ class GenericAdapter<T : Any>(val clazz: Class<T>, val extras: Map<String, Any>?
 					}
 				}
 			}
-			GenericMenuItem::class.java -> GenericMenuViewHolder.newInstance(parent, R.layout.generic_menu_item)
+			GenericMenuItem::class.java -> {
+				val baseItem = if (extras != null) {
+					extras["menu"]!!
+				} else {
+					null
+				}
+				GenericMenuViewHolder.newInstance(parent, R.layout.generic_menu_item, baseItem)
+			}
+			SimpleComment::class.java -> {
+				val (isMinimized, post) = if (extras != null) {
+					(extras[IS_MINIMIZED] as Boolean?) to (extras[POST] as Post?)
+				} else {
+					null to null
+				}
+
+				if (isMinimized == false) {
+					CommentViewHolder.newInstance(parent, R.layout.comment_item, post, false)
+				} else {
+					CommentViewHolder.newInstance(parent, R.layout.comment_item, post)
+				}
+			}
 			ChatChannel::class.java -> ChatChannelViewHolder.newInstance(parent, R.layout.chat_channel_layout)
 			RecentSearch::class.java -> RecentSearchViewHolder.newInstance(parent, R.layout.search_item_layout)
 			TagsHolder::class.java -> TagsHolderViewHolder.newInstance(parent, R.layout.tags_holder_layout)

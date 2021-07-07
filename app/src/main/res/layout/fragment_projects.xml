@@ -4,14 +4,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/postsFragmentRoot"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:id="@+id/postsRefresher"
             android:layout_width="match_parent"
-            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/projectsFragmentList"
@@ -75,20 +76,19 @@
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/postsAppBar"
             android:layout_width="match_parent"
-            android:backgroundTint="@color/white"
-            android:stateListAnimator="@animator/app_bar_elevation"
-            android:layout_height="218dp">
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/white">
 
             <com.google.android.material.appbar.CollapsingToolbarLayout
-                style="@style/CollapseToolbarStyle"
+                style="@style/HomeCollapseToolbarStyle"
                 android:layout_width="match_parent"
-                android:layout_height="170dp"
+                android:layout_height="192dp"
                 app:toolbarId="@id/postsFragmentToolbar">
 
                 <com.google.android.material.appbar.MaterialToolbar
                     android:id="@+id/postsFragmentToolbar"
                     android:layout_width="match_parent"
-                    android:layout_height="?actionBarSize"
+                    android:layout_height="48dp"
                     android:layout_marginTop="26dp"
                     app:layout_collapseMode="pin"
                     app:title="@string/app_name"
@@ -101,11 +101,11 @@
                     style="@style/Theme.Button.IconOnly"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="30dp"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginTop="26dp"
                     android:layout_marginEnd="2dp"
-                    app:icon="@drawable/ic_baseline_add_24"
-                    app:iconSize="26dp"
+                    app:icon="@drawable/ic_round_add_24"
+                    app:iconSize="30dp"
                     app:layout_collapseMode="pin"
                     app:rippleColor="@color/grey" />
 
@@ -114,7 +114,7 @@
                     android:layout_width="36dp"
                     android:layout_height="36dp"
                     android:layout_gravity="end"
-                    android:layout_marginTop="36dp"
+                    android:layout_marginTop="32dp"
                     android:layout_marginEnd="16dp"
                     android:clickable="true"
                     android:focusable="true"
@@ -128,27 +128,30 @@
                 android:id="@+id/horizontalTagsContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:clipToPadding="false"
                 android:minHeight="45dp"
-                android:scrollbars="none"
-                app:layout_collapseMode="none">
+                android:paddingStart="0dp"
+                android:paddingEnd="0dp"
+                android:scrollbars="none">
 
                 <com.google.android.material.chip.ChipGroup
                     android:id="@+id/homeInterestsGroup"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingStart="8dp"
                     android:minHeight="45dp"
+                    android:paddingStart="8dp"
                     android:paddingEnd="8dp"
                     app:singleLine="true"
                     app:singleSelection="true">
 
                     <com.google.android.material.chip.Chip
                         android:id="@+id/first_chip"
+                        style="@style/Widget.MaterialComponents.Chip.Choice"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:checked="true"
-                        android:text="Random"
-                        style="@style/Widget.MaterialComponents.Chip.Choice"/>
+                        android:text="@string/random" />
 
                 </com.google.android.material.chip.ChipGroup>
 

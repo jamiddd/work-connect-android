@@ -31,6 +31,14 @@
           }
         },
         {
+          "client_id": "39101350371-erbp4ic9hobdog4cc3gcgf7e7sbb4hu8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.codesquare.android",
+            "certificate_hash": "47c4fba224d6e982ff29e233acb5fbfdd868314b"
+          }
+        },
+        {
           "client_id": "39101350371-mq5jgfqqk2uu6poagk64o1osri9r1fg2.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -192,6 +200,14 @@
           "android_info": {
             "package_name": "com.jamid.workconnect",
             "certificate_hash": "0b74190eb2601c274ba69d193bbc5d1245b33ef5"
+          }
+        },
+        {
+          "client_id": "39101350371-unem5c811lp6nvi76jm0o4is8r5kff06.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.jamid.workconnect",
+            "certificate_hash": "47c4fba224d6e982ff29e233acb5fbfdd868314b"
           }
         },
         {

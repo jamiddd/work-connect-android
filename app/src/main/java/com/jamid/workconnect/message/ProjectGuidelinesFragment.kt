@@ -28,11 +28,10 @@ class ProjectGuidelinesFragment : SupportFragment(R.layout.fragment_project_guid
     private lateinit var binding: FragmentProjectGuidelinesBinding
     private var positionFromBottom = 0
     private var saved = false
-    private lateinit var dialog: AlertDialog
+    private var dialog: AlertDialog? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         binding = FragmentProjectGuidelinesBinding.bind(view)
         val chatChannel = arguments?.getParcelable<ChatChannel>(ARG_CHAT_CHANNEL) ?: return
         val post = arguments?.getParcelable<Post>(ARG_POST) ?: return
@@ -41,7 +40,7 @@ class ProjectGuidelinesFragment : SupportFragment(R.layout.fragment_project_guid
 
         viewModel.guidelinesUpdateResult.observe(viewLifecycleOwner) {
             if (it != null) {
-                dialog.dismiss()
+                dialog?.dismiss()
                 findNavController().navigateUp()
                 viewModel.clearGuidelinesUpdateResult()
             }

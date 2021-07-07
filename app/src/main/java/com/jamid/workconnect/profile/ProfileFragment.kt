@@ -11,14 +11,11 @@ import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
 import android.text.style.StyleSpan
 import android.util.Log
-import android.view.Gravity
 import android.view.View
 import android.widget.Button
-import android.widget.PopupMenu
 import androidx.core.content.ContextCompat
-import androidx.core.view.get
 import androidx.lifecycle.MutableLiveData
-import androidx.navigation.fragment.FragmentNavigatorExtras
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
 import androidx.recyclerview.widget.RecyclerView
@@ -33,8 +30,7 @@ import com.jamid.workconnect.databinding.FragmentProfileBinding
 import com.jamid.workconnect.model.GenericMenuItem
 import com.jamid.workconnect.model.User
 import com.jamid.workconnect.model.UserPrivate
-import com.jamid.workconnect.settings.SettingsFragment
-import me.everything.android.ui.overscroll.OverScrollDecoratorHelper
+import kotlinx.coroutines.launch
 
 class ProfileFragment : SupportFragment(R.layout.fragment_profile, TAG, false) {
 
@@ -130,44 +126,40 @@ class ProfileFragment : SupportFragment(R.layout.fragment_profile, TAG, false) {
             binding.profileUserSection.updateLayout(marginTop = top)
         }
 
-        OverScrollDecoratorHelper.setUpOverScroll((binding.profilePager[0] as RecyclerView), OverScrollDecoratorHelper.ORIENTATION_HORIZONTAL)
-
-        argUid?.let {
-            activity.setFragmentTitle("")
-            viewModel.getObject(it, User::class.java) { user ->
+        argUid?.let { uid ->
+            viewLifecycleOwner.lifecycleScope.launch {
+                val ref = Firebase.firestore.collection(USERS).document(uid)
+                val user = viewModel.getObject<User>(ref)
                 if (user != null) {
                     setPrefetchedContent(user)
-                    setUser(user, activity)
+                    getUserInfo(user)
                 }
             }
         }
 
         argOtherUser?.let {
-
             setPrefetchedContent(it)
-
             if (it.id == Firebase.auth.currentUser?.uid) {
-                viewModel.user.observe(viewLifecycleOwner) { user ->
-                    if (user != null) {
-                        setUser(user, activity)
-                    }
+                viewModel.user.value?.let { currentUser ->
+                    setUser(currentUser, activity)
                 }
             } else {
-                Firebase.firestore.collection(USERS)
-                    .document(it.id)
-                    .collection("private")
-                    .document(it.id)
-                    .get()
-                    .addOnSuccessListener { doc->
-                        val userPrivate = doc.toObject(UserPrivate::class.java)
-                        it.userPrivate = userPrivate!!
-                        setUser(it, activity)
-                    }.addOnFailureListener {
-                        //
-                    }
+                getUserInfo(argOtherUser)
             }
         }
+    }
 
+    private fun getUserInfo(user: User) = viewLifecycleOwner.lifecycleScope.launch {
+        val privateDocRef = Firebase.firestore.collection(USERS)
+            .document(user.id)
+            .collection(PRIVATE)
+            .document(user.id)
+
+        val userPrivate = viewModel.getObject<UserPrivate>(privateDocRef)
+        if (userPrivate != null) {
+            user.userPrivate = userPrivate
+            setUser(user, activity)
+        }
     }
 
     private fun setPrefetchedContent(otherUser: User) {
@@ -203,9 +195,7 @@ class ProfileFragment : SupportFragment(R.layout.fragment_profile, TAG, false) {
         binding.profileFragmentToolbar.title = "@${otherUser.username}"
 
         otherUserLive.postValue(otherUser)
-
-        // TODO("There is a problem with this observer .. ")
-        viewModel.user.observe(activity) { currentUser ->
+        viewModel.user.observe(viewLifecycleOwner) { currentUser ->
             Log.d(BUG_TAG, "The user observer in profile fragment is alive.")
             setFollowButton(binding.editBtn, currentUser, otherUser)
             if (currentUser != null) {

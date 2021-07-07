@@ -8,6 +8,7 @@
         android:id="@+id/projectScrollContainer"
         android:layout_width="match_parent"
         android:fillViewport="true"
+        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
         android:clipToPadding="false"
         android:paddingBottom="56dp"
         android:layout_height="match_parent">
@@ -21,7 +22,7 @@
                 android:id="@+id/project_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/roboto_medium"
+                android:fontFamily="@font/roboto_black"
                 android:padding="8dp"
                 android:text="Project title that is big"
                 android:textAppearance="@style/TextAppearance.AppCompat.Display1"
@@ -52,7 +53,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:text="Jamid Deka"
+                    tools:text="Jamid Deka"
+                    android:textAllCaps="true"
                     app:layout_constraintBottom_toBottomOf="@+id/projectAuthorPhoto"
                     app:layout_constraintStart_toEndOf="@+id/projectAuthorPhoto"
                     app:layout_constraintTop_toTopOf="@+id/projectAuthorPhoto" />
@@ -72,6 +74,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
+                android:layout_marginBottom="16dp"
                 android:text="12:34 pm • Gumoria Pathar " />
 
 
@@ -81,6 +84,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
+                android:fontFamily="@font/roboto_medium"
                 android:text="Tags"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                 android:visibility="gone"
@@ -103,6 +107,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginBottom="8dp"
+                android:fontFamily="@font/roboto_medium"
                 android:text="Contributors"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                 android:visibility="gone"

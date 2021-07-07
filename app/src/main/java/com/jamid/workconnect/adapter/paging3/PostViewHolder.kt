@@ -4,27 +4,34 @@ import android.os.Build
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.annotation.LayoutRes
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.findViewTreeLifecycleOwner
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.facebook.drawee.view.SimpleDraweeView
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.jamid.workconnect.IMAGE
+import com.jamid.workconnect.POST
 import com.jamid.workconnect.PROJECT
 import com.jamid.workconnect.R
+import com.jamid.workconnect.adapter.GenericAdapter
 import com.jamid.workconnect.adapter.GenericViewHolder
 import com.jamid.workconnect.interfaces.PostItemClickListener
 import com.jamid.workconnect.model.BlogItemConverter
 import com.jamid.workconnect.model.Post
+import com.jamid.workconnect.model.SimpleComment
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
 class PostViewHolder(
 	val parent: ViewGroup,
 	@LayoutRes val layout: Int,
-): GenericViewHolder<Post>(parent, layout){
+): GenericViewHolder<Post>(parent, layout) {
 
 	private val view = itemView
 	private val postItemClickListener = view.context as PostItemClickListener
@@ -50,7 +57,6 @@ class PostViewHolder(
 
 		// special cases
 		val optionBtn = view.findViewById<Button>(R.id.projectOptionsBtn)
-		val progressBar = view.findViewById<ProgressBar>(R.id.miniProjectProgressBar)
 
 
 		// same for both project and blog
@@ -116,20 +122,89 @@ class PostViewHolder(
 			postItemClickListener.onOptionClick(post)
 		}
 
+		itemView.setOnLongClickListener {
+			postItemClickListener.onOptionClick(post)
+			true
+		}
+
 	}
 
 	private fun setPost() {
 		val likeBtn = view.findViewById<Button>(R.id.projectLikeBtn)
 		val dislikeBtn = view.findViewById<Button>(R.id.projectDislikeBtn)
 		val saveBtn = view.findViewById<Button>(R.id.projectSaveBtn)
-//		val followBtn = view.findViewById<Button>(R.id.projectAdminFollowBtn)
-
+		val recycler = view.findViewById<RecyclerView>(R.id.post_comments_recycler)
+		val commentBtn = view.findViewById<Button>(R.id.projectCommentBtn)
 
 		setLikeButton(likeBtn, dislikeBtn)
 		setDislikeButton(likeBtn, dislikeBtn)
-//		setFollowButton(followBtn)
 		setMetadata()
 		setSaveButton(saveBtn)
+		setUpComments(recycler)
+
+		commentBtn?.setOnClickListener {
+			postItemClickListener.onCommentClick(post)
+		}
+	}
+
+	private fun setUpComments(recycler: RecyclerView) {
+		val moreComments = itemView.findViewById<TextView>(R.id.more_comments) ?: return
+		when {
+			post.commentCount > 2 -> moreComments.visibility = View.VISIBLE
+			post.commentCount == 0.toLong() -> recycler.visibility = View.GONE
+			else -> moreComments.visibility = View.GONE
+		}
+
+		setComments(recycler, moreComments)
+	}
+
+	private fun setComments(recycler: RecyclerView, textView: TextView) {
+
+		val commentAdapter = GenericAdapter(SimpleComment::class.java, mapOf(POST to post))
+
+		parent.findViewTreeLifecycleOwner()?.lifecycleScope?.launch {
+
+			val comments = postItemClickListener.onFetchComments(post)
+
+			if (comments.isEmpty()) {
+				recycler.visibility = View.GONE
+				textView.visibility = View.GONE
+			} else {
+				for (comment in comments) {
+					comment.postTitle = post.title
+				}
+
+				recycler.apply {
+					visibility = View.VISIBLE
+					adapter = commentAdapter
+					layoutManager = LinearLayoutManager(recycler.context)
+				}
+
+				commentAdapter.submitList(comments)
+
+				textView.setOnClickListener {
+					if (post.commentCount > 2) {
+						postItemClickListener.onCommentClick(post)
+					}
+				}
+			}
+
+		}
+
+		/*val task = Firebase.firestore.collection(COMMENT_CHANNELS)
+			.document(post.commentChannelId)
+			.collection(COMMENTS)
+			.orderBy(POSTED_AT, Query.Direction.DESCENDING)
+			.limit(2)
+			.get()
+
+		task.addOnSuccessListener {
+
+
+		}.addOnFailureListener {
+			Log.e(BUG_TAG, "Couldn't get comments. Reason - ${it.localizedMessage}")
+		}*/
+
 	}
 
 
@@ -143,7 +218,9 @@ class PostViewHolder(
 				if (post.postLocalData.isDisliked) {
 					dislikeBtn.isSelected = false
 				}
-				post = postItemClickListener.onLikePressed(post)
+				itemView.findViewTreeLifecycleOwner()?.lifecycleScope?.launch {
+					post = postItemClickListener.onLikePressed(post)
+				}
 				setMetadata()
 			} else {
 				postItemClickListener.onNotSignedIn(post)
@@ -161,7 +238,9 @@ class PostViewHolder(
 				if (post.postLocalData.isLiked) {
 					likeBtn.isSelected = false
 				}
-				post = postItemClickListener.onDislikePressed(post)
+				itemView.findViewTreeLifecycleOwner()?.lifecycleScope?.launch {
+					post = postItemClickListener.onDislikePressed(post)
+				}
 				setMetadata()
 			} else {
 				postItemClickListener.onNotSignedIn(post)
@@ -172,14 +251,45 @@ class PostViewHolder(
 	private fun setMetadata() {
 		val text = view.findViewById<TextView>(R.id.meta)
 		val ft = if (post.type == PROJECT) {
-			"${post.likes} Likes • ${post.dislikes} Dislikes • ${post.contributors?.size ?: 0} Contributors"
+			"${post.likes} Likes • ${post.dislikes} Dislikes • ${post.commentCount} Comments • ${post.contributors?.size ?: 0} Contributors"
 		} else {
-			"${post.likes} Likes • ${post.dislikes} Dislikes"
+			"${post.likes} Likes • ${post.dislikes} Dislikes • ${post.commentCount} Comments"
 		}
-		text.text = ft
+		text?.text = ft
+
+		if (post.commentCount > 0) {
+			text?.setOnClickListener {
+				postItemClickListener.onCommentClick(post)
+			}
+		}
 	}
 
-	private fun setFollowButton(followBtn: Button) {
+	private fun setSaveButton(saveBtn: Button) {
+		saveBtn.isSelected = post.postLocalData.isSaved
+
+		saveBtn.setOnClickListener {
+			if (auth.currentUser != null) {
+				saveBtn.isSelected = !saveBtn.isSelected
+				itemView.findViewTreeLifecycleOwner()?.lifecycleScope?.launch {
+					post = postItemClickListener.onSavePressed(post)
+				}
+			} else {
+				postItemClickListener.onNotSignedIn(post)
+			}
+		}
+	}
+
+	companion object {
+
+		@JvmStatic
+		fun newInstance(parent: ViewGroup, @LayoutRes layout: Int) =
+			PostViewHolder(parent, layout)
+
+	}
+
+}
+
+/*private fun setFollowButton(followBtn: Button) {
 
 		fun setFollowText(isUserFollowed: Boolean) {
 			if (isUserFollowed) {
@@ -205,27 +315,4 @@ class PostViewHolder(
 				}
 			}
 		}
-	}
-
-	private fun setSaveButton(saveBtn: Button) {
-		saveBtn.isSelected = post.postLocalData.isSaved
-
-		saveBtn.setOnClickListener {
-			if (auth.currentUser != null) {
-				saveBtn.isSelected = !saveBtn.isSelected
-				post = postItemClickListener.onSavePressed(post)
-			} else {
-				postItemClickListener.onNotSignedIn(post)
-			}
-		}
-	}
-
-	companion object {
-
-		@JvmStatic
-		fun newInstance(parent: ViewGroup, @LayoutRes layout: Int) =
-			PostViewHolder(parent, layout)
-
-	}
-
-}
+	}*/

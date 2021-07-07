@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import android.os.Parcelable
 import android.util.Log
 import android.view.View
 import androidx.fragment.app.Fragment
@@ -18,6 +19,7 @@ class GenericMenuFragment: Fragment(R.layout.generic_menu_layout) {
     private lateinit var binding: GenericMenuLayoutBinding
     private lateinit var genericMenuAdapter: GenericAdapter<GenericMenuItem>
     private lateinit var activity: MainActivity
+    var shouldHideTitle = false
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -28,12 +30,22 @@ class GenericMenuFragment: Fragment(R.layout.generic_menu_layout) {
         super.onViewCreated(view, savedInstanceState)
 
         binding = GenericMenuLayoutBinding.bind(view)
+
         val genericMenuClickListener = activity as GenericMenuClickListener
-        genericMenuAdapter = GenericAdapter(GenericMenuItem::class.java)
+        val currentItem = arguments?.getParcelable<Parcelable>(ARG_EXTRA_ITEM)
+        genericMenuAdapter = if (currentItem != null) {
+            GenericAdapter(GenericMenuItem::class.java, extras = mapOf("menu" to currentItem))
+        } else {
+            GenericAdapter(GenericMenuItem::class.java)
+        }
 
         if (Build.VERSION.SDK_INT <= 27) {
-//            binding.genericMenuRoot.removeView(binding.genericMenuBlurView)
             binding.genericMenuRoot.setBackgroundColor(Color.WHITE)
+            binding.genericMenuHeading.setTextColor(Color.BLACK)
+        }
+
+        if (shouldHideTitle) {
+            binding.genericMenuHeading.visibility = View.GONE
         }
 
         arguments?.apply {
@@ -65,6 +77,7 @@ class GenericMenuFragment: Fragment(R.layout.generic_menu_layout) {
         val bottomInset = activity.navigationBarHeight()
         binding.genericMenuContainer.setPadding(0, 0, 0, bottomInset)
 
+
     }
 
     companion object {
@@ -73,13 +86,15 @@ class GenericMenuFragment: Fragment(R.layout.generic_menu_layout) {
         const val ARG_TITLE = "ARG_TITLE"
         const val ARG_ITEMS = "ARG_ITEMS"
         const val ARG_TAG = "ARG_TAG"
+        const val ARG_EXTRA_ITEM = "ARG_EXTRA_ITEM"
 
         @JvmStatic
-        fun newInstance(tag: String, title: String, items: ArrayList<GenericMenuItem>) = GenericMenuFragment().apply {
+        fun newInstance(tag: String, title: String, items: ArrayList<GenericMenuItem>, item: Parcelable? = null) = GenericMenuFragment().apply {
             arguments = Bundle().apply {
                 putString(ARG_TAG, tag)
                 putString(ARG_TITLE, title)
                 putParcelableArrayList(ARG_ITEMS, items)
+                putParcelable(ARG_EXTRA_ITEM, item)
             }
         }
     }

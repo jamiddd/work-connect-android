@@ -38,21 +38,21 @@ class GenericDataSource<T: Any>(private val lim: Long, private val initialQuery:
 
     override fun loadInitial(params: LoadInitialParams<String>, callback: LoadInitialCallback<T>) {
         Log.d("GenericDataSource", "OnLoadInitial")
-        repository.getItemsWithoutCaching(initialQuery.limit(lim)) {
+        /*repository.getItemsWithoutCaching(initialQuery.limit(lim)) {
             firstSnapshot = it.firstOrNull()
             lastSnapshot = it.lastOrNull()
             Log.d("GenericDataSource", "${firstSnapshot?.id}, ${lastSnapshot?.id}")
             callback.onResult(it.toObjects(clazz))
-        }
+        }*/
     }
 
     override fun loadAfter(params: LoadParams<String>, callback: LoadCallback<T>) {
         if (lastSnapshot != null) {
-            repository.getItemsWithoutCaching(initialQuery.startAfter(lastSnapshot).limit(lim)) {
+            /*repository.getItemsWithoutCaching(initialQuery.startAfter(lastSnapshot).limit(lim)) {
                 firstSnapshot = it.firstOrNull()
                 lastSnapshot = it.lastOrNull()
                 callback.onResult(it.toObjects(clazz))
-            }
+            }*/
         } else {
             val query = when (clazz) {
                 User::class.java -> {
@@ -63,13 +63,13 @@ class GenericDataSource<T: Any>(private val lim: Long, private val initialQuery:
                 }
                 else -> throw ClassCastException("Class not found in the given options in Generic Data Source.")
             }
-            repository.getSnapshot(query) { doc ->
+            /*repository.getSnapshot(query) { doc ->
                 repository.getItemsWithoutCaching(initialQuery.startAfter(doc).limit(lim)) {
                     firstSnapshot = it.firstOrNull()
                     lastSnapshot = it.lastOrNull()
                     callback.onResult(it.toObjects(clazz))
                 }
-            }
+            }*/
         }
     }
 

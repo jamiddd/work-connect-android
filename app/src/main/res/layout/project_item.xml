@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <include layout="@layout/project_item_top" />
+
+    <include layout="@layout/project_item_middle" />
+
+    <include layout="@layout/project_item_bottom" />
+
+    <View
+        android:id="@+id/divider19"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?android:attr/listDivider" />
+
+    <!--<ViewStub
+        android:id="@+id/post_extra_stub"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inflatedId="extra_stuff"
+        android:layout="@layout/project_item_extra" />-->
+
+</LinearLayout>

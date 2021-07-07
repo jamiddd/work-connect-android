@@ -61,7 +61,9 @@
             style="@style/PostMetaCardStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
+            app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
+            app:behavior_hideable="false"
+            app:behavior_peekHeight="100dp"
             android:clickable="true"
             android:focusable="true"
             app:cardElevation="3dp"
@@ -82,21 +84,23 @@
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/blogFragmentToolbar"
                 android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:titleTextAppearance="@style/TitleCollapsedPost"
+                app:subtitleTextAppearance="@style/SubTitleCollapsedPost"
                 app:navigationIcon="@drawable/ic_round_arrow_back_24"
-                app:titleCentered="true"
                 app:subtitleCentered="true"
                 app:title="Blog"
-                android:layout_height="?actionBarSize">
+                app:titleCentered="true">
 
                 <com.facebook.drawee.view.SimpleDraweeView
                     android:id="@+id/blog_author_image"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
-                    app:placeholderImage="@drawable/ic_user"
-                    app:roundAsCircle="true"
-                    android:visibility="gone"
+                    android:layout_gravity="center_vertical|end"
                     android:layout_marginEnd="8dp"
-                    android:layout_gravity="center_vertical|end"/>
+                    android:visibility="gone"
+                    app:placeholderImage="@drawable/ic_user"
+                    app:roundAsCircle="true" />
 
             </com.google.android.material.appbar.MaterialToolbar>
 

@@ -32,7 +32,11 @@ class SettingsFragment : SupportFragment(R.layout.fragment_settings, TAG, false)
 
 		viewModel.windowInsets.observe(viewLifecycleOwner) { (top, bottom) ->
 			binding.settingsToolbar.updateLayout(marginTop = top)
-			binding.settingsScrollContainer.setPadding(0, 0, 0, bottom + convertDpToPx(56))
+			if (activity.mainBinding.bottomCard.translationY != 0f) {
+				binding.settingsScrollContainer.setPadding(0, 0, 0, bottom)
+			} else {
+				binding.settingsScrollContainer.setPadding(0, convertDpToPx(8), 0, bottom + convertDpToPx(56))
+			}
 		}
 
 		binding.logOutButton.setOnClickListener {

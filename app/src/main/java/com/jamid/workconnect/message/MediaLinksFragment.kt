@@ -38,7 +38,7 @@ class MediaLinksFragment : InsetControlFragment(R.layout.fragment_media_links) {
 
         OverScrollDecoratorHelper.setUpOverScroll(binding.linksRecycler, OverScrollDecoratorHelper.ORIENTATION_VERTICAL)
 
-        viewModel.messagesByType(chatChannel.chatChannelId, LINKS).observe(viewLifecycleOwner) {
+        /*viewModel.messagesByType(chatChannel.chatChannelId, LINKS).observe(viewLifecycleOwner) {
             if (it.isNotEmpty()) {
                 job?.cancel()
 //                activity.mainBinding.primaryProgressBar.visibility = View.GONE
@@ -54,7 +54,7 @@ class MediaLinksFragment : InsetControlFragment(R.layout.fragment_media_links) {
                     binding.linksRecycler.visibility = View.GONE
                 }
             }
-        }
+        }*/
 
     }
 

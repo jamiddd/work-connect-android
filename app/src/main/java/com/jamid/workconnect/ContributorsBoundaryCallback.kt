@@ -26,14 +26,14 @@ class ContributorsBoundaryCallback(private val channelId: String, private val re
 
     override fun onZeroItemsLoaded() {
         super.onZeroItemsLoaded()
-        repo.getChannelContributors(channelId, PAGE_SIZE) {
+        /*repo.getChannelContributors(channelId, PAGE_SIZE) {
             if (!it.isEmpty) {
                 hasReachedEndFromEnd = it.size() < PAGE_SIZE
                 hasReachedEndFromStart = it.size() < PAGE_SIZE
                 firstDoc = it.first()
                 lastDoc = it.last()
             }
-        }
+        }*/
     }
 
     override fun onItemAtFrontLoaded(itemAtFront: ChatChannelContributor) {
@@ -41,9 +41,9 @@ class ContributorsBoundaryCallback(private val channelId: String, private val re
         val doc = firstDoc
         if (doc == null) {
             if (!hasReachedEndFromStart) {
-                repo.getContributorSnapshot(channelId, itemAtFront.id) {
+               /* repo.getContributorSnapshot(channelId, itemAtFront.id) {
                     getContributorsBefore(it)
-                }
+                }*/
             }
         } else {
             getContributorsBefore(doc)
@@ -51,21 +51,21 @@ class ContributorsBoundaryCallback(private val channelId: String, private val re
     }
 
     private fun getContributorsBefore(documentSnapshot: DocumentSnapshot) {
-        repo.getChannelContributors(channelId, PAGE_SIZE, documentSnapshot, true) {
+        /*repo.getChannelContributors(channelId, PAGE_SIZE, documentSnapshot, true) {
             if (!it.isEmpty) {
                 hasReachedEndFromStart = it.size() < PAGE_SIZE
                 firstDoc = it.first()
             }
-        }
+        }*/
     }
 
     private fun getContributorsAfter(documentSnapshot: DocumentSnapshot) {
-        repo.getChannelContributors(channelId, PAGE_SIZE, documentSnapshot) {
+       /* repo.getChannelContributors(channelId, PAGE_SIZE, documentSnapshot) {
             if (!it.isEmpty) {
                 hasReachedEndFromEnd = it.size() < PAGE_SIZE
                 lastDoc = it.last()
             }
-        }
+        }*/
     }
 
     override fun onItemAtEndLoaded(itemAtEnd: ChatChannelContributor) {
@@ -73,9 +73,9 @@ class ContributorsBoundaryCallback(private val channelId: String, private val re
         val doc = lastDoc
         if (doc == null) {
             if (!hasReachedEndFromEnd) {
-                repo.getContributorSnapshot(channelId, itemAtEnd.id) {
+                /*repo.getContributorSnapshot(channelId, itemAtEnd.id) {
                     getContributorsAfter(it)
-                }
+                }*/
             }
         } else {
             getContributorsAfter(doc)

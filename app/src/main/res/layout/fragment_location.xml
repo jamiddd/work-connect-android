@@ -31,8 +31,9 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:layout_marginBottom="16dp"
+            android:fontFamily="@font/roboto_medium"
             android:text="Add Location"
-            android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
             app:layout_constraintBottom_toTopOf="@+id/customLocation"
             app:layout_constraintEnd_toStartOf="@+id/addCustomLocation"
             app:layout_constraintHorizontal_bias="0.5"
@@ -71,15 +72,14 @@
             app:layout_constraintTop_toBottomOf="@+id/divider"
             tools:context=".ui.home.child.AddLocationFragment"
             tools:itemCount="10"
-            tools:listitem="@layout/location_list_item" />
+            tools:listitem="@layout/generic_menu_item" />
 
         <EditText
             android:id="@+id/customLocation"
-            style="@style/EditTextStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
             android:background="@drawable/grey_rounded_rect_edittext"
             android:ems="10"
             android:hint="Add custom location"

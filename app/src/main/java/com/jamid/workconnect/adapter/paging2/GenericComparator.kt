@@ -43,10 +43,16 @@ class GenericComparator<T: Any>(private val clazz: Class<T>): DiffUtil.ItemCallb
 				return oldMenuItem.item == newMenuItem.item
 			}
 			InterestItem::class.java -> {
-				val oldMenuItem = oldItem as InterestItem
-				val newMenuItem = newItem as InterestItem
+				val oldInterestItem = oldItem as InterestItem
+				val newInterestItem = newItem as InterestItem
 
-				return oldMenuItem.id == newMenuItem.id
+				return oldInterestItem.id == newInterestItem.id
+			}
+			SimpleComment::class.java -> {
+				val oldComment = oldItem as SimpleComment
+				val newComment = newItem as SimpleComment
+
+				return oldComment.commentId == newComment.commentId
 			}
 			else -> true
 		}
@@ -91,10 +97,16 @@ class GenericComparator<T: Any>(private val clazz: Class<T>): DiffUtil.ItemCallb
 				return oldMenuItem == newMenuItem
 			}
 			InterestItem::class.java -> {
-				val oldMenuItem = oldItem as InterestItem
-				val newMenuItem = newItem as InterestItem
+				val oldInterestItem = oldItem as InterestItem
+				val newInterestItem = newItem as InterestItem
 
-				return oldMenuItem == newMenuItem
+				return oldInterestItem == newInterestItem
+			}
+			SimpleComment::class.java -> {
+				val oldComment = oldItem as SimpleComment
+				val newComment = newItem as SimpleComment
+
+				return oldComment == newComment
 			}
 			else -> true
 		}

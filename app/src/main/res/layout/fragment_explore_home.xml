@@ -19,21 +19,21 @@
                 android:layout_height="match_parent"
                 android:clipToPadding="false"
                 android:paddingBottom="80dp"
-                tools:context="com.jamid.workconnect.explore.ExploreHomeFragment"/>
+                tools:context="com.jamid.workconnect.explore.ExploreHomeFragment"
+                tools:listitem="@layout/nested_child_recycler_item" />
 
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/exploreAppBar"
             android:layout_width="match_parent"
-            android:backgroundTint="@color/white"
-            android:stateListAnimator="@animator/app_bar_elevation"
-            android:layout_height="226dp">
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/white">
 
             <com.google.android.material.appbar.CollapsingToolbarLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
                 style="@style/CollapseToolbarStyle"
+                android:layout_width="match_parent"
+                android:layout_height="226dp"
                 app:expandedTitleMarginBottom="72dp"
                 app:toolbarId="@id/exploreToolbar">
 
@@ -47,12 +47,12 @@
                     android:layout_marginTop="8dp"
                     android:layout_marginEnd="16dp"
                     android:layout_marginBottom="8dp"
+                    android:focusable="false"
                     app:boxBackgroundColor="@color/grey"
                     app:boxBackgroundMode="filled"
                     app:boxCornerRadiusBottomEnd="8dp"
                     app:boxCornerRadiusBottomStart="8dp"
                     app:boxCornerRadiusTopEnd="8dp"
-                    android:focusable="false"
                     app:boxCornerRadiusTopStart="8dp"
                     app:boxStrokeColor="@color/transparent"
                     app:boxStrokeWidth="0dp"
@@ -66,10 +66,11 @@
                         android:id="@+id/searchEditText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:focusable="false"
                         android:clickable="true"
+                        android:focusable="false"
                         android:hint="Search for posts, accounts ..."
-                        android:paddingTop="12dp" />
+                        android:paddingTop="12dp"
+                        android:transitionName="transition-explore-search" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.appbar.MaterialToolbar
@@ -99,12 +100,12 @@
                     android:id="@+id/accountImg"
                     android:layout_width="36dp"
                     android:layout_height="36dp"
+                    android:layout_gravity="end"
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="36dp"
-                    android:layout_gravity="end"
-                    app:layout_collapseMode="pin"
                     android:clickable="true"
                     android:focusable="true"
+                    app:layout_collapseMode="pin"
                     app:placeholderImage="@drawable/ic_user"
                     app:roundAsCircle="true" />
 

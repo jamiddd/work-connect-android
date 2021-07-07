@@ -18,7 +18,7 @@
             android:fillViewport="true"
             android:clipToPadding="false">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <!--<androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
@@ -27,72 +27,47 @@
                     style="@style/EditTextStyle"
                     android:layout_width="match_parent"
                     android:layout_height="48dp"
-                    android:layout_marginStart="12dp"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginEnd="12dp"
-                    android:background="@drawable/grey_rounded_rect_edittext"
+                    android:background="@null"
                     android:ems="10"
                     android:hint="Title of the Project ..."
                     android:inputType="textPersonName"
                     android:paddingStart="12dp"
                     android:paddingEnd="12dp"
-                    app:layout_constraintBottom_toTopOf="@+id/projectAdminPhoto"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintVertical_bias="0.0"
-                    app:layout_constraintVertical_chainStyle="packed" />
+                    tools:layout_editor_absoluteX="12dp"
+                    tools:layout_editor_absoluteY="16dp" />
 
                 <com.facebook.drawee.view.SimpleDraweeView
                     android:id="@+id/projectAdminPhoto"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
-                    android:layout_marginTop="8dp"
-                    app:layout_constraintBottom_toTopOf="@+id/projectThumnailImg"
-                    app:layout_constraintEnd_toStartOf="@+id/projectAdminNameAndTime"
-                    app:layout_constraintHorizontal_bias="0.0"
-                    app:layout_constraintHorizontal_chainStyle="packed"
-                    app:layout_constraintStart_toStartOf="@+id/projectTitleText"
-                    app:layout_constraintTop_toBottomOf="@+id/projectTitleText"
                     app:placeholderImage="@drawable/ic_user"
-                    app:roundAsCircle="true" />
+                    app:roundAsCircle="true"
+                    tools:layout_editor_absoluteX="12dp"
+                    tools:layout_editor_absoluteY="72dp" />
 
                 <TextView
                     android:id="@+id/projectAdminNameAndTime"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="4dp"
                     android:text=" Jamid Deka • 12:34 pm •"
-                    app:layout_constraintBottom_toBottomOf="@+id/projectAdminPhoto"
-                    app:layout_constraintEnd_toStartOf="@+id/projectLocation"
-                    app:layout_constraintStart_toEndOf="@+id/projectAdminPhoto"
-                    app:layout_constraintTop_toTopOf="@+id/projectAdminPhoto" />
+                    tools:layout_editor_absoluteX="50dp"
+                    tools:layout_editor_absoluteY="77dp" />
 
                 <com.facebook.drawee.view.SimpleDraweeView
                     android:id="@+id/projectThumnailImg"
                     style="@style/ProjectImagePlaceholder"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginEnd="12dp"
-                    app:layout_constraintBottom_toTopOf="@+id/projectContentText"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/projectAdminPhoto"
                     app:roundedCornerRadius="8dp"
-                    app:viewAspectRatio="1.333" />
+                    app:viewAspectRatio="1.333"
+                    tools:layout_editor_absoluteX="12dp"
+                    tools:layout_editor_absoluteY="118dp" />
 
                 <EditText
                     android:id="@+id/projectContentText"
                     style="@style/EditTextStyle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginEnd="12dp"
-                    android:layout_marginBottom="12dp"
                     android:background="@drawable/grey_rounded_rect_edittext"
                     android:ems="10"
                     android:gravity="start|top"
@@ -103,10 +78,8 @@
                     android:paddingTop="8dp"
                     android:paddingEnd="12dp"
                     android:paddingBottom="8dp"
-                    app:layout_constraintBottom_toTopOf="@id/tagsGroup"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/projectThumnailImg" />
+                    tools:layout_editor_absoluteX="12dp"
+                    tools:layout_editor_absoluteY="410dp" />
 
                 <Button
                     android:id="@+id/addProjectImageBtn"
@@ -118,42 +91,32 @@
                     android:textAppearance="@style/TextAppearance.AppCompat.Small"
                     android:textColor="@color/white"
                     app:cornerRadius="8dp"
-                    app:layout_constraintBottom_toBottomOf="@+id/projectThumnailImg"
-                    app:layout_constraintEnd_toEndOf="@+id/projectThumnailImg"
-                    app:layout_constraintStart_toStartOf="@+id/projectThumnailImg"
-                    app:layout_constraintTop_toTopOf="@+id/projectThumnailImg"
                     app:rippleColor="#6AFFFFFF"
                     app:strokeColor="@color/white"
                     app:strokeWidth="2dp"
+                    tools:layout_editor_absoluteX="145dp"
+                    tools:layout_editor_absoluteY="232dp"
                     tools:visibility="invisible" />
 
                 <com.google.android.material.chip.ChipGroup
                     android:id="@+id/tagsGroup"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
                     android:paddingStart="12dp"
                     android:paddingEnd="12dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/projectContentText"
-                    app:layout_constraintVertical_bias="0.0" />
+                    tools:layout_editor_absoluteY="522dp" />
 
                 <TextView
                     android:id="@+id/projectLocation"
-                    android:layout_width="0dp"
+                    android:layout_width="164dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="4dp"
                     android:clickable="true"
                     android:ellipsize="end"
                     android:focusable="true"
                     android:maxLines="1"
                     android:singleLine="true"
-                    app:layout_constraintBottom_toBottomOf="@+id/projectAdminNameAndTime"
-                    app:layout_constraintEnd_toEndOf="@+id/projectTitleText"
-                    app:layout_constraintStart_toEndOf="@+id/projectAdminNameAndTime"
-                    app:layout_constraintTop_toTopOf="@+id/projectAdminNameAndTime" />
+                    tools:layout_editor_absoluteX="216dp"
+                    tools:layout_editor_absoluteY="77dp" />
 
                 <Button
                     android:id="@+id/removeProjectImgBtn"
@@ -166,21 +129,139 @@
                     android:textColor="@color/white"
                     android:visibility="gone"
                     app:cornerRadius="8dp"
-                    app:layout_constraintBottom_toBottomOf="@+id/projectThumnailImg"
-                    app:layout_constraintEnd_toEndOf="@+id/projectThumnailImg"
-                    app:layout_constraintStart_toStartOf="@+id/projectThumnailImg"
-                    app:layout_constraintTop_toTopOf="@+id/projectThumnailImg"
                     app:rippleColor="#6AFFFFFF"
                     app:strokeColor="@color/white"
                     app:strokeWidth="2dp"
+                    tools:layout_editor_absoluteX="152dp"
+                    tools:layout_editor_absoluteY="232dp"
                     tools:visibility="visible" />
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>-->
+
+            <LinearLayout
+                android:id="@+id/itemsContainer"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <EditText
+                    android:id="@+id/projectTitleText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@null"
+                    android:ems="10"
+                    android:fontFamily="@font/roboto_medium"
+                    android:hint="@string/project_title_hint"
+                    android:importantForAutofill="no"
+                    android:inputType="textPersonName"
+                    android:minHeight="48dp"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:textColorHint="#78909C" />
+
+                <LinearLayout
+                    android:id="@+id/admin_info_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <com.facebook.drawee.view.SimpleDraweeView
+                        android:id="@+id/adminImg"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_marginStart="12dp"
+                        app:placeholderImage="@drawable/ic_user"
+                        app:roundAsCircle="true"
+                        tools:ignore="ImageContrastCheck" />
+
+                    <TextView
+                        android:id="@+id/adminInfo"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginEnd="8dp"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        tools:text="Jamid Deka • 1:24 pm • Gumoria Pathar" />
+
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/projectImg"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:background="@color/darkestGrey"
+                    android:clickable="true"
+                    android:contentDescription="@string/add_project_image"
+                    android:focusable="true"
+                    android:longClickable="true"
+                    android:minHeight="250dp"
+                    android:visibility="gone" />
+
+                <EditText
+                    android:id="@+id/projectContentText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:autofillHints="The content of the project that describes the project."
+                    android:background="@null"
+                    android:ems="10"
+                    android:gravity="start|top"
+                    android:hint="@string/sample_hint"
+                    android:inputType="textMultiLine|text"
+                    android:minHeight="100dp"
+                    android:paddingStart="12dp"
+                    android:paddingTop="8dp"
+                    android:paddingEnd="12dp"
+                    android:paddingBottom="8dp"
+                    android:textColorHint="#78909C" />
+
+                <View
+                    android:id="@+id/divider18"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="?android:attr/listDivider" />
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/tagsGroup"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp" />
+
+                <TextView
+                    android:id="@+id/projectLocation"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:background="?selectableItemBackground"
+                    android:clickable="true"
+                    android:drawablePadding="8dp"
+                    android:ellipsize="end"
+                    android:focusable="true"
+                    android:fontFamily="@font/roboto_medium"
+                    android:gravity="center_vertical"
+                    android:maxLines="1"
+                    android:minHeight="48dp"
+                    android:paddingStart="4dp"
+                    android:paddingEnd="4dp"
+                    android:singleLine="true"
+                    android:text="@string/add_location"
+                    android:textColor="@color/blue_500"
+                    app:drawableLeftCompat="@drawable/ic_baseline_add_location_alt_24"
+                    app:drawableTint="@color/blue_500" />
+
+            </LinearLayout>
+
 
         </androidx.core.widget.NestedScrollView>
 
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cardView3"
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/bottomActions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:cardElevation="20dp"
@@ -198,51 +279,129 @@
                 android:layout_height="1dp"
                 android:background="?android:attr/listDivider" />
 
-            <LinearLayout
+            <HorizontalScrollView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp">
+                android:layout_height="match_parent"
+                android:scrollbars="none">
 
-                <Button
-                    android:id="@+id/addProjectLocationBtn"
-                    style="@style/GenericButton"
+                <LinearLayout
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:icon="@drawable/ic_baseline_add_location_alt_24" />
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal">
 
-                <Button
-                    android:id="@+id/addProjectTagBtn"
-                    style="@style/GenericButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:icon="@drawable/ic_baseline_label_24" />
+                    <LinearLayout
+                        android:id="@+id/textFormatLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:visibility="gone">
 
-                <Button
-                    android:id="@+id/addProjectLinkBtn"
-                    style="@style/GenericButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:icon="@drawable/ic_baseline_insert_link_24" />
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
+                        <Button
+                            android:id="@+id/bold"
+                            style="@style/GenericButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:contentDescription="@string/add_location_btn_desc"
+                            app:icon="@drawable/ic_baseline_format_bold_24"
+                            tools:ignore="RedundantDescriptionCheck" />
+
+                        <Button
+                            android:id="@+id/italic"
+                            style="@style/GenericButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:contentDescription="@string/add_tag_btn_desc"
+                            app:icon="@drawable/ic_baseline_format_italic_24"
+                            tools:ignore="RedundantDescriptionCheck" />
+
+                        <Button
+                            android:id="@+id/underline"
+                            style="@style/GenericButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:contentDescription="@string/add_link_btn_desc"
+                            app:icon="@drawable/ic_baseline_format_underlined_24"
+                            tools:ignore="RedundantDescriptionCheck" />
+
+                        <Button
+                            android:id="@+id/strikethrough"
+                            style="@style/GenericButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:contentDescription="@string/add_image_btn_desc"
+                            app:icon="@drawable/ic_baseline_format_strikethrough_24"
+                            tools:ignore="RedundantDescriptionCheck" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/itemsLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp">
+
+                        <Button
+                            android:id="@+id/addProjectLocationBtn"
+                            style="@style/GenericButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:contentDescription="@string/add_location_btn_desc"
+                            app:icon="@drawable/ic_baseline_add_location_alt_24"
+                            tools:ignore="RedundantDescriptionCheck" />
+
+                        <Button
+                            android:id="@+id/addProjectTagBtn"
+                            style="@style/GenericButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:contentDescription="@string/add_tag_btn_desc"
+                            app:icon="@drawable/ic_baseline_label_24"
+                            tools:ignore="RedundantDescriptionCheck" />
+
+                        <Button
+                            android:id="@+id/addProjectLinkBtn"
+                            style="@style/GenericButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:contentDescription="@string/add_link_btn_desc"
+                            app:icon="@drawable/ic_baseline_insert_link_24"
+                            tools:ignore="RedundantDescriptionCheck" />
+
+                        <Button
+                            android:id="@+id/addImageBtn"
+                            style="@style/GenericButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:contentDescription="@string/add_image_btn_desc"
+                            app:icon="@drawable/ic_baseline_add_photo_alternate_24"
+                            tools:ignore="RedundantDescriptionCheck" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+            </HorizontalScrollView>
+
+        </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/createProjectFragmentAppBar"
             android:layout_width="match_parent"
-            android:backgroundTint="@color/white"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/white">
 
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/createProjectFragmentToolbar"
                 android:layout_width="match_parent"
-                app:title="Create new Project"
-                app:titleCentered="true"
+                android:layout_height="?actionBarSize"
                 android:layout_marginTop="26dp"
                 app:navigationIcon="@drawable/ic_round_arrow_back_24"
-                android:layout_height="?actionBarSize">
+                app:title="Create new Project"
+                app:titleCentered="true">
 
                 <com.google.android.material.button.MaterialButton
+                    android:id="@+id/createProjectBtn"
                     style="@style/Widget.MaterialComponents.Button.TextButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -250,7 +409,7 @@
                     android:layout_marginEnd="8dp"
                     android:fontFamily="@font/roboto_medium"
                     android:minWidth="40dp"
-                    android:text="Create"
+                    android:text="@string/create"
                     android:textAppearance="@style/TextAppearance.AppCompat.Small"
                     app:cornerRadius="24dp" />
 

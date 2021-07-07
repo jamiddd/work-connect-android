@@ -1,6 +1,8 @@
 package com.jamid.workconnect.model
 
 import android.os.Parcelable
+import androidx.room.Ignore
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -13,5 +15,5 @@ data class PostLocalData(
 	var isCollaboration: Boolean  = false,
 	var inFeed: Boolean = false
 ): Parcelable {
-	constructor(): this(false)
+	constructor(): this(false, false, false, false, false, false, false)
 }

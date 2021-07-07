@@ -25,6 +25,10 @@ abstract class UserDao: BaseDao<User>() {
     @Query("SELECT * FROM users WHERE name LIKE :item")
     abstract fun getSearchedUsers(item: String): DataSource.Factory<Int, User>
 
+
+    @Query("SELECT * FROM users WHERE isCurrentUser = 1")
+    abstract fun currentUser(): LiveData<User>
+
 	// Deprecated
 //	@Query("SELECT * FROM users WHERE user_followings LIKE :uid")
 //	abstract fun getFollowers(uid: String): DataSource.Factory<Int, User>
@@ -160,5 +164,8 @@ abstract class UserDao: BaseDao<User>() {
 
     @Query("DELETE FROM users")
     abstract suspend fun clearUsers()
+
+    @Query("SELECT * FROM users WHERE isCurrentUser = 1")
+    abstract suspend fun getCachedUser(): User?
 
 }

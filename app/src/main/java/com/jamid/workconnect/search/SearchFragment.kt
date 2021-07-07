@@ -2,17 +2,14 @@ package com.jamid.workconnect.search
 
 import android.os.Bundle
 import android.view.View
-import androidx.core.view.get
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.google.android.material.tabs.TabLayoutMediator
 import com.jamid.workconnect.*
 import com.jamid.workconnect.databinding.FragmentSearchBinding
-import me.everything.android.ui.overscroll.OverScrollDecoratorHelper
 
 class SearchFragment : SupportFragment(R.layout.fragment_search, TAG, false) {
 
@@ -57,7 +54,7 @@ class SearchFragment : SupportFragment(R.layout.fragment_search, TAG, false) {
 
     }
 
-    inner class SearchPagesAdapter(fa: FragmentActivity): FragmentStateAdapter(fa) {
+    inner class SearchPagesAdapter(fa: FragmentActivity) : FragmentStateAdapter(fa) {
 
         override fun getItemCount() = 3
 
@@ -74,7 +71,6 @@ class SearchFragment : SupportFragment(R.layout.fragment_search, TAG, false) {
 
     override fun onDestroy() {
         super.onDestroy()
-        binding.searchMotionLayout.transitionToStart()
         viewModel.clearSearch()
     }
 

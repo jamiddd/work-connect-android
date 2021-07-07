@@ -4,6 +4,8 @@ import android.view.View
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.lifecycle.findViewTreeLifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.facebook.drawee.view.SimpleDraweeView
 import com.google.firebase.auth.ktx.auth
@@ -14,6 +16,7 @@ import com.jamid.workconnect.R
 import com.jamid.workconnect.interfaces.PostItemClickListener
 import com.jamid.workconnect.model.BlogItemConverter
 import com.jamid.workconnect.model.Post
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -130,7 +133,9 @@ class PostViewHolder(
                 if (post.postLocalData.isDisliked) {
                     dislikeBtn.isSelected = false
                 }
-                postItemClickListener.onLikePressed(post)
+                itemView.findViewTreeLifecycleOwner()?.lifecycleScope?.launch {
+                    postItemClickListener.onLikePressed(post)
+                }
             } else {
                 postItemClickListener.onNotSignedIn(post)
             }
@@ -147,7 +152,9 @@ class PostViewHolder(
                 if (post.postLocalData.isLiked) {
                     likeBtn.isSelected = false
                 }
-                postItemClickListener.onDislikePressed(post)
+                itemView.findViewTreeLifecycleOwner()?.lifecycleScope?.launch {
+                    postItemClickListener.onDislikePressed(post)
+                }
             } else {
                 postItemClickListener.onNotSignedIn(post)
             }
@@ -174,7 +181,9 @@ class PostViewHolder(
             followBtn.setOnClickListener {
                 if (auth.currentUser != null) {
                     setFollowText(!post.postLocalData.isUserFollowed)
-                    postItemClickListener.onFollowPressed(post)
+                    itemView.findViewTreeLifecycleOwner()?.lifecycleScope?.launch {
+                        postItemClickListener.onFollowPressed(post)
+                    }
                 } else {
                     postItemClickListener.onNotSignedIn(post)
                 }
@@ -188,7 +197,9 @@ class PostViewHolder(
         saveBtn.setOnClickListener {
             if (auth.currentUser != null) {
                 saveBtn.isSelected = !saveBtn.isSelected
-                postItemClickListener.onSavePressed(post)
+                itemView.findViewTreeLifecycleOwner()?.lifecycleScope?.launch {
+                    postItemClickListener.onSavePressed(post)
+                }
             } else {
                 postItemClickListener.onNotSignedIn(post)
             }

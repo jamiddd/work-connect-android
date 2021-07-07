@@ -1,14 +1,21 @@
 package com.jamid.workconnect.profile
 
 import android.os.Bundle
+import android.view.Gravity
 import android.view.View
+import android.view.ViewGroup
+import android.widget.FrameLayout
+import android.widget.LinearLayout
+import android.widget.ScrollView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.jamid.workconnect.InsetControlFragment
-import com.jamid.workconnect.R
+import com.jamid.workconnect.*
 import com.jamid.workconnect.adapter.paging3.PostAdapter
 import com.jamid.workconnect.databinding.FragmentCollaborationsListBinding
+import com.jamid.workconnect.model.Post
 import com.jamid.workconnect.model.User
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -16,11 +23,12 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @OptIn(androidx.paging.ExperimentalPagingApi::class)
-class CollaborationsListFragment : InsetControlFragment(R.layout.fragment_collaborations_list) {
+class CollaborationsListFragment : PagingListFragment(R.layout.fragment_collaborations_list) {
 
     private lateinit var postAdapter: PostAdapter
     private lateinit var binding: FragmentCollaborationsListBinding
-    private var job: Job? = null
+    private var errorView: View? = null
+    private lateinit var user: User
 
     private fun getUserCollaborations(user: User) {
         job?.cancel()
@@ -35,72 +43,65 @@ class CollaborationsListFragment : InsetControlFragment(R.layout.fragment_collab
         super.onViewCreated(view, savedInstanceState)
 
         binding = FragmentCollaborationsListBinding.bind(view)
-        /*setInsetView(binding.collaborationsRecycler, mapOf(INSET_TOP to 8, INSET_BOTTOM to 48))*/
+        user = arguments?.getParcelable(ARG_USER) ?: return
 
-        val user = arguments?.getParcelable<User>(ARG_USER)
+        binding.collaborationsRefresher.isRefreshing = true
 
-        if (user != null) {
-
-            initAdapter()
-
-            if (user.id != viewModel.user.value?.id) {
-                binding.noCollaborationsText.text = "No collaborations"
-            }
-
-            setCollaborationsRefresher(user)
-
+        postAdapter = PostAdapter()
+        binding.collaborationsRecycler.setListAdapter(pagingAdapter = postAdapter, clazz = Post::class.java,
+        onComplete = {
             getUserCollaborations(user)
+        },
+        onEmptySet = {
+            binding.collaborationsRefresher.isRefreshing = false
+            showEmptyNotificationsUI()
+        }, onNonEmptySet = {
+            binding.collaborationsRefresher.isRefreshing = false
+            hideEmptyNotificationsUI()
+        }, onNewDataArrivedOnTop = {
+            binding.collaborationsRefresher.isRefreshing = false
+        })
 
-        }
-    }
-
-    private fun setCollaborationsRefresher(user: User) {
-        viewLifecycleOwner.lifecycleScope.launch {
-            postAdapter.loadStateFlow.collectLatest { loadStates ->
-                binding.collaborationsRefresher.isRefreshing = true
-                if (loadStates.refresh is LoadState.NotLoading) {
-                    delay(1000)
-                    binding.collaborationsRefresher.isRefreshing = false
-                    if (postAdapter.itemCount == 0) {
-                        showEmptyNotificationsUI()
-                    } else {
-                        hideEmptyNotificationsUI()
-                    }
-                }
-            }
-        }
-
-        binding.collaborationsRefresher.setOnRefreshListener {
-
+        binding.collaborationsRefresher.setSwipeRefresher {
             getUserCollaborations(user)
+        }
 
-            viewLifecycleOwner.lifecycleScope.launch {
-                delay(2000)
-                binding.collaborationsRefresher.isRefreshing = false
+        viewModel.windowInsets.observe(viewLifecycleOwner) { (_, bottom) ->
+            if (activity.mainBinding.bottomCard.translationY != 0f) {
+                binding.collaborationsRecycler.setPadding(0, convertDpToPx(8), 0, bottom)
+            } else {
+                binding.collaborationsRecycler.setPadding(0, convertDpToPx(8), 0, bottom + convertDpToPx(56))
             }
         }
+
     }
 
     private fun hideEmptyNotificationsUI() {
-        binding.collaborationsRecycler.visibility = View.VISIBLE
-        binding.noCollaborationsLayoutScroll.visibility = View.GONE
+        binding.collaborationsRefresher.visibility = View.VISIBLE
+        errorView?.let {
+            binding.collaborationsRoot.removeView(it)
+        }
     }
 
     private fun showEmptyNotificationsUI() {
-        binding.collaborationsRecycler.visibility = View.GONE
-        binding.noCollaborationsLayoutScroll.visibility = View.VISIBLE
-    }
-
-
-    private fun initAdapter() {
-        postAdapter = PostAdapter()
-
-        binding.collaborationsRecycler.apply {
-            adapter = postAdapter
-            itemAnimator = null
-            setRecycledViewPool(activity.recyclerViewPool)
-            layoutManager = LinearLayoutManager(activity)
+        binding.collaborationsRefresher.visibility = View.GONE
+        if (errorView != null) {
+            binding.collaborationsRoot.removeView(errorView)
+            errorView = null
         }
+
+        val errorViewBinding = if (viewModel.user.value?.id == user.id) {
+            setErrorLayout(binding.collaborationsRoot, "No collaborations yet. Explore projects and start collaborating. Your collaborations will show up here.", errorActionEnabled = false)
+        } else {
+            setErrorLayout(binding.collaborationsRoot, "No collaborations yet.", errorActionEnabled = false)
+        }
+
+        val errorViewParams = errorViewBinding.errorItemsContainer.layoutParams as FrameLayout.LayoutParams
+        errorViewParams.gravity = Gravity.TOP
+        errorViewBinding.errorItemsContainer.layoutParams = errorViewParams
+
+        errorView = errorViewBinding.root
+
     }
 
     companion object {

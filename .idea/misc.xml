@@ -53,8 +53,74 @@
         <entry key="..\:/projectFromLinux/WorkConnect/app/src/main/res/layout/user_horizontal_layout.xml" value="0.264" />
         <entry key="..\:/projectFromLinux/WorkConnect/app/src/main/res/menu/home_menu.xml" value="0.20885416666666667" />
         <entry key="..\:/projectFromLinux/WorkConnect/app/src/main/res/menu/search_menu.xml" value="0.25625" />
-        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/fragment_project.xml" value="0.22777777777777777" />
-        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/fragment_projects.xml" value="0.2" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/drawable/ic_comment.xml" value="0.2615" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/drawable/ic_home.xml" value="0.1" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/drawable/ic_messages.xml" value="0.1" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/drawable/ic_notification.xml" value="0.1" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/drawable/ic_round_thumb_down_24.xml" value="0.1135" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/drawable/ic_round_thumb_down_off_alt_24.xml" value="0.1995" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/drawable/ic_round_thumb_down_on_alt.xml" value="0.1995" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/drawable/ic_round_thumb_up_24.xml" value="0.1005" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/drawable/ic_round_thumb_up_24_disabled.xml" value="0.1005" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/drawable/ic_upload_doc.xml" value="0.1" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/drawable/thumb_down_selector.xml" value="0.1995" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/drawable/thumb_up_selector.xml" value="0.104" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/activity_main.xml" value="0.22777777777777777" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/comment_item.xml" value="0.4" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/error_no_output_layout.xml" value="0.264" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/fragment_blog.xml" value="0.22777777777777777" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/fragment_blogs.xml" value="0.16847826086956522" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/fragment_chat.xml" value="0.264" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/fragment_chat_channel.xml" value="0.176" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/fragment_collaborations_list.xml" value="0.22777777777777777" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/fragment_comments.xml" value="0.264" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/fragment_create_project.xml" value="0.4" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/fragment_editor.xml" value="0.264" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/fragment_explore.xml" value="0.22777777777777777" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/fragment_explore_home.xml" value="0.22777777777777777" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/fragment_followers.xml" value="0.13287037037037036" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/fragment_general_notification.xml" value="0.22777777777777777" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/fragment_image_crop.xml" value="0.264" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/fragment_image_view.xml" value="0.264" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/fragment_interest.xml" value="0.264" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/fragment_location.xml" value="0.4" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/fragment_notification.xml" value="0.21388888888888888" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/fragment_profile.xml" value="0.22777777777777777" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/fragment_project.xml" value="0.264" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/fragment_project_detail.xml" value="0.22777777777777777" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/fragment_project_guidelines.xml" value="0.22777777777777777" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/fragment_project_list.xml" value="0.22777777777777777" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/fragment_projects.xml" value="0.264" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/fragment_random_users.xml" value="0.22777777777777777" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/fragment_request.xml" value="0.1" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/fragment_saved_posts.xml" value="0.22777777777777777" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/fragment_search.xml" value="0.22777777777777777" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/fragment_search_projects.xml" value="0.22777777777777777" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/fragment_settings.xml" value="0.22777777777777777" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/fragment_sign_in.xml" value="0.22777777777777777" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/fragment_top_projects.xml" value="0.22777777777777777" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/fragment_user_detail.xml" value="0.22777777777777777" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/generic_bottom_sheet_fragment.xml" value="0.22777777777777777" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/generic_dialog_layout.xml" value="0.264" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/generic_menu_item.xml" value="0.6" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/generic_menu_layout.xml" value="0.4" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/image_layout.xml" value="0.4" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/menu_item.xml" value="0.22777777777777777" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/micro_project_item.xml" value="0.22777777777777777" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/mini_blog_item.xml" value="0.536" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/mini_project_item.xml" value="0.4" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/nested_child_recycler_item.xml" value="0.22777777777777777" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/post_meta_layout.xml" value="0.4" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/project_fragment_content.xml" value="0.4" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/project_item.xml" value="0.264" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/project_item_bottom.xml" value="0.264" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/project_item_extra.xml" value="0.2" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/project_item_middle.xml" value="0.2" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/project_item_top.xml" value="0.4" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/user_horizontal_layout.xml" value="0.536" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/user_item.xml" value="0.22777777777777777" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/layout/user_wide_layout.xml" value="0.22777777777777777" />
+        <entry key="..\:/projectFromLinux/x/app/src/main/res/menu/main_navigation_menu.xml" value="0.22777777777777777" />
       </map>
     </option>
   </component>
@@ -63,5 +129,8 @@
   </component>
   <component name="ProjectType">
     <option name="id" value="Android" />
+  </component>
+  <component name="SuppressKotlinCodeStyleNotification">
+    <option name="disableForAll" value="true" />
   </component>
 </project>

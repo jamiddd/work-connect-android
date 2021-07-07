@@ -4,14 +4,11 @@ import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.LinearSnapHelper
-import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.SnapHelper
+import androidx.recyclerview.widget.*
+import com.google.android.material.button.MaterialButton
 import com.jamid.workconnect.BLOG
 import com.jamid.workconnect.PROJECT
 import com.jamid.workconnect.R
@@ -47,8 +44,7 @@ class ExploreAdapter(
                 header.setTextColor(ContextCompat.getColor(context, R.color.black))
             }
 
-            val seeMoreBtn = view.findViewById<Button>(R.id.seeMoreBtn)
-
+            val seeMoreBtn = view.findViewById<MaterialButton>(R.id.seeMoreBtn)
 
             val helper: SnapHelper = LinearSnapHelper()
             if (item != null) {
@@ -77,6 +73,7 @@ class ExploreAdapter(
                         recycler.apply {
                             itemAnimator = null
                             layoutManager = LinearLayoutManager(view.context)
+                            addItemDecoration(DividerItemDecoration(view.context, DividerItemDecoration.VERTICAL))
                         }
 
                         seeMoreBtn.setOnClickListener {

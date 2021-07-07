@@ -1,13 +1,7 @@
 package com.jamid.workconnect.auth
 
-import android.app.Activity
-import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
-import android.text.Editable
-import android.text.SpannableString
-import android.text.TextWatcher
-import android.text.style.StyleSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.FIND_VIEWS_WITH_TEXT
@@ -81,11 +75,11 @@ class InterestFragment : SupportFragment(R.layout.fragment_interest, TAG, false)
         activity.mainBinding.apply {
             bottomNavBackground.visibility = View.GONE
             if (isSignInFragment) {
-                bottomCard.visibility = View.GONE
+                bottomCard.hide()
             } else {
                 binding.skipInterestBtn.visibility = View.INVISIBLE
                 binding.signInLayout.visibility = View.GONE
-                bottomCard.visibility = View.VISIBLE
+                bottomCard.show()
             }
         }
 
@@ -95,10 +89,17 @@ class InterestFragment : SupportFragment(R.layout.fragment_interest, TAG, false)
             if (s.isNullOrBlank()) {
                 binding.searchResultCardView.visibility = View.GONE
             } else {
+                binding.customInterestText.text = s
                 binding.searchResultCardView.visibility = View.VISIBLE
                 val query = s.toString()
                 search(query)
             }
+        }
+
+        binding.customInterestText.setOnClickListener {
+            val customInterest = binding.interestEditText.text.toString()
+            addNewChip(customInterest, binding.interestsList, isChecked = true)
+            binding.interestEditText.text?.clear()
         }
 
         binding.interestEditText.setOnFocusChangeListener { v, hasFocus ->
@@ -162,7 +163,6 @@ class InterestFragment : SupportFragment(R.layout.fragment_interest, TAG, false)
         /*binding.customInterestText.doAfterTextChanged {
             binding.addTagBtn.isEnabled = !it.isNullOrBlank()
         }*/
-
         /*binding.customInterestText.setOnEditorActionListener { v, actionId, event ->
             when (actionId) {
                 EditorInfo.IME_ACTION_DONE -> {
@@ -264,8 +264,9 @@ class InterestFragment : SupportFragment(R.layout.fragment_interest, TAG, false)
             layoutManager = LinearLayoutManager(activity)
         }
 
-        viewModel.windowInsets.observe(viewLifecycleOwner) {
-            binding.signInCompleteBtn.updateLayout(marginLeft = convertDpToPx(32), marginRight = convertDpToPx(32), marginBottom = it.second)
+        viewModel.windowInsets.observe(viewLifecycleOwner) { (_, bottom) ->
+            binding.signInCompleteBtn.updateLayout(marginLeft = convertDpToPx(32), marginRight = convertDpToPx(32), marginBottom = bottom)
+            binding.interestScroller.setPadding(0, 0, 0, bottom + convertDpToPx(128))
         }
 
         /*binding.interestScroller.setOnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY ->
@@ -293,9 +294,9 @@ class InterestFragment : SupportFragment(R.layout.fragment_interest, TAG, false)
             createUser()
         }
 
-        /*binding.skipBtn.setOnClickListener {
+        binding.skipInterestBtn.setOnClickListener {
             createUser()
-        }*/
+        }
 
 //        binding.interestsDoneBtn.updateLayout(marginBottom = viewModel.windowInsets.value!!.second)
 
@@ -375,25 +376,7 @@ class InterestFragment : SupportFragment(R.layout.fragment_interest, TAG, false)
                 onChipClickListener.onInterestRemoved(chip.text.toString())
             }
         }
-        group.addView(chip)
-    }
-
-    private fun addChip(interest: String, index: Int, context: Activity, initial: Boolean = true) {
-        val chip = LayoutInflater.from(context).inflate(R.layout.chip, null) as Chip
-        chip.text = interest
-        chip.id = index
-
-        chip.isChecked = !initial
-
-        chip.setOnCloseIconClickListener {
-            binding.interestsList.removeView(chip)
-        }
-
-        chip.setOnClickListener {
-            checkedCount.postValue(binding.interestsList.checkedChipIds.size)
-        }
-
-        binding.interestsList.addView(chip)
+        group.addView(chip, 0)
     }
 
     companion object {

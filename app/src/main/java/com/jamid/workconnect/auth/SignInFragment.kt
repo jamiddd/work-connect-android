@@ -53,13 +53,14 @@ class SignInFragment : SupportFragment(R.layout.fragment_sign_in, TAG, false) {
         viewModel.windowInsets.observe(viewLifecycleOwner) { (top, _) ->
             binding.signInToolbar.updateLayout(marginTop = top)
         }
+
     }
 
     private fun fakeSignIn() {
 
         hideKeyboard()
 
-        activity.toFragment(UserDetailFragment.newInstance(), UserDetailFragment.TAG)
+//        activity.toFragment(UserDetailFragment.newInstance(), UserDetailFragment.TAG)
     }
 
     private fun setListeners() {
@@ -70,8 +71,11 @@ class SignInFragment : SupportFragment(R.layout.fragment_sign_in, TAG, false) {
             binding.signInProgress.visibility = View.GONE
             binding.signInRegisterBtn.visibility = View.VISIBLE
 
+            activity.hideBottomSheet()
+
             when (result) {
                 is Result.Success -> {
+                    viewModel.fetchCurrentUser(result.data)
                     findNavController().navigateUp()
                 }
                 is Result.Error -> {
@@ -86,10 +90,11 @@ class SignInFragment : SupportFragment(R.layout.fragment_sign_in, TAG, false) {
             binding.signInProgress.visibility = View.GONE
             binding.signInRegisterBtn.visibility = View.VISIBLE
 
+            activity.hideBottomSheet()
+
             when (result) {
                 is Result.Success -> {
                     findNavController().navigate(R.id.userDetailFragment)
-//                    activity.toFragment(UserDetailFragment.newInstance(), UserDetailFragment.TAG)
                 }
                 is Result.Error -> {
                     Toast.makeText(

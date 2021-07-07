@@ -83,6 +83,16 @@ class GenericDialogFragment: Fragment(R.layout.generic_dialog_layout) {
             SIGN_IN_PROMPT -> {
                 binding.dialogPositiveBtn.text = "Sign In"
             }
+            SIGN_IN_WITH_GOOGLE -> {
+                binding.dialogTitle.setCompoundDrawablesRelativeWithIntrinsicBounds(0, R.drawable.googleg_standard_color_18, 0, 0)
+            }
+            UPLOAD_DOCUMENT -> {
+                binding.dialogPositiveBtn.text = "Upload"
+            }
+            EDITOR -> {
+                binding.dialogCancelBtn.text = "No"
+                binding.dialogPositiveBtn.text = "Save"
+            }
         }
 
         if (isProgressing) {
@@ -111,7 +121,7 @@ class GenericDialogFragment: Fragment(R.layout.generic_dialog_layout) {
 
 
         if (selfDestructDuration > 0) {
-            lifecycleScope.launch {
+            viewLifecycleOwner.lifecycleScope.launch {
                 delay(selfDestructDuration)
                 activity.hideBottomSheet()
             }
@@ -156,7 +166,7 @@ class GenericDialogFragment: Fragment(R.layout.generic_dialog_layout) {
             }
         }
 
-        viewModel.windowInsets.observe(viewLifecycleOwner) { (top, bottom) ->
+        viewModel.windowInsets.observe(viewLifecycleOwner) { (_, bottom) ->
             binding.dialogItemsContainer.setPadding(0, 0, 0, bottom + convertDpToPx(12))
         }
     }

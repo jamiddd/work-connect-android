@@ -19,8 +19,10 @@ data class Post(
     @Embedded(prefix = "admin_")
     var admin: User,
     var uid: String,
+    var commentChannelId: String,
     var likes: Long = 0,
     var dislikes: Long = 0,
+    var commentCount: Long = 0,
     var chatChannelId: String? = null,
     var guidelines: String? = null,
     @Embedded(prefix = "location_")
@@ -45,6 +47,7 @@ data class Post(
     "",
     "",
     User(),
+    "",
     ""
     )
 }

@@ -1,13 +1,15 @@
 package com.jamid.workconnect
 
 import android.util.Log
+import android.view.View
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
+import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import com.jamid.workconnect.data.MainRepository
-import com.jamid.workconnect.model.PageKey
-import com.jamid.workconnect.model.Post
-import com.jamid.workconnect.model.PostSource
-import com.jamid.workconnect.model.Result
+import com.jamid.workconnect.model.*
+import kotlinx.coroutines.tasks.await
 
 class PostPagingSource(private val postSource: PostSource, private val repository: MainRepository): PagingSource<PageKey, Post>() {
 
@@ -58,7 +60,6 @@ class PostPagingSource(private val postSource: PostSource, private val repositor
 				repository.mapOfDocumentSnapshots[lastSnapshot.id] = lastSnapshot
 
 				val unfilteredPosts = postSnapshot.toObjects(Post::class.java)
-
 				val posts = repository.filterPosts(unfilteredPosts)
 
 				return if (postSnapshot.size() < params.loadSize) {

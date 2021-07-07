@@ -21,11 +21,9 @@ import com.jamid.workconnect.databinding.FragmentChatBinding
 import com.jamid.workconnect.model.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.distinctUntilChangedBy
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
+import java.io.File
 
 class ChatFragment : SupportFragment(R.layout.fragment_chat, TAG, false) {
 
@@ -42,6 +40,8 @@ class ChatFragment : SupportFragment(R.layout.fragment_chat, TAG, false) {
 
         chatChannel = arguments?.getParcelable(ARG_CHAT_CHANNEL) ?: return
 
+        binding.projectImg.setImageURI(chatChannel.postImage)
+
         binding.sendMsgBtn.isEnabled = false
         binding.chatFragmentToolbar.title = chatChannel.postTitle
 
@@ -50,13 +50,12 @@ class ChatFragment : SupportFragment(R.layout.fragment_chat, TAG, false) {
         }
 
         if (!initiateListeners) {
-            viewModel.setChannelContributorsListener(chatChannel)
+            activity.setChannelContributorsListener(chatChannel)
+            activity.setChatChannelListeners(chatChannel)
 
-            val externalDocumentsDir = activity.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)!!
+         /*   val externalDocumentsDir = activity.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)!!
             val externalImagesDir = activity.getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
-            viewModel.setChannelMessagesListener(externalImagesDir, externalDocumentsDir, chatChannel)
-
-
+            viewModel.setChannelMessagesListener(externalImagesDir, externalDocumentsDir, chatChannel)*/
             initiateListeners = true
         }
 
@@ -106,14 +105,14 @@ class ChatFragment : SupportFragment(R.layout.fragment_chat, TAG, false) {
 
 
     private fun setListeners() {
-
+        val minMargin = convertDpToPx(8)
         viewModel.windowInsets.observe(viewLifecycleOwner) { insets ->
             if (insets != null) {
-                binding.messagesRecycler.setPadding(0, convertDpToPx(8), 0, insets.second + convertDpToPx(64))
-
+                binding.messagesRecycler.setPadding(0, minMargin, 0, insets.second + (minMargin * 8))
+                binding.projectImg.updateLayout(marginTop = minMargin, marginBottom = minMargin)
                 binding.chatFragmentAppBar.setPadding(0, insets.first, 0, 0)
 
-                binding.messageText.updateLayout(marginTop = convertDpToPx(8), marginRight = convertDpToPx(4), marginBottom = insets.second + convertDpToPx(8))
+                binding.messageText.updateLayout(marginTop = minMargin, marginRight = minMargin/2, marginBottom = insets.second + minMargin)
 
                 val parentId = binding.chatFragmentRoot.id
 
@@ -190,7 +189,7 @@ class ChatFragment : SupportFragment(R.layout.fragment_chat, TAG, false) {
                     cursor?.close()
                     val currentUser = viewModel.user.value!!
                     val metaData = MediaMetaData(size, name!!, ".jpg")
-                    val message = SimpleMessage("", chatChannel.chatChannelId, IMAGE, it.toString(), currentUser.id, metaData = metaData, currentUser)
+                    val message = SimpleMessage("", chatChannel.chatChannelId, IMAGE, it.toString(), currentUser.id, metaData = metaData, currentUser, isDownloaded = true)
 
                     viewModel.uploadMessageMedia(message, chatChannel)
                 } catch (e: Exception) {
@@ -203,12 +202,55 @@ class ChatFragment : SupportFragment(R.layout.fragment_chat, TAG, false) {
 
         viewModel.currentDocUri.observe(viewLifecycleOwner) {
             if (it != null) {
-                val fragment = UploadDocumentFragment.newInstance(chatChannel)
-                activity.showBottomSheet(fragment, UploadDocumentFragment.TAG)
+                val externalDocumentsDir = activity.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)!!
+                val cursor = contentResolver.query(it, null, null, null, null)
+
+                cursor?.moveToFirst()
+                val nameIndex = cursor?.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                val sizeIndex = cursor?.getColumnIndex(OpenableColumns.SIZE)
+
+                var name = cursor?.getString(nameIndex ?: 0)
+
+                val size = (cursor?.getLong(sizeIndex ?: 0) ?: 0)
+                val sizeText = when {
+                    size > (1024 * 1024) -> {
+                        val sizeInMB = size.toFloat()/(1024 * 1024)
+                        sizeInMB.toString().take(4) + " MB"
+                    }
+                    size/1024 > 100 -> {
+                        val sizeInMB = size.toFloat()/(1024 * 1024)
+                        sizeInMB.toString().take(4) + " MB"
+                    }
+                    else -> {
+                        val sizeInKB = size.toFloat()/1024
+                        sizeInKB.toString().take(3) + " KB"
+                    }
+                }
+                cursor?.close()
+
+                var file = File(externalDocumentsDir, name!!)
+                var counter = 0
+                val ext = file.extension
+
+                while (file.exists()) {
+                    counter++
+                    val actName = name!!.substring(0, name.length - (ext.length + 1))
+                    name = "$actName($counter).$ext"
+                    file = File(externalDocumentsDir, name)
+                }
+
+                val metadata = MediaMetaData(size, name!!, ext)
+                viewModel.extras["file_metadata"] = metadata
+                viewModel.extras["file_chat_channel"] = chatChannel
+
+                 val f = GenericDialogFragment.newInstance(UPLOAD_DOCUMENT, name,
+                     sizeText, R.drawable.ic_upload_doc, isActionOn = true)
+                 activity.showBottomSheet(f, GenericDialogFragment.TAG)
+
             }
         }
 
-        binding.messagesRecycler.addOnLayoutChangeListener { view, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
+        binding.messagesRecycler.addOnLayoutChangeListener { _, _, _, _, bottom, _, _, _, oldBottom ->
             if (bottom < oldBottom) {
                 binding.messagesRecycler.postDelayed({
                     binding.messagesRecycler.smoothScrollToPosition(
@@ -254,6 +296,19 @@ class ChatFragment : SupportFragment(R.layout.fragment_chat, TAG, false) {
                 }
             }
         }
+
+        viewModel.mediaUploadResult.observe(viewLifecycleOwner) {
+            val uploadResult = it ?: return@observe
+
+            when (uploadResult) {
+                is Result.Error -> viewModel.setCurrentError(uploadResult.exception)
+                is Result.Success -> {
+                    Log.d(TAG, "Upload complete.")
+                }
+            }
+            viewModel.clearMediaUploadResult()
+        }
+
     }
 
     companion object {

@@ -1,17 +1,22 @@
 package com.jamid.workconnect.profile
 
 import android.os.Bundle
+import android.view.Gravity
 import android.view.View
+import android.widget.FrameLayout
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.jamid.workconnect.InsetControlFragment
+import com.jamid.workconnect.PagingListFragment
 import com.jamid.workconnect.R
 import com.jamid.workconnect.adapter.paging3.PostAdapter
+import com.jamid.workconnect.convertDpToPx
 import com.jamid.workconnect.databinding.FragmentBlogsBinding
 import com.jamid.workconnect.home.EditorFragment
+import com.jamid.workconnect.model.Post
 import com.jamid.workconnect.model.User
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -19,11 +24,12 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @OptIn(androidx.paging.ExperimentalPagingApi::class)
-class BlogsFragment : InsetControlFragment(R.layout.fragment_blogs) {
+class BlogsFragment : PagingListFragment(R.layout.fragment_blogs) {
 
     private lateinit var binding: FragmentBlogsBinding
     private lateinit var postAdapter: PostAdapter
-    private var job: Job? = null
+    private lateinit var user: User
+    private var errorView: View? = null
 
     private fun getUserBlogs(user: User) {
         job?.cancel()
@@ -38,79 +44,68 @@ class BlogsFragment : InsetControlFragment(R.layout.fragment_blogs) {
         super.onViewCreated(view, savedInstanceState)
 
         binding = FragmentBlogsBinding.bind(view)
-        val user = arguments?.getParcelable<User>(ARG_USER)
+        user = arguments?.getParcelable(ARG_USER) ?: return
+        binding.blogsRefresher.isRefreshing = true
+        postAdapter = PostAdapter()
 
-        if (user != null) {
+        binding.blogsRecycler.setListAdapter(pagingAdapter = postAdapter,
+        clazz = Post::class.java,
+        onComplete = {
+            getUserBlogs(user)
+        },
+        onEmptySet = {
+            binding.blogsRefresher.isRefreshing = false
+            showEmptyNotificationsUI()
+        }, onNonEmptySet = {
+            binding.blogsRefresher.isRefreshing = false
+            hideEmptyNotificationsUI()
+        }, onNewDataArrivedOnTop = {
+            binding.blogsRefresher.isRefreshing = false
+        })
 
-            initAdapter()
+        binding.blogsRefresher.setSwipeRefresher {
+            getUserBlogs(user)
+        }
 
-            if (user.id == viewModel.user.value?.id) {
-                binding.noBlogsCreatePost.visibility = View.VISIBLE
+        viewModel.windowInsets.observe(viewLifecycleOwner) { (_, bottom) ->
+            if (activity.mainBinding.bottomCard.translationY != 0f) {
+                binding.blogsRecycler.setPadding(0, convertDpToPx(8), 0, bottom)
             } else {
-                binding.noBlogsText.text = "No blogs"
-                binding.noBlogsCreatePost.visibility = View.GONE
-            }
-
-            val options = navOptions {
-                anim {
-                    enter = R.anim.slide_in_right
-                    exit = R.anim.slide_out_left
-                    popEnter = R.anim.slide_in_left
-                    popExit = R.anim.slide_out_right
-                }
-            }
-
-            binding.noBlogsCreatePost.setOnClickListener {
-                findNavController().navigate(R.id.editorFragment, null, options)
-//                activity.toFragment(EditorFragment.newInstance(), EditorFragment.TAG)
-            }
-
-            setBlogsRefresher(user)
-
-            getUserBlogs(user)
-        }
-    }
-
-    private fun setBlogsRefresher(user: User) {
-        viewLifecycleOwner.lifecycleScope.launch {
-            postAdapter.loadStateFlow.collectLatest { loadStates ->
-                binding.blogsRefresher.isRefreshing = true
-                if (loadStates.refresh is LoadState.NotLoading) {
-                    delay(1000)
-                    binding.blogsRefresher.isRefreshing = false
-                    if (postAdapter.itemCount == 0) {
-                        showEmptyNotificationsUI()
-                    } else {
-                        hideEmptyNotificationsUI()
-                    }
-                }
+                binding.blogsRecycler.setPadding(0, convertDpToPx(8), 0, bottom + convertDpToPx(56))
             }
         }
 
-        binding.blogsRefresher.setOnRefreshListener {
-            getUserBlogs(user)
-        }
     }
 
     private fun hideEmptyNotificationsUI() {
-        binding.blogsRecycler.visibility = View.VISIBLE
-        binding.noBlogsLayoutScroll.visibility = View.GONE
+        binding.blogsRefresher.visibility = View.VISIBLE
+        errorView?.let {
+            binding.blogFragmentRoot.removeView(it)
+        }
     }
 
     private fun showEmptyNotificationsUI() {
-        binding.blogsRecycler.visibility = View.GONE
-        binding.noBlogsLayoutScroll.visibility = View.VISIBLE
-    }
-
-    private fun initAdapter() {
-        postAdapter = PostAdapter()
-
-        binding.blogsRecycler.apply {
-            adapter = postAdapter
-            itemAnimator = null
-            setRecycledViewPool(activity.recyclerViewPool)
-            layoutManager = LinearLayoutManager(activity)
+        binding.blogsRefresher.visibility = View.GONE
+        if (errorView != null) {
+            binding.blogFragmentRoot.removeView(errorView)
+            errorView = null
         }
+        val errorViewBinding = if (viewModel.user.value?.id == user.id) {
+            setErrorLayout(binding.blogFragmentRoot, "No blogs yet.\nYour blogs will show up here.", errorActionLabel = "Create Blog") { b, p ->
+                b.visibility = View.VISIBLE
+                p.visibility = View.GONE
+                findNavController().navigate(R.id.editorFragment, null, options)
+            }
+        } else {
+            setErrorLayout(binding.blogFragmentRoot, "No blogs yet.", errorActionEnabled = false)
+        }
+
+        val errorViewParams = errorViewBinding.errorItemsContainer.layoutParams as FrameLayout.LayoutParams
+        errorViewParams.gravity = Gravity.TOP
+        errorViewBinding.errorItemsContainer.layoutParams = errorViewParams
+
+        errorView = errorViewBinding.root
+
     }
 
     companion object {

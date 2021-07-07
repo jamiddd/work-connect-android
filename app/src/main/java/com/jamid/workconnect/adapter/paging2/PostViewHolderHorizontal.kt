@@ -5,6 +5,8 @@ import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.findViewTreeLifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.facebook.drawee.view.SimpleDraweeView
 import com.google.firebase.auth.ktx.auth
@@ -15,6 +17,7 @@ import com.jamid.workconnect.R
 import com.jamid.workconnect.interfaces.PostItemClickListener
 import com.jamid.workconnect.model.BlogItemConverter
 import com.jamid.workconnect.model.Post
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -40,7 +43,9 @@ class PostViewHolderHorizontal(val view: View): RecyclerView.ViewHolder(view) {
         saveBtn.setOnClickListener {
             if (auth.currentUser != null) {
                 saveBtn.isSelected = !saveBtn.isSelected
-                postItemClickListener.onSavePressed(post)
+                itemView.findViewTreeLifecycleOwner()?.lifecycleScope?.launch {
+                    postItemClickListener.onSavePressed(post)
+                }
             } else {
                 postItemClickListener.onNotSignedIn(post)
             }

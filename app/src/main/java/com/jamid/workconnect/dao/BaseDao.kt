@@ -11,7 +11,7 @@ abstract class BaseDao<T> {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     abstract suspend fun insert(item : T)
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun insertItems(items: List<T>)
 
     @Update

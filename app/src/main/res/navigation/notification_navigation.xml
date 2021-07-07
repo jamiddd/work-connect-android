@@ -104,5 +104,16 @@
         tools:layout="@layout/fragment_saved_posts"
         android:label="SavedPostsFragment" />
 
+    <fragment
+        android:id="@+id/imageViewFragment"
+        android:name="com.jamid.workconnect.views.zoomable.ImageViewFragment"
+        tools:layout="@layout/fragment_image_view"
+        android:label="Image"/>
+
+    <fragment
+        android:id="@+id/commentsFragment"
+        android:name="com.jamid.workconnect.CommentsFragment"
+        tools:layout="@layout/fragment_comments"
+        android:label="Comments"/>
 
 </navigation>

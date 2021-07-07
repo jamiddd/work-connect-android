@@ -24,6 +24,7 @@
                 android:id="@+id/searchMotionLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+
                 app:applyMotionScene="true"
                 app:layoutDescription="@xml/search_scene">
 
@@ -36,6 +37,7 @@
                     android:hint="Search for posts ..."
                     android:inputType="textPersonName"
                     android:maxLines="1"
+                    android:transitionName="transition-explore-search"
                     android:minHeight="40dp"
                     android:paddingStart="12dp"
                     android:paddingTop="8dp"

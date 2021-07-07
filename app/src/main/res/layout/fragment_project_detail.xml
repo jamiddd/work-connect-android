@@ -40,6 +40,7 @@
                 android:layout_height="match_parent"
                 app:contentScrim="@color/white"
                 app:expandedTitleTextAppearance="@style/WhiteToolbarText"
+                app:collapsedTitleTextAppearance="@style/TitleCollapsedPost"
                 app:layout_scrollFlags="scroll|exitUntilCollapsed|snap|snapMargins"
                 app:titleEnabled="true">
 

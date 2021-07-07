@@ -163,25 +163,37 @@
                 <com.google.android.material.appbar.MaterialToolbar
                     android:id="@+id/chatFragmentToolbar"
                     android:layout_width="match_parent"
-                    app:title=""
-                    app:titleCentered="true"
-                    app:navigationIcon="@drawable/ic_round_arrow_back_24"
+                    android:layout_height="80dp"
                     app:layout_collapseMode="pin"
+                    app:navigationIcon="@drawable/ic_round_arrow_back_24"
+                    app:titleCentered="true"
+                    app:titleMarginTop="56dp"
+                    app:titleTextAppearance="@style/TitleCollapsedPost"
                     app:titleTextColor="@color/black"
-                    android:layout_height="?actionBarSize">
+                    tools:title="The post of the Century">
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/projectInfoButton"
                         style="@style/Theme.Button.IconOnly"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="end"
+                        android:layout_gravity="top|end"
                         android:layout_marginEnd="2dp"
                         app:icon="@drawable/ic_baseline_info_24"
                         app:rippleColor="@color/grey" />
 
 
                 </com.google.android.material.appbar.MaterialToolbar>
+
+                <com.facebook.drawee.view.SimpleDraweeView
+                    android:id="@+id/project_img"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"
+                    app:placeholderImage="@drawable/ic_user"
+                    app:roundAsCircle="true" />
 
             </com.google.android.material.appbar.CollapsingToolbarLayout>
 

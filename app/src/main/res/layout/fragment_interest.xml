@@ -188,14 +188,58 @@
             android:id="@+id/searchResultCardView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+            android:visibility="gone"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            tools:visibility="visible">
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/interests_search_result_recycler"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                tools:itemCount="3"
-                tools:listitem="@layout/menu_item" />
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/addCustomInterestLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="32dp"
+                    android:paddingTop="8dp"
+                    android:paddingEnd="0dp"
+                    android:text="Add custom interest:"
+                    android:textColor="@color/blue_500" />
+
+                <TextView
+                    android:id="@+id/custom_interest_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?selectableItemBackground"
+                    android:backgroundTint="@color/grey"
+                    android:clickable="true"
+                    android:drawableTint="@color/blue_500"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:minHeight="48dp"
+                    android:paddingStart="32dp"
+                    android:paddingEnd="32dp"
+                    android:text="Sample Menu Item"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                    android:textColor="@color/darkestGrey"
+                    app:drawableEndCompat="@drawable/ic_baseline_add_24" />
+
+                <View
+                    android:id="@+id/divider13"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="?android:attr/listDivider" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/interests_search_result_recycler"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    tools:itemCount="3"
+                    tools:listitem="@layout/menu_item" />
+
+            </LinearLayout>
+
         </androidx.cardview.widget.CardView>
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>

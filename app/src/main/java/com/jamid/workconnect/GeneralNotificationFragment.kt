@@ -8,21 +8,20 @@ import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
-import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.appbar.AppBarLayout
 import com.jamid.workconnect.adapter.paging2.NotificationAdapter
 import com.jamid.workconnect.databinding.FragmentGeneralNotificationBinding
 import com.jamid.workconnect.model.Result
 import com.jamid.workconnect.model.SimpleNotification
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-class GeneralNotificationFragment : InsetControlFragment(R.layout.fragment_general_notification) {
+class GeneralNotificationFragment : PagingListFragment(R.layout.fragment_general_notification) {
 
     private lateinit var binding: FragmentGeneralNotificationBinding
     private lateinit var notificationAdapter: NotificationAdapter<SimpleNotification>
-    private var job: Job? = null
+    private var errorView: View? = null
 
     private fun notifications() {
         job?.cancel()
@@ -36,87 +35,78 @@ class GeneralNotificationFragment : InsetControlFragment(R.layout.fragment_gener
 
     private fun hideEmptyNotificationUI() {
         binding.notificationsRefresher.visibility = View.VISIBLE
-        binding.noNotificationsLayoutScroll.visibility = View.GONE
+        errorView?.let {
+            binding.generalNotificationRoot.removeView(it)
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentGeneralNotificationBinding.bind(view)
-
-        setInsetView(binding.notificationsRecycler, mapOf(INSET_TOP to 0, INSET_BOTTOM to 56))
-
-        binding.noNotificationsLayoutScroll.setPadding(0, 0, 0, viewModel.windowInsets.value!!.second + convertDpToPx(56))
-
-        initAdapter()
-
-        initRefresher()
-
-        viewModel.miniUser.observe(viewLifecycleOwner) { user ->
-            if (user != null) {
-                notifications()
-            } else {
-                Log.d(TAG, "Not showing notifications because mini user is null")
+        binding.notificationsRefresher.isRefreshing = true
+        notificationAdapter = NotificationAdapter(SimpleNotification::class.java)
+        binding.notificationsRecycler.setListAdapter(pagingAdapter = notificationAdapter,
+            clazz = SimpleNotification::class.java,
+            onComplete = {
+                viewModel.user.observe(viewLifecycleOwner) { user ->
+                    if (user != null) {
+                        notifications()
+                    } else {
+                        showEmptyNotificationsUI()
+                    }
+                }
+            },
+            onEmptySet = {
+                binding.notificationsRefresher.isRefreshing = false
                 showEmptyNotificationsUI()
-            }
+            }, onNonEmptySet = {
+                binding.notificationsRefresher.isRefreshing = false
+                hideEmptyNotificationUI()
+            })
+
+        binding.notificationsRefresher.setSwipeRefresher {
+            notifications()
         }
 
         setListeners()
 
-    }
-
-    private fun initRefresher() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            if (activity.resources?.configuration?.isNightModeActive == true) {
-                binding.notificationsRefresher.setProgressBackgroundColorSchemeColor(ContextCompat.getColor(activity, R.color.darkestGrey))
-                binding.notificationsRefresher.setColorSchemeColors(ContextCompat.getColor(activity, R.color.purple_200))
-            } else {
-                binding.notificationsRefresher.setProgressBackgroundColorSchemeColor(ContextCompat.getColor(activity, R.color.white))
-                binding.notificationsRefresher.setColorSchemeColors(ContextCompat.getColor(activity, R.color.blue_500))
-            }
-        } else {
-            if (activity.resources?.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES) {
-                binding.notificationsRefresher.setProgressBackgroundColorSchemeColor(ContextCompat.getColor(activity, R.color.darkerGrey))
-                binding.notificationsRefresher.setColorSchemeColors(ContextCompat.getColor(activity, R.color.purple_200))
-            } else {
-                binding.notificationsRefresher.setColorSchemeColors(ContextCompat.getColor(activity, R.color.blue_500))
-                binding.notificationsRefresher.setProgressBackgroundColorSchemeColor(ContextCompat.getColor(activity, R.color.white))
-            }
+        viewModel.windowInsets.observe(viewLifecycleOwner) { (_, bottom) ->
+            binding.notificationsRecycler.setPadding(0, 0, 0, convertDpToPx(56) + bottom)
         }
 
-        binding.notificationsRefresher.setOnRefreshListener {
-            notifications()
-        }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            notificationAdapter.loadStateFlow.collectLatest { loadStates ->
-                binding.notificationsRefresher.isRefreshing = loadStates.refresh is LoadState.Loading
-                if (loadStates.refresh is LoadState.NotLoading) {
-                    delay(1000)
-                    if (notificationAdapter.itemCount == 0) {
-                        showEmptyNotificationsUI()
-                    }
-                }
-            }
-        }
-    }
-
-    private fun hideProgressBar()  = viewLifecycleOwner.lifecycleScope.launchWhenCreated {
-        binding.notificationsRefresher.isRefreshing = false
     }
 
     private fun showEmptyNotificationsUI() {
         binding.notificationsRefresher.visibility = View.GONE
-        binding.noNotificationsLayoutScroll.visibility = View.VISIBLE
-    }
-
-    private fun initAdapter() {
-        notificationAdapter = NotificationAdapter(SimpleNotification::class.java)
-
-        binding.notificationsRecycler.apply {
-            layoutManager = LinearLayoutManager(activity)
-            adapter = notificationAdapter
+        if (errorView != null) {
+            binding.generalNotificationRoot.removeView(errorView)
+            errorView = null
         }
+
+        val errorViewBinding = if (viewModel.user.value != null) {
+            setErrorLayout(binding.generalNotificationRoot, "No notifications at the moment.", errorImg = R.drawable.ic_empty_notifications, margin = convertDpToPx(109)) { b, p ->
+                binding.notificationsRefresher.isRefreshing = true
+                notifications()
+            }
+        } else {
+            setErrorLayout(binding.generalNotificationRoot, "No notifications at the moment.", errorImg = R.drawable.ic_empty_notifications, margin = convertDpToPx(109), errorActionEnabled = false)
+        }
+
+        errorView = errorViewBinding.root
+
+        /*val co = intArrayOf(0, 0)
+        errorViewBinding.errorActionBtn.getLocationOnScreen(co)
+
+        val windowHeight = getWindowHeight()
+        val bottomHeight = activity.mainBinding.bottomCard.measuredHeight
+        val bottomCardPositionFromTop = windowHeight - bottomHeight
+
+        if (co[1] + errorViewBinding.errorActionBtn.measuredHeight > bottomCardPositionFromTop) {
+            activity.findViewById<AppBarLayout>(R.id.notificationAppBar)?.setExpanded(false, true)
+        }*/
+
     }
+
 
     private fun setListeners() {
         viewModel.declineProjectResult.observe(viewLifecycleOwner) {

@@ -18,6 +18,7 @@
             android:paddingBottom="60dp">
 
             <LinearLayout
+                android:id="@+id/edittorScrollContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
@@ -40,6 +41,7 @@
                     android:typeface="serif" />
 
                 <LinearLayout
+                    android:id="@+id/author_info_layout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
@@ -90,7 +92,7 @@
         </androidx.core.widget.NestedScrollView>
 
         <androidx.cardview.widget.CardView
-            android:id="@+id/cardView"
+            android:id="@+id/bottomActions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
@@ -241,31 +243,32 @@
         </androidx.cardview.widget.CardView>
 
         <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/editorAppBar"
             android:layout_width="match_parent"
-            android:backgroundTint="@color/white"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/white">
 
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/editorFragmentToolbar"
                 android:layout_width="match_parent"
-                app:title="Create new Blog"
-                app:titleCentered="true"
+                android:layout_height="?actionBarSize"
                 android:layout_marginTop="26dp"
                 app:navigationIcon="@drawable/ic_round_arrow_back_24"
-                android:layout_height="?actionBarSize">
+                app:title="Create new Blog"
+                app:titleCentered="true">
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/editorFragmentDoneButton"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="end|center_vertical"
-                    android:text="Create"
-                    app:cornerRadius="24dp"
-                    android:minWidth="40dp"
-                    style="@style/Widget.MaterialComponents.Button.TextButton"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                    android:layout_marginEnd="8dp"
                     android:fontFamily="@font/roboto_medium"
-                    android:layout_marginEnd="8dp"/>
+                    android:minWidth="40dp"
+                    android:text="Create"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                    app:cornerRadius="24dp" />
 
             </com.google.android.material.appbar.MaterialToolbar>
 

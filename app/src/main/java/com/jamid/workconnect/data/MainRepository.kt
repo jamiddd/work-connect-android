@@ -2,15 +2,11 @@ package com.jamid.workconnect.data
 
 import android.net.Uri
 import android.util.Log
-import androidx.core.net.toUri
 import androidx.lifecycle.LiveData
-import androidx.paging.PagingSource
+import androidx.lifecycle.MutableLiveData
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.firestore.DocumentReference
-import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.Query
-import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.jamid.workconnect.*
@@ -23,65 +19,98 @@ import java.io.File
 
 class MainRepository(val scope: CoroutineScope, val db: WorkConnectDatabase) {
 
+    val firebaseUtility = FirebaseUtilityImpl()
+
     private val messageDao = db.messageDao()
-    private val chatChannelContributorDao = db.chatChannelContributorDao()
-    private val simpleMediaDao = db.simpleMediaDao()
     private val chatChannelDao = db.chatChannelDao()
     private val notificationDao = db.notificationDao()
     private val userDao = db.userDao()
     private val postDao = db.postDao()
     private val requestDao = db.activeRequestDao()
-    private val simpleTagsDao = db.simpleTagsDao()
     private val recentSearchDao = db.recentSearchDao()
-    var firebaseUtility = FirebaseUtilityImpl(scope, db)
+
+    var currentFirebaseUser = MutableLiveData<FirebaseUser>().apply { value = null }
 
     val declineProjectResult = firebaseUtility.declineRequestResult
     val undoProjectResult = firebaseUtility.undoRequestSent
     val acceptProjectResult = firebaseUtility.acceptRequestResult
-
+    val commentSentResult = firebaseUtility.commentSentResult
     val mediaDownloadResult = firebaseUtility.mediaDownloadResult
+    val mediaUploadResult = firebaseUtility.mediaUploadResult
     val signInResult: LiveData<Result<FirebaseUser>> = firebaseUtility.signInResult
     val registerResult: LiveData<Result<FirebaseUser>> = firebaseUtility.registerResult
-    val currentFirebaseUser: LiveData<FirebaseUser> = firebaseUtility.currentFirebaseUser
-    val currentLocalUser = firebaseUtility.currentLocalUser
+    val currentLocalUser: LiveData<User> = userDao.currentUser()
     val usernameExists: LiveData<Result<Boolean>> = firebaseUtility.usernameExists
     val emailExists: LiveData<Boolean> = firebaseUtility.emailExists
     val profilePhotoUpload = firebaseUtility.profilePhotoUpload
     val postPhotoUpload: LiveData<Result<Uri>> = firebaseUtility.postPhotoUpload
     val postUpload: LiveData<Result<Post>> = firebaseUtility.postUpload
     val requestSent: LiveData<Result<String>> = firebaseUtility.requestSent
-    val mediaUploadResult: LiveData<Result<SimpleMessage>> = firebaseUtility.mediaUploadResult
     val updateUser: LiveData<Result<Map<String, Any?>>> = firebaseUtility.updateUser
-    val networkErrors: LiveData<Exception> = firebaseUtility.networkErrors
+    val networkErrors: MutableLiveData<Exception> = firebaseUtility.networkErrors
     val guidelinesUpdateResult: LiveData<Post> = firebaseUtility.guidelinesUpdateResult
     val firebaseUserUpdateResult: LiveData<Result<FirebaseUser>> = firebaseUtility.firebaseUserUpdateResult
-    val localTagsList = firebaseUtility.localTagsList
-    //    val uid: String = firebaseUtility.uid
     val chatChannelsLiveData = chatChannelDao.allChannels()
-
-
     val mapOfDocumentSnapshots = mutableMapOf<String, DocumentSnapshot>()
 
-//    val allRecentSearches = recentSearchDao.allRecentSearches()
-
-    // new set
-    val currentOtherUserDetail = firebaseUtility.currentOtherUserDetail
-
     init {
-    	/*scope.launch (Dispatchers.IO) {
-    	    postDao.clearPosts()
-    	}*/
+        scope.launch {
+            val firebaseUser = firebaseUtility.currentFirebaseUser
+            if (firebaseUser != null) {
+                currentFirebaseUser.postValue(firebaseUser)
+                val token = firebaseUtility.getToken()
+                if (token != null) {
+                    updateRegistrationToken(token)
+                }
+                // signed in
+                val currentUser = firebaseUtility.getCurrentUser()
+                val currentCachedUser = userDao.getCachedUser()
+                if (currentCachedUser != null) {
+                    if (currentUser != null) {
+                        if (currentCachedUser == currentUser) {
+                            // do nothing
+                        } else {
+                            insertCurrentUser(currentUser)
+                        }
+                    } else {
+                        setCurrentError("Couldn't retrieve new user data from database.")
+                        // report error that the firebase call was an error
+                    }
+                } else {
+                    // the user was never in the cache or somehow was deleted before
+                    Log.i(TAG, "The cached user was never in the cache or somehow was deleted before")
+                    if (currentUser != null) {
+                        insertCurrentUser(currentUser)
+                    }
+                }
+            } else {
+                Log.d(TAG, "No firebase account signed in")
+                // not signed in
+            }
+        }
     }
 
-
-    val uid: String? = firebaseUtility.uid
-
-    suspend fun getChatMessages(chatChannelId: String) : List<SimpleMessage> {
-        return messageDao.getChatMessages(chatChannelId)
+    @Suppress("SameParameterValue")
+    fun setCurrentError(msg: String) {
+        val e = Exception(msg)
+        setCurrentError(e)
     }
 
-    suspend fun updateMessage(messages: List<SimpleMessage>) {
-//        messageDao.insertMessages(messages)
+    @Suppress("SameParameterValue")
+    fun setCurrentError(e: Exception?) {
+        networkErrors.postValue(e)
+    }
+
+    private suspend fun insertCurrentUser(newUpdatedUser: User) {
+        newUpdatedUser.isCurrentUser = true
+        newUpdatedUser.isUserFollowed = false
+        newUpdatedUser.isUserFollowingMe = false
+
+        userDao.insertCurrentUser(newUpdatedUser)
+    }
+
+    companion object {
+        private const val TAG = "MainRepository"
     }
 
     fun getChatMessagesAfter(chatChannelId: String, key: Long): List<SimpleMessage> {
@@ -92,26 +121,8 @@ class MainRepository(val scope: CoroutineScope, val db: WorkConnectDatabase) {
         messageDao.updateItem(message)
     }
 
-    fun channelContributors(chatChannelId: String): LiveData<List<ChatChannelContributor>> {
-        return chatChannelContributorDao.getChatChannelContributors(chatChannelId)
-    }
-
     fun channelContributorsLive(channelId: String): LiveData<List<User>> {
         return userDao.getChannelContributorsLive(channelId)
-    }
-
-    suspend fun clearChatChannelContributorsAndChannelIds() {
-        chatChannelContributorDao.clearEverything()
-    }
-
-    suspend fun checkIfDownloaded(messageId: String): SimpleMedia? {
-        return simpleMediaDao.getSimpleMedia(messageId)
-    }
-
-    suspend fun insertSimpleMedia(simpleMedia: SimpleMedia?) {
-        simpleMedia?.let {
-            simpleMediaDao.insertSimpleMedia(listOf(it))
-        }
     }
 
     /////////////////////////////////////////////////////////////////////
@@ -124,19 +135,27 @@ class MainRepository(val scope: CoroutineScope, val db: WorkConnectDatabase) {
         firebaseUtility.register(email, password)
     }
 
-    fun uploadUser(tags: List<String>? = null) {
+    suspend fun uploadUser(tags: List<String>? = null) {
         val user = firebaseUtility.createNewUser(tags)
         if (user != null) {
-            firebaseUtility.uploadCurrentUser(user)
+            val uploadedUser = firebaseUtility.uploadCurrentUser(user)
+            if (uploadedUser != null)
+                insertCurrentUser(uploadedUser)
         }
     }
 
     fun updateRegistrationToken(token: String) {
-        firebaseUtility.updateRegistrationToken(token)
+        val currentUser = currentLocalUser.value
+        if (currentUser != null) {
+            firebaseUtility.updateRegistrationToken(currentUser, token)
+        }
     }
 
-    fun checkIfUsernameExists(username: String) {
-        firebaseUtility.checkIfUsernameExists(username)
+    suspend fun checkIfUsernameExists(username: String) {
+        val currentUser = currentLocalUser.value
+        if (currentUser != null) {
+            firebaseUtility.checkIfUsernameExists(currentUser, username)
+        }
     }
 
     fun checkIfEmailExists(email: String) {
@@ -155,48 +174,138 @@ class MainRepository(val scope: CoroutineScope, val db: WorkConnectDatabase) {
         firebaseUtility.uploadPostImage(image, type)
     }
 
-    fun updateUser(userMap: Map<String, Any?>) {
-        firebaseUtility.updateCurrentUser(userMap)
+    suspend fun updateUser(userMap: Map<String, Any?>) {
+        val currentUser = currentLocalUser.value
+        if (currentUser != null) {
+            val updatedUser = firebaseUtility.updateCurrentUser(currentUser, userMap)
+            if (updatedUser != null) {
+                userDao.insertCurrentUser(updatedUser)
+                postUpdateChanges(updatedUser)
+            }
+        }
     }
 
-    fun signOut() {
-        firebaseUtility.signOut()
+    private suspend fun postUpdateChanges(currentUser: User) {
+        val lastMessageSenderChats =
+            chatChannelDao.getChatChannelsForLastMessage(currentUser.id).toMutableList()
+        if (!lastMessageSenderChats.isNullOrEmpty()) {
+            for (chat in lastMessageSenderChats) {
+                chat.lastMessage?.sender = currentUser
+            }
+        }
+        chatChannelDao.updateItems(lastMessageSenderChats)
     }
 
-    fun onLikePressed(post: Post): Post {
-        return firebaseUtility.onLikePressedWithoutCaching(post)
+    suspend fun onLikePressed(post: Post): Post {
+        val currentUser = currentLocalUser.value
+        return if (currentUser != null) {
+            val result = firebaseUtility.onLikePressedWithoutCaching(currentUser, post)
+            if (result != null) {
+               insertCurrentUser(result.first)
+               return result.second
+            } else {
+                throw Exception("Something went wrong while liking the post")
+            }
+        } else {
+            post
+        }
     }
 
-    fun onDislikePressed(post: Post): Post {
-        return firebaseUtility.onDislikePressedWithoutCaching(post)
+    suspend fun onDislikePressed(post: Post): Post {
+        val currentUser = currentLocalUser.value
+        return if (currentUser != null) {
+            val result = firebaseUtility.onDislikePressedWithoutCaching(currentUser, post)
+            if (result != null) {
+                insertCurrentUser(result.first)
+                return result.second
+            } else {
+                throw Exception("Something went wrong while disliking the post")
+            }
+        } else {
+            post
+        }
     }
 
-    fun onSaved(post: Post): Post {
-        return firebaseUtility.onPostSavedWithoutCaching(post)
+    suspend fun onSaved(post: Post): Post {
+        val currentUser = currentLocalUser.value
+        return if (currentUser != null) {
+            val result = firebaseUtility.onPostSavedWithoutCaching(currentUser, post)
+            if (result != null) {
+                insertCurrentUser(result.first)
+                return result.second
+            } else {
+                throw Exception("Something went wrong while saving the post")
+            }
+        } else {
+            post
+        }
     }
 
-    fun onFollowPressed(post: Post): Post {
-        return firebaseUtility.onFollowPressed(post)
+    suspend fun onFollowPressed(post: Post): Post {
+        val currentUser = currentLocalUser.value
+        return if (currentUser != null) {
+            val result = firebaseUtility.onFollowPressed(currentUser, post)
+            if (result != null) {
+                insertCurrentUser(result.first)
+                result.second
+            } else {
+                post
+            }
+        } else {
+            post
+        }
     }
 
-    fun onFollowPressed(currentUser: User, otherUser: User) {
+    suspend fun onFollowPressed(currentUser: User, otherUser: User) {
         firebaseUtility.onFollowPressed(currentUser, otherUser)
     }
 
-    fun uploadPost(post: Post) {
-        firebaseUtility.uploadPost(post)
+    suspend fun uploadPost(post: Post) {
+        val currentUser = currentLocalUser.value
+        if (currentUser != null) {
+            val result = firebaseUtility.uploadPost(currentUser, post)
+            if (result != null) {
+                insertPosts(listOf(result.first))
+                insertChatChannels(listOf(result.second))
+            }
+        }
     }
 
-    fun joinProject(post: Post) {
-        firebaseUtility.joinProject(post)
+    private suspend fun insertChatChannels(channels: List<ChatChannel>) {
+        chatChannelDao.insertItems(channels)
     }
 
-    fun uploadMessageMedia(message: SimpleMessage, chatChannel: ChatChannel) {
-        firebaseUtility.uploadMessageMedia(message, chatChannel)
+    suspend fun joinProject(post: Post) {
+        val currentUser = currentLocalUser.value
+        if (currentUser != null) {
+            val result = firebaseUtility.joinProject(currentUser, post)
+            if (result != null) {
+                insertCurrentUser(result.first)
+                requestDao.insert(result.second)
+            }
+        }
     }
 
-    fun sendMessage(message: SimpleMessage, chatChannel: ChatChannel) {
-        firebaseUtility.sendMessage(message, chatChannel)
+    suspend fun uploadMessageMedia(message: SimpleMessage, chatChannel: ChatChannel) {
+        val currentUser = currentLocalUser.value
+        if (currentUser != null) {
+            val result = firebaseUtility.uploadMessageMedia(currentUser, message, chatChannel)
+            if (result != null) {
+                chatChannelDao.updateItem(result.first)
+                messageDao.insert(result.second)
+            }
+        }
+    }
+
+    suspend fun sendMessage(message: SimpleMessage, chatChannel: ChatChannel) {
+        val currentUser = currentLocalUser.value
+        if (currentUser != null) {
+            val result = firebaseUtility.sendMessage(currentUser, message, chatChannel)
+            if (result != null) {
+                chatChannelDao.updateItem(result.first)
+                messageDao.insert(result.second)
+            }
+        }
     }
 
     fun clearUploadResults() {
@@ -211,72 +320,42 @@ class MainRepository(val scope: CoroutineScope, val db: WorkConnectDatabase) {
         firebaseUtility.clearEditChanges()
     }
 
-    fun onNewMessageNotification(chatChannelId: String, onComplete: (chatChannel: ChatChannel) -> Unit) {
-        firebaseUtility.onNewMessagesFromBackground(chatChannelId) {
-            onComplete(it)
-        }
-    }
-
-    /*fun getPopularInterests(onComplete: (interests: List<PopularInterest>) -> Unit) {
-        firebaseUtility.getPopularInterests {
-            onComplete(it)
-        }
+    /*suspend fun onNewMessageNotification(chatChannelId: String): ChatChannel? {
+        return firebaseUtility.onNewMessagesFromBackground(chatChannelId)
     }*/
-
-    suspend fun getCurrentUserAsContributor(uid: String, chatChannelId: String) : ChatChannelContributor? {
-        return chatChannelContributorDao.getContributor(uid, chatChannelId)
-    }
 
     fun getCachedPost(postId: String) : LiveData<Post> {
         return postDao.getPostLive(postId)
     }
 
-    fun updatePost(post: Post, guidelines: String) {
+    suspend fun updatePost(post: Post, guidelines: String) {
         post.guidelines = guidelines
-        updatePost(post, mapOf("guidelines" to guidelines))
+        updatePost(post, mapOf(GUIDELINES to guidelines))
     }
 
-    private fun updatePost(post: Post, map: Map<String, Any?>) {
-        firebaseUtility.updatePost(post, map)
-    }
-
-    suspend fun getLocalMedia(messageId: String) : SimpleMedia? {
-        return simpleMediaDao.getSimpleMedia(messageId)
-    }
-
-    fun downloadMedia(externalDir: File?, message: SimpleMessage) {
-        firebaseUtility.downloadMedia(externalDir, message)
-    }
-
-    fun listenToDownloadProcess(messageId: String): LiveData<SimpleMedia> {
-        return simpleMediaDao.getSimpleMediaLive(messageId)
-    }
-
-    fun getMedia(chatChannelId: String, messageId: String, onComplete: (simpleMedia: SimpleMedia) -> Unit) {
-        firebaseUtility.getMedia(chatChannelId, messageId) {
-            onComplete(it)
+    private suspend fun updatePost(post: Post, map: Map<String, Any?>) {
+        val returnedPost = firebaseUtility.updatePost(post, map)
+        if (returnedPost != null) {
+            postDao.updateItem(returnedPost)
         }
     }
 
-    fun getContributorsForPost(channelId: String) {
-        firebaseUtility.getContributorsForPost(channelId)
-    }
-
-    fun getChannelContributors(chatChannelId: String, pageSize: Long, extra: DocumentSnapshot? = null, ahead: Boolean = false, onComplete: (contributors: QuerySnapshot) -> Unit) {
-        firebaseUtility.getChannelContributors(chatChannelId, pageSize, extra, ahead) {
-            onComplete(it)
+    suspend fun downloadMedia(destinationFile: File, message: SimpleMessage) {
+        val returnedMessage = firebaseUtility.downloadMedia(destinationFile, message)
+        if (returnedMessage != null) {
+            messageDao.updateItem(returnedMessage)
         }
     }
 
-    fun getContributorSnapshot(channelId: String, id: String, onComplete: (doc: DocumentSnapshot) -> Unit) {
+    /*fun getChannelContributors(chatChannelId: String, pageSize: Long, extra: DocumentSnapshot? = null, ahead: Boolean = false, onComplete: (contributors: QuerySnapshot) -> Unit) {
+
+    }*/
+
+    /*fun getContributorSnapshot(channelId: String, id: String, onComplete: (doc: DocumentSnapshot) -> Unit) {
         firebaseUtility.getContributorSnapshot(channelId, id) {
             onComplete(it)
         }
-    }
-
-    fun updateGuidelines(postId: String, guidelines: String) {
-        firebaseUtility.updateGuidelines(postId, guidelines)
-    }
+    }*/
 
     fun clearGuideUpdateResult() {
         firebaseUtility.guidelinesUpdateResult.postValue(null)
@@ -286,168 +365,158 @@ class MainRepository(val scope: CoroutineScope, val db: WorkConnectDatabase) {
         firebaseUtility.clearSignInChanges()
     }
 
-    fun getPost(postId: String) {
-        firebaseUtility.getPost(postId)
-    }
-
-    fun <T: Any> getPostsOnStart(query: Query, ofClass: Class<T>, onComplete: (items: List<T>) -> Unit) {
-        firebaseUtility.getPostsOnStart(query, ofClass) {
-            onComplete(it)
+    suspend fun getPost(postId: String) {
+        val post = firebaseUtility.getPost(postId)
+        if (post != null) {
+            insertPosts(listOf(post))
         }
     }
 
-    fun <T: Any> getItems(limit: Long, query: Query, clazz: Class<T>, extras: Map<String, Any?>?, onComplete: (firstDoc: DocumentSnapshot?, lastDoc: DocumentSnapshot?, isEnd: Boolean) -> Unit) {
+    /*fun <T: Any> getItems(limit: Long, query: Query, clazz: Class<T>, extras: Map<String, Any?>?, onComplete: (firstDoc: DocumentSnapshot?, lastDoc: DocumentSnapshot?, isEnd: Boolean) -> Unit) {
         firebaseUtility.getItems(limit, query, clazz, extras) { doc1, doc2, isEnd ->
             onComplete(doc1, doc2, isEnd)
         }
-    }
+    }*/
 
-    fun getItemsWithoutCaching(query: Query, onComplete: (querySnapshot: QuerySnapshot) -> Unit) {
+    /*fun getItemsWithoutCaching(query: Query, onComplete: (querySnapshot: QuerySnapshot) -> Unit) {
         firebaseUtility.getItemsWithoutCaching(query) {
             onComplete(it)
         }
-    }
+    }*/
 
-    fun <T> getSnapshot(item: T, clazz: Class<T>, onComplete: (doc: DocumentSnapshot) -> Unit) {
-        firebaseUtility.getSnapshot(item, clazz) {
+   /* fun <T> getSnapshot(item: T, clazz: Class<T>, onComplete: (doc: DocumentSnapshot) -> Unit) {
+       *//* firebaseUtility.getSnapshot(item, clazz) {
             onComplete(it)
-        }
-    }
+        }*//*
+    }*/
 
-    fun getSnapshot(query: DocumentReference, onComplete: (doc: DocumentSnapshot) -> Unit) {
+    /*fun getSnapshot(query: DocumentReference, onComplete: (doc: DocumentSnapshot) -> Unit) {
         firebaseUtility.getSnapshot(query) {
             onComplete(it)
         }
+    }*/
+
+    suspend inline fun <reified T: Any?> getObject(docRef: DocumentReference): T? {
+        return firebaseUtility.getObject<T>(docRef)
     }
 
-    fun <T: Any> getObject(objectId: String, objectClass: Class<T>, onComplete: (obj: T?) -> Unit) {
-        Log.d("GET_FIREBASE_OBJECT", "MainRepo")
-        firebaseUtility.getObject(objectId, objectClass) {
-            Log.d("GET_FIREBASE_OBJECT", "MainRepo - after success")
-            onComplete(it)
-        }
-    }
-
-    inline fun <reified T: Any> getObject(documentReference: DocumentReference, crossinline onComplete: (obj: T) -> Unit) {
-        firebaseUtility.getObject<T>(documentReference) {
-            onComplete(it)
-        }
-    }
-
-    fun <T> getObject(documentReference: DocumentReference, clazz: Class<T>, onComplete: (obj: T) -> Unit) {
-        firebaseUtility.getObject(documentReference, clazz) {
-            onComplete(it)
-        }
-    }
-
-    fun getOtherUser(userId: String) {
-        val docRef = Firebase.firestore.collection(USERS).document(userId).collection("private").document(userId)
-        firebaseUtility.getSnapshot(docRef) {
-            val userPrivate = it.toObject(UserPrivate::class.java)!!
-            currentOtherUserDetail.postValue(userPrivate)
-        }
+    suspend inline fun <reified T: Any> getObjects(query: Query): List<T> {
+        return firebaseUtility.getObjects(query)
     }
 
     suspend fun getLocalUser(uid: String) : User? {
         return userDao.getUser(uid)
     }
 
-    fun setProfilePhotoUploadResult(s: String?) {
-        profilePhotoUpload.postValue(s?.toUri())
+    suspend fun acceptProjectRequest(notification: SimpleNotification) {
+        val currentUser = currentLocalUser.value
+        if (currentUser != null) {
+            firebaseUtility.acceptProjectRequest(currentUser, notification)
+            val localSender = notification.sender
+            localSender.userPrivate.chatChannels = listOf(notification.post?.chatChannelId ?: "")
+            val users = filterUsers(listOf(localSender))
+            userDao.insertItems(users)
+
+            notificationDao.deleteNotification(notification)
+
+            val chatChannel = chatChannelDao.getChatChannel(notification.post?.chatChannelId ?: "")
+            if (chatChannel != null) {
+                chatChannel.contributorsCount += 1
+                val existingList = chatChannel.contributorsList.toMutableList()
+                existingList.add(notification.sender.id)
+                chatChannel.contributorsList = existingList
+
+                chatChannelDao.updateItem(chatChannel)
+            }
+
+        }
     }
 
-    fun acceptProjectRequest(notification: SimpleNotification) {
-        firebaseUtility.acceptProjectRequest(notification)
+    suspend fun declineProjectRequest(notification: SimpleNotification) {
+        val currentUser = currentLocalUser.value
+        if (currentUser != null) {
+            firebaseUtility.denyProjectRequest(currentUser, notification)
+            notificationDao.deleteNotification(notification)
+        }
+
     }
 
-    fun declineProjectRequest(notification: SimpleNotification) {
-        firebaseUtility.denyProjectRequest(notification)
-    }
-
-    fun undoProjectRequest(request: SimpleRequest) {
-        firebaseUtility.undoProjectRequest(request)
+    suspend fun undoProjectRequest(request: SimpleRequest) {
+        val currentUser = currentLocalUser.value
+        if (currentUser != null) {
+            val result = firebaseUtility.undoProjectRequest(currentUser, request)
+            if (result != null) {
+                insertCurrentUser(result.first)
+                requestDao.deleteRequest(result.second)
+            }
+        }
     }
 
     suspend fun getChannelContributors(channelId: String) : List<User> {
         return userDao.getChannelContributors(channelId)
     }
 
-    /*fun getChannelContributorsFromFirebase(channelId: String) {
-        firebaseUtility.getChannelContributors(channelId)
-    }
-*/
-   /* fun getChatChannels() {
-        Log.d(ChatChannelFragment.TAG, "Getting chat channels - REP")
-        firebaseUtility.getChatChannelsFromFirebase()
-    }*/
-
-    fun getLocalPostContributors(channelId: String): LiveData<List<User>> {
-        return userDao.getChannelContributorsLive(channelId)
-    }
-
-    fun getSavedPosts(initialItemPosition: Int, finalItemPosition: Int) {
+    /*fun getSavedPosts(initialItemPosition: Int, finalItemPosition: Int) {
         Log.d(BUG_TAG, "Getting saved posts ... RP")
         firebaseUtility.getSavedPosts(initialItemPosition, finalItemPosition)
-    }
+    }*/
 
     suspend fun deleteLocalRequest(notificationId: String, postId: String, requestId: String, chatChannelId: String) {
         Log.d(BUG_TAG, "Delete local request")
-        val currentUser = currentLocalUser.value!!
-        val simpleRequest = requestDao.getRequest(requestId)
-        if (simpleRequest != null) {
-            requestDao.deleteRequest(simpleRequest)
-        }
-
-        val existingCollaborationList = currentUser.userPrivate.collaborationIds.toMutableList()
-        existingCollaborationList.add(postId)
-        currentUser.userPrivate.collaborationIds = existingCollaborationList
-
-        val existingChannels = currentUser.userPrivate.chatChannels.toMutableList()
-        existingChannels.add(chatChannelId)
-        currentUser.userPrivate.chatChannels = existingChannels
-
-        val existingActiveRequests = currentUser.userPrivate.activeRequests.toMutableList()
-        existingActiveRequests.remove(postId)
-        currentUser.userPrivate.activeRequests = existingActiveRequests
-
-        val post = postDao.getPost(postId)
-        if (post != null) {
-            if (post.type == PROJECT) {
-                val existingContributors = post.contributors!!.toMutableList()
-                existingContributors.add(currentUser.id)
-                post.contributors = existingContributors
-                postDao.updateItem(post)
+        val currentUser = currentLocalUser.value
+        if (currentUser != null) {
+            val simpleRequest = requestDao.getRequest(requestId)
+            if (simpleRequest != null) {
+                requestDao.deleteRequest(simpleRequest)
             }
+
+            val existingCollaborationList = currentUser.userPrivate.collaborationIds.toMutableList()
+            existingCollaborationList.add(postId)
+            currentUser.userPrivate.collaborationIds = existingCollaborationList
+
+            val existingChannels = currentUser.userPrivate.chatChannels.toMutableList()
+            existingChannels.add(chatChannelId)
+            currentUser.userPrivate.chatChannels = existingChannels
+
+            val existingActiveRequests = currentUser.userPrivate.activeRequests.toMutableList()
+            existingActiveRequests.remove(postId)
+            currentUser.userPrivate.activeRequests = existingActiveRequests
+
+            val post = postDao.getPost(postId)
+            if (post != null) {
+                if (post.type == PROJECT) {
+                    val existingContributors = post.contributors!!.toMutableList()
+                    existingContributors.add(currentUser.id)
+                    post.contributors = existingContributors
+                    postDao.updateItem(post)
+                }
+            }
+
+            val notification = firebaseUtility.getNotificationFromFirebase(currentUser, notificationId)
+            if (notification != null)
+                notificationDao.insert(notification)
+
+            insertCurrentUser(currentUser)
         }
-
-//        firebaseUtility.getChatChannelFromFirebase(chatChannelId)
-        firebaseUtility.getNotificationFromFirebase(notificationId)
-
-        userDao.updateItem(currentUser)
-
-    }
-
-    fun setNotificationListener() {
-        firebaseUtility.setNotificationListener()
     }
 
     suspend fun clearPosts() {
         postDao.clearPosts()
     }
 
-    fun getNotifications() {
-        firebaseUtility.getNotifications()
-    }
-
-    fun getMyRequests() {
-        firebaseUtility.getMyRequests()
+    suspend fun getNotifications() {
+        val currentUser = currentLocalUser.value
+        if (currentUser != null) {
+            val notifications = firebaseUtility.getNotifications(currentUser)
+            notificationDao.insertItems(notifications)
+        }
     }
 
     suspend fun clearRequests() {
         requestDao.clearRequests()
     }
 
-    fun increaseProjectWeightage(cachedPost: Post) {
+    suspend fun increaseProjectWeightage(cachedPost: Post) {
         val newWeightage = cachedPost.weightage + 0.1
         val newSearchRank = cachedPost.searchRank + 1
 
@@ -462,15 +531,21 @@ class MainRepository(val scope: CoroutineScope, val db: WorkConnectDatabase) {
         otherUser.searchRank = userSearchRank
 
         // updated user search rank
-        firebaseUtility.updateOtherUser(otherUser, mapOf<String, Any?>(SEARCH_RANK to userSearchRank))
-
+        val returnedOtherUser = firebaseUtility.updateOtherUser(otherUser, mapOf<String, Any?>(SEARCH_RANK to userSearchRank))
+        if (returnedOtherUser != null) {
+            if (userDao.getUser(otherUser.id) != null) {
+                userDao.updateItem(returnedOtherUser)
+            } else {
+                userDao.insert(returnedOtherUser)
+            }
+        }
 
         // TODO("If the user is followed or following the current user, change the weightage of the user
         //      both in fireStore and locally")
         //      both in fireStore and locally")
     }
 
-    suspend fun insertPosts(posts: List<Post>, source: PostSource) = scope.launch (Dispatchers.IO) {
+    suspend fun insertPosts(posts: List<Post>) = scope.launch (Dispatchers.IO) {
         val returnedPosts = filterPosts(posts)
         postDao.insertItems(returnedPosts)
     }
@@ -485,11 +560,9 @@ class MainRepository(val scope: CoroutineScope, val db: WorkConnectDatabase) {
             if (message.type == DOCUMENT) {
                 val f = File(externalDocumentsDir, message.metaData?.originalFileName!!)
                 message.isDownloaded = f.exists()
-                Log.d(BUG_TAG, message.content + " " + message.isDownloaded)
             } else if (message.type == IMAGE) {
                 val f = File(externalImagesDir, message.metaData?.originalFileName!!)
                 message.isDownloaded = f.exists()
-                Log.d(BUG_TAG, message.content + " " + message.isDownloaded)
             }
         }
 
@@ -498,8 +571,6 @@ class MainRepository(val scope: CoroutineScope, val db: WorkConnectDatabase) {
 
     }
 
-
-    // TODO("This function actually doesn't require postSource, the filters have to applied always.")
     fun filterPosts(posts: List<Post>): List<Post> {
         val currentUser = currentLocalUser.value
         return filter(currentUser, posts)
@@ -509,188 +580,21 @@ class MainRepository(val scope: CoroutineScope, val db: WorkConnectDatabase) {
         if (user == null) return posts
 
         val userDetails = user.userPrivate
-//        val interests = userDetails.interests.toSet()
-//        val finalSet = mutableSetOf<String>()
-
         for (post in posts) {
-
             post.postLocalData.isCreator = userDetails.projectIds.contains(post.id) || userDetails.blogIds.contains(post.id)
             post.postLocalData.isLiked = userDetails.likedPosts.contains(post.id)
             post.postLocalData.isSaved = userDetails.savedPosts.contains(post.id)
             post.postLocalData.isDisliked = userDetails.dislikedPosts.contains(post.id)
             post.postLocalData.isCollaboration = userDetails.collaborationIds.contains(post.id)
 
-//            val tempSet = post.tags.toMutableSet()
-//            val intersection = tempSet.intersect(interests)
-
-            /*if (intersection.isNotEmpty()) {
-                finalSet.addAll(intersection)
-            }*/
-
             if (!post.postLocalData.isCreator) {
                 post.postLocalData.isUserFollowed = userDetails.followings.contains(post.uid)
             }
-
-//            post.postLocalData.inFeed = true
-
         }
 
-        /*val tags = mutableListOf<SimpleTag>()
-        for (item in finalSet) {
-            tags.add(SimpleTag(item, 0))
-        }
-
-        simpleTagsDao.insertItems(tags)*/
         return posts
     }
 
-    suspend fun <T> getLocalItems(params: PagingSource.LoadParams<String>, clazz: Class<T>): List<T> {
-        /*when (clazz) {
-            Post::class.java -> {
-                val postId = params.key
-                if (postId != null) {
-                    val anchorPost = postDao.getPost(postId)
-                    if (anchorPost != null) {
-                        val anchorTime = anchorPost.createdAt
-                        val posts = postDao.getPostsBasedOnTime(anchorTime)
-                        return posts as List<T>
-                    }
-                }
-            }
-        }*/
-        TODO("return a list of items from database of generic type")
-    }
-
-    suspend fun getLocalPosts(params: PagingSource.LoadParams<String>): List<Post> {
-        val postId = params.key
-        return if (postId != null) {
-            val anchorPost = postDao.getPost(postId)
-            if (anchorPost != null) {
-                val anchorTime = anchorPost.createdAt
-                return postDao.getPostsBasedOnTime(anchorTime, params.loadSize) ?: emptyList()
-            } else {
-                emptyList()
-            }
-        } else {
-            emptyList()
-        }
-    }
-
-    /*suspend fun getPosts(postSource: PostSource, key: PageKey? = null, lim: Int): List<Post> {
-        return when (postSource) {
-            is PostSource.FeedRandom -> {
-                if (key != null) {
-                    val endBeforeId = key.endBefore?.id
-                    val startAfterId = key.startAfter?.id
-                    when {
-                        endBeforeId != null -> {
-                            val post = postDao.getPost(endBeforeId)
-                            return if (post != null) {
-                                val endBeforeTime = post.createdAt
-                                return postDao.getPostsBefore(endBeforeTime, lim)
-                            } else emptyList()
-                        }
-                        startAfterId != null -> {
-                            val post = postDao.getPost(startAfterId)
-                            return if (post != null) {
-                                val startAfterTime = post.createdAt
-                                return postDao.getPostsAfter(startAfterTime, lim)
-                            } else listOf()
-                        }
-                        else -> {
-                            return postDao.getPosts(lim)
-                        }
-                    }
-                } else {
-                    postDao.getPosts(lim)
-                }
-            }
-            is PostSource.FeedWithFollowings -> {
-                if (key != null) {
-                    val endBeforeId = key.endBefore?.id
-                    val startAfterId = key.startAfter?.id
-                    when {
-                        endBeforeId != null -> {
-                            val post = postDao.getPost(endBeforeId)
-                            return if (post != null) {
-                                val endBeforeTime = post.createdAt
-                                return postDao.getPostsBasedOnUserBefore(postSource.currentUser.id, endBeforeTime, lim)
-                            } else emptyList()
-                        }
-                        startAfterId != null -> {
-                            val post = postDao.getPost(startAfterId)
-                            return if (post != null) {
-                                val startAfterTime = post.createdAt
-                                return postDao.getPostsBasedOnUserAfter(postSource.currentUser.id, startAfterTime, lim)
-                            } else emptyList()
-                        }
-                        else -> {
-                            return postDao.getPostsBasedOnUserAfter(postSource.currentUser.id, System.currentTimeMillis(), lim)
-                        }
-                    }
-                } else {
-                    postDao.getPostsBasedOnUserAfter(postSource.currentUser.id, System.currentTimeMillis(), lim)
-                }
-            }
-            is PostSource.FeedWithOtherUserAndType -> {
-                if (key != null) {
-                    val endBeforeId = key.endBefore?.id
-                    val startAfterId = key.startAfter?.id
-                    when {
-                        endBeforeId != null -> {
-                            val post = postDao.getPost(endBeforeId)
-                            return if (post != null) {
-                                val endBeforeTime = post.createdAt
-                                return postDao.getUserProjectsBefore(postSource.otherUser.id, postSource.type, lim, endBeforeTime)
-                            } else emptyList()
-                        }
-                        startAfterId != null -> {
-                            val post = postDao.getPost(startAfterId)
-                            return if (post != null) {
-                                val startAfterTime = post.createdAt
-                                return postDao.getUserProjectsAfter(postSource.otherUser.id, postSource.type, lim, startAfterTime)
-                            } else emptyList()
-                        }
-                        else -> {
-                            return postDao.getUserProjects(postSource.otherUser.id, postSource.type, lim)
-                        }
-                    }
-                } else {
-                    postDao.getUserProjects(postSource.otherUser.id, postSource.type, lim)
-                }
-            }
-            is PostSource.FeedWithOtherUserCollaborations -> {
-                if (key != null) {
-                    val endBeforeId = key.endBefore?.id
-                    val startAfterId = key.startAfter?.id
-                    when {
-                        endBeforeId != null -> {
-                            val post = postDao.getPost(endBeforeId)
-                            return if (post != null) {
-                                val endBeforeTime = post.createdAt
-                                return postDao.getUserCollaborationsBefore("%${postSource.otherUser.id}%", endBeforeTime, lim)
-                            } else emptyList()
-                        }
-                        startAfterId != null -> {
-                            val post = postDao.getPost(startAfterId)
-                            return if (post != null) {
-                                val startAfterTime = post.createdAt
-                                return postDao.getUserCollaborationsAfter("%${postSource.otherUser.id}%", startAfterTime, lim)
-                            } else emptyList()
-                        }
-                        else -> {
-                            return postDao.getUserCollaborations(postSource.otherUser.id, lim)
-                        }
-                    }
-                } else {
-                    postDao.getUserCollaborations("%${postSource.otherUser.id}%", lim)
-                }
-            }
-            is PostSource.FeedWithTags -> {
-                throw Exception("This type of post source is not supported.")
-            }
-        }
-    }*/
 
     suspend fun getProjectContributors(post: Post): Result<QuerySnapshot> {
         return firebaseUtility.getProjectContributors(post)
@@ -698,10 +602,6 @@ class MainRepository(val scope: CoroutineScope, val db: WorkConnectDatabase) {
 
     suspend fun getRandomTopUsers(): Result<QuerySnapshot> {
         return firebaseUtility.getRandomTopUsers()
-    }
-
-    suspend fun clearMessages(chatChannelId: String) {
-        messageDao.clearMessages(chatChannelId)
     }
 
     suspend fun insertMessages(externalImagesDir: File, externalDocumentsDir: File, messages: List<SimpleMessage>, chatChannel: ChatChannel) {
@@ -785,7 +685,12 @@ class MainRepository(val scope: CoroutineScope, val db: WorkConnectDatabase) {
                     user.userPrivate.followers = existingList
                 }
             }
-            is UserSource.Search -> TODO()
+            is UserSource.Search -> {
+
+            }
+            else -> {
+
+            }
         }
 
         val currentUser = currentLocalUser.value
@@ -988,16 +893,52 @@ class MainRepository(val scope: CoroutineScope, val db: WorkConnectDatabase) {
         return firebaseUtility.getTopBlogs()
     }
 
-    fun setChatChannelListeners() {
-        firebaseUtility.setChatChannelsListeners()
-    }
+    private var chatChannelListenerRegistration: ListenerRegistration? = null
 
-    fun getContributorsForAllChannels() {
-        firebaseUtility.getContributorForAllChannels()
-    }
+    suspend fun setChatChannelsListeners() {
+        val currentUser = currentLocalUser.value
+        if (currentUser != null) {
+            chatChannelListenerRegistration?.remove()
+            chatChannelListenerRegistration = Firebase.firestore
+                .collection(CHAT_CHANNELS)
+                .whereArrayContains(CONTRIBUTORS_LIST, currentUser.id)
+                .orderBy(UPDATED_AT, Query.Direction.DESCENDING)
+                .addSnapshotListener { value, error ->
 
-    suspend fun getPagedNotifications(query: Query, limit: Int, startAfter: DocumentSnapshot?): Result<QuerySnapshot> {
-        return firebaseUtility.getPagedNotifications(query, limit, startAfter)
+                    if (error != null) {
+                        networkErrors.postValue(error)
+                    }
+
+                    if (value != null && !value.isEmpty) {
+                        val chatChannels = value.toObjects(ChatChannel::class.java)
+
+                        scope.launch(Dispatchers.IO) {
+                            for (chatChannel in chatChannels) {
+                                val senderId = chatChannel.lastMessage?.senderId
+                                if (senderId != null) {
+                                    val otherLocalUser = userDao.getUser(senderId)
+                                    if (otherLocalUser != null) {
+                                        chatChannel.lastMessage?.sender = otherLocalUser
+                                    } else {
+                                        val otherUser = firebaseUtility.getUser(senderId)
+                                        if (otherUser != null) {
+                                            chatChannel.lastMessage?.sender = otherUser
+                                        }
+                                        /*try {
+                                            val fetchedUserTask = db.collection(USERS).document(senderId).get()
+                                            val user = fetchedUserTask.await().toObject(User::class.java)!!
+                                            chatChannel.lastMessage?.sender = user
+                                        } catch (e: Exception) {
+                                            Log.e(BUG_TAG, e.localizedMessage!!)
+                                        }*/
+                                    }
+                                }
+                            }
+                            chatChannelDao.insertChatChannels(chatChannels)
+                        }
+                    }
+                }
+        }
     }
 
     suspend fun clearNotifications() {
@@ -1012,13 +953,9 @@ class MainRepository(val scope: CoroutineScope, val db: WorkConnectDatabase) {
         requestDao.insertItems(requests)
     }
 
-    fun setChannelContributorsListener(chatChannel: ChatChannel) {
-        firebaseUtility.setChannelContributorsListener(chatChannel)
-    }
-
-    suspend fun setChannelMessagesListener(externalImagesDir: File, externalDocumentsDir: File, chatChannel: ChatChannel) {
-        firebaseUtility.setChannelMessagesListener(externalImagesDir, externalDocumentsDir, chatChannel)
-    }
+//    fun setChannelContributorsListener(chatChannel: ChatChannel) {
+////        firebaseUtility.setChannelContributorsListener(chatChannel)
+//    }
 
     fun getRecentSearchesByType(type: String): Flow<List<RecentSearch>> {
         return recentSearchDao.getRecentSearchesByType(type)
@@ -1033,27 +970,40 @@ class MainRepository(val scope: CoroutineScope, val db: WorkConnectDatabase) {
     }
 
     suspend fun fetchSavedPosts(i: Int, f: Int): Result<QuerySnapshot> {
-        return firebaseUtility.fetchSavedPosts(i, f)
+        val currentUser = currentLocalUser.value
+        return if (currentUser != null) {
+            firebaseUtility.fetchSavedPosts(currentUser, i, f)
+        } else {
+            Result.Error(Exception("User is null."))
+        }
     }
 
     fun signInWithGoogle(credential: AuthCredential) {
         firebaseUtility.signInWithGoogle(credential)
     }
 
-    fun addInterest(interest: String) {
-        firebaseUtility.addInterest(interest)
+    suspend fun addInterest(interest: String) {
+        val currentUser = currentLocalUser.value
+        if (currentUser != null) {
+            val updatedUser = firebaseUtility.addInterest(currentUser, interest)
+            if (updatedUser != null) {
+                insertCurrentUser(updatedUser)
+            }
+        }
     }
 
-    fun removeInterest(interest: String) {
-        firebaseUtility.removeInterest(interest)
+    suspend fun removeInterest(interest: String) {
+        val currentUser = currentLocalUser.value
+        if (currentUser != null) {
+            val updatedUser = firebaseUtility.removeInterest(currentUser, interest)
+            if (updatedUser != null) {
+                insertCurrentUser(updatedUser)
+            }
+        }
     }
 
     fun getMessageSender(senderId: String): LiveData<User> {
         return userDao.getMessageSender(senderId)
-    }
-
-    fun downloadImage(message: SimpleMessage, externalDir: File) {
-        firebaseUtility.downloadImage(message, externalDir)
     }
 
     suspend fun localMessages(type: String = IMAGE, chatChannelId: String, limit: Int = 0): List<SimpleMessage> {
@@ -1070,11 +1020,119 @@ class MainRepository(val scope: CoroutineScope, val db: WorkConnectDatabase) {
         messageDao.clearMessages()
         notificationDao.clearNotifications()
         chatChannelDao.clearChatChannels()
-        firebaseUtility = FirebaseUtilityImpl(scope, db)
     }
 
     suspend fun getChannelsForQuery(query: String): List<ChatChannel> {
         return chatChannelDao.getChannelsForQuery(query)
+    }
+
+    fun sendComment(post: Post, comment: String) {
+        val currentUser = currentLocalUser.value
+        if (currentUser != null) {
+            firebaseUtility.sendComment(currentUser, post, comment)
+        }
+    }
+
+    /*fun tempFixBlog(post: Post) {
+        firebaseUtility.tempFixBlog(post)
+    }*/
+
+    suspend fun likeComment(comment: SimpleComment): SimpleComment {
+        val currentUser = currentLocalUser.value
+        return if (currentUser != null) {
+            firebaseUtility.likeComment(currentUser, comment)
+        } else {
+            comment
+        }
+    }
+
+    suspend fun dislikeComment(comment: SimpleComment): SimpleComment {
+        val currentUser = currentLocalUser.value
+        return if (currentUser != null) {
+            firebaseUtility.dislikeComment(currentUser, comment)
+        } else {
+            comment
+        }
+    }
+
+    fun sendCommentReply(parentComment: SimpleComment, comment: String) {
+        val currentUser = currentLocalUser.value
+        if (currentUser != null) {
+            firebaseUtility.sendCommentReply(currentUser, parentComment, comment)
+        }
+    }
+
+    suspend fun insertPublicUserData(userHalf: User) {
+        val cachedUser = userDao.getCachedUser()
+        if (cachedUser != null) {
+            userHalf.userPrivate = cachedUser.userPrivate
+            insertCurrentUser(userHalf)
+        } else {
+            Log.d(TAG, "New user data cannot be inserted if there is no cached user, as there are two documents - User and UserPrivate mixed together")
+        }
+    }
+
+    suspend fun insertPrivateUserData(userHalf: UserPrivate) {
+        val cachedUser = userDao.getCachedUser()
+        if (cachedUser != null) {
+            cachedUser.userPrivate = userHalf
+            insertCurrentUser(cachedUser)
+        } else {
+            Log.d(TAG, "New user data cannot be inserted if there is no cached user, as there are two documents - User and UserPrivate mixed together")
+        }
+    }
+
+    suspend fun fetchCurrentUser(firebaseUser: FirebaseUser) {
+        currentFirebaseUser.postValue(firebaseUser)
+        val currentUser = firebaseUtility.getCurrentUser()
+        if (currentUser != null) {
+            insertCurrentUser(currentUser)
+        } else {
+            Log.w(TAG, "Couldn't fetch current user data.")
+        }
+    }
+
+    private val usersMap = mutableMapOf<String, User>()
+    private val listOfUsers = mutableListOf<User>()
+
+    suspend fun insertChannelContributors(chatChannel: ChatChannel, contributors: List<User>) {
+        for (contributor in contributors) {
+            if (!usersMap.containsKey(contributor.id)) {
+                if (currentLocalUser.value?.id == contributor.id) {
+                    usersMap[contributor.id] = currentLocalUser.value!!
+                } else {
+                    val existingList = contributor.userPrivate.chatChannels.toMutableList()
+                    existingList.add(chatChannel.chatChannelId)
+                    contributor.userPrivate.chatChannels = existingList
+                    usersMap[contributor.id] = contributor
+                }
+            } else {
+                val existingUser = usersMap[contributor.id]!!
+                val existingList = existingUser.userPrivate.chatChannels.toMutableList()
+                existingList.add(chatChannel.chatChannelId)
+                existingUser.userPrivate.chatChannels = existingList
+                usersMap[contributor.id] = existingUser
+            }
+        }
+
+        usersMap.forEach {
+            listOfUsers.add(it.value)
+        }
+
+        chatChannel.lastMessage?.sender = listOfUsers.find {
+            it.id == chatChannel.lastMessage?.senderId
+        }!!
+
+        chatChannelDao.updateItem(chatChannel)
+        userDao.insertItems(filterUsers(listOfUsers))
+    }
+
+    fun clearMediaDownloadResult() {
+        mediaDownloadResult.postValue(null)
+    }
+
+    fun clearMediaUploadResult() {
+        mediaUploadResult.postValue(null)
     }
 
 }
