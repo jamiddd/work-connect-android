@@ -24,6 +24,7 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.view.WindowCompat
+import androidx.core.widget.doAfterTextChanged
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -48,7 +49,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -57,6 +57,7 @@ import com.jamid.workconnect.adapter.paging2.SimpleMessageViewHolder
 import com.jamid.workconnect.adapter.paging3.PostViewHolder
 import com.jamid.workconnect.auth.InterestFragment
 import com.jamid.workconnect.databinding.ActivityMainBinding
+import com.jamid.workconnect.databinding.DynamicEditTextBinding
 import com.jamid.workconnect.explore.*
 import com.jamid.workconnect.home.*
 import com.jamid.workconnect.home.EditorFragment.Companion.OLD_STATE
@@ -64,6 +65,7 @@ import com.jamid.workconnect.interfaces.*
 import com.jamid.workconnect.message.*
 import com.jamid.workconnect.model.*
 import com.jamid.workconnect.profile.*
+import com.jamid.workconnect.views.zoomable.ImageControllerListener
 import com.jamid.workconnect.views.zoomable.ImageViewFragment
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -109,7 +111,7 @@ class MainActivity : AppCompatActivity(),
     var currentBottomFragment: Fragment? = null
     var currentImagePosition = 0
 
-    private val channelMessagesListeners = mutableMapOf<String, ListenerRegistration>()
+    private val imageControllerListenerList = mutableMapOf<String, ImageControllerListener>()
 
     private val mLocationCallback: LocationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
@@ -410,9 +412,28 @@ class MainActivity : AppCompatActivity(),
                     if (hasPendingTransition) {
                         when (currentFragmentTag) {
                             CreateProjectFragment.TAG -> {
-                                navControllerX.navigate(R.id.createProjectFragment, null,
-                                    slideRightNavOptions()
-                                )
+
+                                val titleView = layoutInflater.inflate(R.layout.dynamic_edit_text, null, false)
+                                val dialog = MaterialAlertDialogBuilder(this@MainActivity)
+                                    .setView(titleView)
+                                    .show()
+
+                                val dialogBinding = DynamicEditTextBinding.bind(titleView)
+
+                                dialogBinding.projectTitleInput.doAfterTextChanged {
+                                    dialogBinding.dialogCreateBtn.isEnabled = !it.isNullOrBlank()
+                                }
+
+                                dialogBinding.dialogCreateBtn.setOnClickListener {
+                                    val title = dialogBinding.projectTitleInput.text.toString()
+                                    navControllerX.navigate(R.id.createProjectFragment, Bundle().apply { putString(CreateProjectFragment.ARG_TITLE, title) }, slideRightNavOptions())
+                                    dialog.dismiss()
+                                }
+
+                                dialogBinding.dialogCancelBtn.setOnClickListener {
+                                    dialog.dismiss()
+                                }
+
                             }
                             EditorFragment.TAG -> {
                                 navControllerX.navigate(R.id.editorFragment, null,
@@ -571,6 +592,13 @@ class MainActivity : AppCompatActivity(),
     override fun onBackPressed() {
         if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED || bottomSheetBehavior.state == BottomSheetBehavior.STATE_HALF_EXPANDED) {
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+        } else if (supportFragmentManager.findFragmentByTag(ImageViewFragment.TAG) != null) {
+            val imageFragment = supportFragmentManager.findFragmentByTag(ImageViewFragment.TAG)
+            if (imageFragment != null) {
+                supportFragmentManager.beginTransaction().remove(imageFragment).commit()
+            } else {
+                super.onBackPressed()
+            }
         } else {
             super.onBackPressed()
         }
@@ -1075,14 +1103,33 @@ class MainActivity : AppCompatActivity(),
         view: SimpleDraweeView,
         message: SimpleMessage
     ) {
-        val extras = FragmentNavigatorExtras(view to message.messageId)
+        val extras = FragmentNavigatorExtras(view to message.content)
 
-        navControllerX.navigate(
+        val width = imageControllerListenerList[message.content]!!.params.first
+        val height = imageControllerListenerList[message.content]!!.params.second
+
+
+        /*val bundle = Bundle().apply {
+            putString(ImageViewFragment.ARG_TRANSITION_NAME, message.content)
+            putString(ImageViewFragment.ARG_IMAGE, message.content)
+            putInt(ImageViewFragment.ARG_WIDTH, width)
+            putInt(ImageViewFragment.ARG_HEIGHT, height)
+            putParcelable(ImageViewFragment.ARG_MESSAGE, message)
+        }*/
+
+
+        val imageFragment = ImageViewFragment.newInstance(message, Pair(message.content, message.content), width, height)
+        supportFragmentManager.beginTransaction()
+            .addSharedElement(view, message.content)
+            .add(android.R.id.content, imageFragment, ImageViewFragment.TAG)
+            .commit()
+
+        /*navControllerX.navigate(
             R.id.imageViewFragment,
-            Bundle().apply { putParcelable(ImageViewFragment.ARG_MESSAGE, message) },
+            bundle,
             null,
             extras
-            )
+            )*/
 
     }
 
@@ -1124,6 +1171,10 @@ class MainActivity : AppCompatActivity(),
                 createNewFileAndDownload(it, message)
             }
         }
+    }
+
+    override fun onImageSet(message: SimpleMessage, imageControllerListener: ImageControllerListener) {
+        imageControllerListenerList[message.content] = imageControllerListener
     }
 
     private fun createNewFileAndDownload(externalFilesDir: File, message: SimpleMessage) {
@@ -1659,15 +1710,6 @@ class MainActivity : AppCompatActivity(),
     override suspend fun onFetchUserData(item: SimpleComment): User? {
         val docRef = Firebase.firestore.collection(USERS).document(item.senderId)
         return viewModel.getObject<User>(docRef)
-        /*return when (val userDocResult = viewModel.getObject(docRef)) {
-            is Result.Error -> {
-                viewModel.setCurrentError(userDocResult.exception)
-                null
-            }
-            is Result.Success -> {
-                userDocResult.data.toObject(User::class.java)
-            }
-        }*/
     }
 
     override suspend fun onFetchReplies(item: SimpleComment): List<SimpleComment> {
@@ -1675,56 +1717,6 @@ class MainActivity : AppCompatActivity(),
             COMMENTS).orderBy(POSTED_AT, Query.Direction.DESCENDING).limit(2)
 
         return viewModel.getObjects(collectionRef)
-
-        /*return when (val commentsCollectionResult = viewModel.getObjects(collectionRef)) {
-            is Result.Error -> {
-                viewModel.setCurrentError(commentsCollectionResult.exception)
-                emptyList()
-            }
-            is Result.Success -> {
-                commentsCollectionResult.data.toObjects(SimpleComment::class.java)
-            }
-        }*/
-    }
-
-    fun setChannelContributorsListener(chatChannel: ChatChannel) {
-        Firebase.firestore.collection(CHAT_CHANNELS).document(chatChannel.chatChannelId)
-            .collection(USERS).addSnapshotListener { v, e ->
-                if (e != null) {
-                    viewModel.setCurrentError(e)
-                }
-
-                if (v != null && !v.isEmpty) {
-                    val contributors = v.toObjects(User::class.java)
-                    viewModel.insertChannelContributors(chatChannel, contributors)
-                }
-            }
-    }
-
-    fun setChatChannelListeners(chatChannel: ChatChannel) {
-        val externalDocumentsDir = getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)!!
-        val externalImagesDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
-
-        if (!channelMessagesListeners.containsKey(chatChannel.chatChannelId)) {
-            val lr = Firebase.firestore.collection(CHAT_CHANNELS).document(chatChannel.chatChannelId)
-                .collection(MESSAGES)
-                .orderBy(CREATED_AT, Query.Direction.DESCENDING)
-                .limit(30)
-                .addSnapshotListener { value, error ->
-                    if (error != null) {
-                        viewModel.setCurrentError(error)
-                        return@addSnapshotListener
-                    }
-
-                    if (value != null && !value.isEmpty) {
-                        val messages = value.toObjects(SimpleMessage::class.java)
-                        viewModel.insertMessagesWithFilter(messages, chatChannel, externalDocumentsDir, externalImagesDir)
-                    }
-                }
-
-            channelMessagesListeners[chatChannel.chatChannelId] = lr
-        }
-
     }
 
 }

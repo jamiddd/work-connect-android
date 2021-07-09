@@ -49,7 +49,6 @@ class ZoomableDraweeView : DraweeView<GenericDraweeHierarchy?>, ScrollingView {
 		onScaleListener = scaleListener
 	}
 
-
 	private val mControllerListener: ControllerListener<*> =
 		object : BaseControllerListener<Any?>() {
 			override fun onFinalImageSet(

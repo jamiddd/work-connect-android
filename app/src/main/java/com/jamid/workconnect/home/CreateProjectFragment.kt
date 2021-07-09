@@ -30,6 +30,8 @@ class CreateProjectFragment : SupportFragment(R.layout.fragment_create_project, 
         binding = FragmentCreateProjectBinding.bind(view)
 
         showKeyboard()
+        val title = arguments?.getString(ARG_TITLE) ?: return
+        binding.createProjectFragmentToolbar.title = title
 
         binding.addImageBtn.setOnClickListener {
             openImageSelectMenu()
@@ -166,30 +168,25 @@ class CreateProjectFragment : SupportFragment(R.layout.fragment_create_project, 
         }
 
         binding.createProjectBtn.setOnClickListener {
-            if (!binding.projectTitleText.text.isNullOrBlank() && !binding.projectContentText.text.isNullOrBlank() && imageUri != null) {
+            if (!binding.projectContentText.text.isNullOrBlank() && imageUri != null) {
                 val tags = mutableListOf<String>()
 
                 for (child in binding.tagsGroup.children) {
                     tags.add((child as Chip).text.toString())
                 }
 
-                val postTitle = binding.projectTitleText.text.toString()
                 val postContent = binding.projectContentText.text.toString()
                 val image = imageUri.toString()
 
                 val currentUser = viewModel.user.value
                 if (currentUser != null) {
-                    val post = Post("", postTitle, currentUser, currentUser.id, "", content = postContent, thumbnail = image, tags = tags)
+                    val post = Post("", title, currentUser, currentUser.id, "", content = postContent, thumbnail = image, tags = tags)
                     viewModel.uploadPost(post)
 
                     val instance = GenericDialogFragment.newInstance(CREATING_PROJECT, "Creating Project", "Creating your project. Please wait ...", isCancelable = false, isProgressing = true)
                     activity.showBottomSheet(instance, TAG)
                 }
             } else {
-                if (binding.projectTitleText.text.isNullOrBlank()) {
-                    Toast.makeText(activity, "Title cannot be empty.", Toast.LENGTH_SHORT).show()
-                    return@setOnClickListener
-                }
 
                 if (binding.projectContentText.text.isNullOrBlank()) {
                     Toast.makeText(activity, "Content cannot be empty.", Toast.LENGTH_SHORT).show()
@@ -312,11 +309,15 @@ class CreateProjectFragment : SupportFragment(R.layout.fragment_create_project, 
 
 
     companion object {
-        const val TITLE = "Create Project"
+        const val ARG_TITLE = "Create Project"
         const val TAG = "CreateProjectFragment"
 
         @JvmStatic
-        fun newInstance() = CreateProjectFragment()
+        fun newInstance(title: String) = CreateProjectFragment().apply {
+            arguments = Bundle().apply {
+                putString(ARG_TITLE, title)
+            }
+        }
     }
 
     override fun onDestroy() {

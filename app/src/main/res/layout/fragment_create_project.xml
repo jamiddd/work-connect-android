@@ -144,21 +144,6 @@
                 android:layout_height="match_parent"
                 android:orientation="vertical">
 
-                <EditText
-                    android:id="@+id/projectTitleText"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@null"
-                    android:ems="10"
-                    android:fontFamily="@font/roboto_medium"
-                    android:hint="@string/project_title_hint"
-                    android:importantForAutofill="no"
-                    android:inputType="textPersonName"
-                    android:minHeight="48dp"
-                    android:paddingStart="12dp"
-                    android:paddingEnd="12dp"
-                    android:textColorHint="#78909C" />
-
                 <LinearLayout
                     android:id="@+id/admin_info_layout"
                     android:layout_width="match_parent"
@@ -397,7 +382,6 @@
                 android:layout_height="?actionBarSize"
                 android:layout_marginTop="26dp"
                 app:navigationIcon="@drawable/ic_round_arrow_back_24"
-                app:title="Create new Project"
                 app:titleCentered="true">
 
                 <com.google.android.material.button.MaterialButton

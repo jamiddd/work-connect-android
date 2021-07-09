@@ -64,7 +64,7 @@ open class DefaultZoomableController(
 	 *
 	 * Hierarchy's scaling (if any) is not taken into account.
 	 */
-	var maxScaleFactor = 2.0f
+	var maxScaleFactor = 3.0f
 
 	// View bounds, in view-absolute coordinates
 	private val mViewBounds = RectF()

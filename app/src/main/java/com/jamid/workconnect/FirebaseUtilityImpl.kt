@@ -1373,6 +1373,17 @@ class FirebaseUtilityImpl : FirebaseUtility {
         }
     }
 
+    private suspend inline fun <reified T: Any?> getObjectsSecurely(query: Query): Result<List<T>> {
+        return try {
+            val task = query.get()
+            val querySnapshot = task.await()
+            Result.Success(querySnapshot.toObjects(T::class.java))
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
+    }
+
+
 
     fun <T : Any> getSnapshot(docId: String, clazz: Class<T>): Result<DocumentSnapshot> {
         return when (clazz) {
@@ -1648,30 +1659,16 @@ class FirebaseUtilityImpl : FirebaseUtility {
         query: Query,
         limit: Int,
         startAfter: DocumentSnapshot? = null
-    ): Result<QuerySnapshot> {
-        return if (startAfter != null) {
-            try {
-                val task = query.startAfter(startAfter)
-                    .orderBy(CREATED_AT, Query.Direction.DESCENDING)
-                    .limit(limit.toLong())
-                    .get()
-
-                Result.Success(task.await())
-            } catch (e: Exception) {
-                Result.Error(e)
-            }
+    ): Result<List<SimpleMessage>> {
+        val finalQuery = if (startAfter != null) {
+            query.startAfter(startAfter)
+                .orderBy(CREATED_AT, Query.Direction.DESCENDING)
+                .limit(limit.toLong())
         } else {
-            try {
-                val task = query.orderBy(CREATED_AT, Query.Direction.DESCENDING)
-                    .limit(limit.toLong())
-                    .get()
-
-                Result.Success(task.await())
-
-            } catch (e: Exception) {
-                Result.Error(e)
-            }
+            query.orderBy(CREATED_AT, Query.Direction.DESCENDING)
+                .limit(limit.toLong())
         }
+        return getObjectsSecurely(finalQuery)
     }
 
     suspend fun getPagedNotifications(
@@ -1701,8 +1698,6 @@ class FirebaseUtilityImpl : FirebaseUtility {
             Result.Success(task.await())
         }
     }
-
-    val usersMap = mutableMapOf<String, User>()
 
     suspend fun fetchSavedPosts(currentUser: User, i: Int, f: Int): Result<QuerySnapshot> {
         val savedPostsIds = currentUser.userPrivate.savedPosts

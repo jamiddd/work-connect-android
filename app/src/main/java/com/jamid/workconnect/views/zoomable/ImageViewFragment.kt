@@ -11,13 +11,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
-import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.navigation.fragment.findNavController
 import com.facebook.drawee.backends.pipeline.Fresco
 import com.facebook.imagepipeline.request.ImageRequest
-import com.google.android.material.appbar.AppBarLayout
-import com.google.android.material.transition.platform.Hold
 import com.google.android.material.transition.platform.MaterialContainerTransform
+import com.google.android.material.transition.platform.MaterialFadeThrough
 import com.jamid.workconnect.*
 import com.jamid.workconnect.databinding.FragmentImageViewBinding
 import com.jamid.workconnect.interfaces.OnScaleListener
@@ -34,6 +32,8 @@ class ImageViewFragment : SupportFragment(R.layout.fragment_image_view, TAG, fal
     private var transitionName: String? = null
     private var params = Pair(0, 0)
     private var image: String? = null
+    private var windowWidth = 0
+    private var scaleRatio = 1f
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -42,21 +42,18 @@ class ImageViewFragment : SupportFragment(R.layout.fragment_image_view, TAG, fal
     ): View? {
         sharedElementEnterTransition = MaterialContainerTransform().apply {
             scrimColor = Color.TRANSPARENT
-            duration = 150
         }
-        exitTransition = Hold()
+        exitTransition = MaterialFadeThrough()
         postponeEnterTransition()
         val root = inflater.inflate(R.layout.fragment_image_view, container, false)
         message = arguments?.getParcelable(ARG_MESSAGE)
         params = Pair(arguments?.getInt(ARG_WIDTH) ?: 0, arguments?.getInt(ARG_HEIGHT) ?: 0)
-        Log.d(TAG, params.toString())
 
-        params = Pair(params.second, minOf(ViewGroup.LayoutParams.MATCH_PARENT, params.first))
-        Log.d(TAG, params.toString())
+        scaleRatio = (params.first/params.second).toFloat()
 
-        val width = getWindowWidth()
+        windowWidth = getWindowWidth()
         val zoomView = root.findViewById<ZoomableDraweeView>(R.id.fullscreenImage)
-        zoomView?.updateLayout(height = convertDpToPx(params.second), width = width)
+        zoomView?.updateLayout(height = convertDpToPx(params.second), width = windowWidth)
         transitionName = arguments?.getString(ARG_TRANSITION_NAME)
         zoomView?.transitionName = message?.messageId ?: transitionName
 
@@ -72,7 +69,11 @@ class ImageViewFragment : SupportFragment(R.layout.fragment_image_view, TAG, fal
         image = arguments?.getString(ARG_IMAGE)
 
         binding.imageViewFragmentToolbar.setNavigationOnClickListener {
-            findNavController().navigateUp()
+            if (message != null) {
+                activity.supportFragmentManager.beginTransaction().remove(this).commit()
+            } else {
+                findNavController().navigateUp()
+            }
         }
 
         mImageView?.apply {
@@ -124,8 +125,6 @@ class ImageViewFragment : SupportFragment(R.layout.fragment_image_view, TAG, fal
             setController(controller)
 
             startPostponedEnterTransition()
-
-//            binding.fullscreenImage.updateLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
 
         }
 
@@ -204,18 +203,13 @@ class ImageViewFragment : SupportFragment(R.layout.fragment_image_view, TAG, fal
             }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        binding.fullscreenImage.updateLayout(height = convertDpToPx(params.second), width = getWindowWidth())
-        val params = activity.mainBinding.navHostFragment.layoutParams as CoordinatorLayout.LayoutParams
-        params.behavior = AppBarLayout.ScrollingViewBehavior()
-        activity.mainBinding.navHostFragment.layoutParams = params
-    }
-
     override fun onImageChange(scaleFactor: Float) {
         Log.d(TAG, scaleFactor.toString())
-        binding.fullscreenImage.scaleX = scaleFactor
-        binding.fullscreenImage.scaleY = scaleFactor
+        if (scaleFactor <= 1f) {
+            binding.fullscreenImage.updateLayout(convertDpToPx(params.second), windowWidth)
+        } else {
+            binding.fullscreenImage.updateLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+        }
     }
 
 }

@@ -9,7 +9,6 @@ import com.jamid.workconnect.*
 import com.jamid.workconnect.model.SimpleMessage
 
 class SimpleMessageAdapter(
-    private val viewModel: MainViewModel,
     private val isGrid: Boolean = false
 ) : PagingDataAdapter<SimpleMessage, SimpleMessageViewHolder>(GenericComparator(SimpleMessage::class.java)) {
 
@@ -21,7 +20,7 @@ class SimpleMessageAdapter(
 
         if (isGrid) {
             return SimpleMessageViewHolder(LayoutInflater.from(parent.context)
-                .inflate(R.layout.square_image_grid, parent, false), GRID_IMAGE_MESSAGE, viewModel, isGrid)
+                .inflate(R.layout.square_image_grid, parent, false), GRID_IMAGE_MESSAGE, isGrid)
         }
 
         return when (viewType) {
@@ -29,55 +28,48 @@ class SimpleMessageAdapter(
                 SimpleMessageViewHolder(
                     LayoutInflater.from(parent.context)
                         .inflate(R.layout.chat_balloon_left, parent, false),
-                    viewType,
-                    viewModel
+                    viewType
                 )
             }
             OTHER_USER_SINGLE_MESSAGE_IMAGE, OTHER_USER_AT_START_IMAGE, OTHER_USER_AT_END_IMAGE -> {
                 SimpleMessageViewHolder(
                     LayoutInflater.from(parent.context)
                         .inflate(R.layout.chat_balloon_image_left, parent, false),
-                    viewType,
-                    viewModel
+                    viewType
                 )
             }
             OTHER_USER_SINGLE_MESSAGE_DOC, OTHER_USER_AT_START_DOC, OTHER_USER_AT_END_DOC -> {
                 SimpleMessageViewHolder(
                     LayoutInflater.from(parent.context)
                         .inflate(R.layout.chat_balloon_doc_left, parent, false),
-                    viewType,
-                    viewModel
+                    viewType
                 )
             }
             CURRENT_USER_AT_START, CURRENT_USER_AT_MIDDLE, CURRENT_USER_AT_END -> {
                 SimpleMessageViewHolder(
                     LayoutInflater.from(parent.context)
                         .inflate(R.layout.chat_balloon_right, parent, false),
-                    viewType,
-                    viewModel
+                    viewType
                 )
             }
             CURRENT_USER_AT_END_IMAGE, CURRENT_USER_AT_START_IMAGE -> {
                 SimpleMessageViewHolder(
                     LayoutInflater.from(parent.context)
                         .inflate(R.layout.chat_balloon_image_right, parent, false),
-                    viewType,
-                    viewModel
+                    viewType
                 )
             }
             CURRENT_USER_AT_START_DOC, CURRENT_USER_AT_END_DOC -> {
                 SimpleMessageViewHolder(
                     LayoutInflater.from(parent.context)
                         .inflate(R.layout.chat_balloon_doc_right, parent, false),
-                    viewType,
-                    viewModel
+                    viewType
                 )
             }
             else -> SimpleMessageViewHolder(
                 LayoutInflater.from(parent.context)
                     .inflate(R.layout.chat_balloon_left, parent, false),
-                viewType,
-                viewModel
+                viewType
             )
         }
     }

@@ -1,6 +1,5 @@
 package com.jamid.workconnect
 
-import android.util.Log
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
@@ -12,7 +11,6 @@ import com.jamid.workconnect.data.MainRepository
 import com.jamid.workconnect.model.ChatChannel
 import com.jamid.workconnect.model.Result
 import com.jamid.workconnect.model.SimpleMessage
-import com.jamid.workconnect.model.User
 import java.io.File
 
 @ExperimentalPagingApi
@@ -31,16 +29,16 @@ class MessagesRemoteMediator(
 		state: PagingState<Int, SimpleMessage>
 	): MediatorResult {
 
-		val key = state.anchorPosition?.let {
+		/*val key = state.anchorPosition?.let {
 			state.closestPageToPosition(it)?.prevKey ?: state.closestPageToPosition(it)?.nextKey
-		}
+		}*/
 
 		val messagesCollectionRef = Firebase.firestore
 				.collection(CHAT_CHANNELS)
 				.document(chatChannel.chatChannelId)
 				.collection(MESSAGES)
 
-		val messagesSnapshotResult = when (loadType) {
+		val messagesResult = when (loadType) {
 			LoadType.REFRESH -> {
 				repository.firebaseUtility.getMessagesFromFirebase(messagesCollectionRef, state.config.initialLoadSize)
 			}
@@ -49,47 +47,35 @@ class MessagesRemoteMediator(
 			}
 			LoadType.APPEND -> {
 				if (lastSnapshot != null) {
-					Log.d("MessageMediator", "Appending with lastSnapshot not null ${lastSnapshot!!["content"]}")
 					repository.firebaseUtility.getMessagesFromFirebase(
 						messagesCollectionRef,
 						state.config.pageSize,
 						lastSnapshot
 					)
 				} else {
-					Log.d("MessageMediator", "Appending with lastSnapshot null")
-					Result.Error(Exception("Shit man"))
+					Result.Error(Exception("Error occurred while appending messages."))
 				}
 
 			}
 		}
 
-		return when (messagesSnapshotResult) {
+		return when (messagesResult) {
 			is Result.Success -> {
-				val messagesSnapshot = messagesSnapshotResult.data
+				val messages = messagesResult.data
 
-				isEmpty = messagesSnapshot.isEmpty
+				isEmpty = messages.isEmpty()
 
-				if (messagesSnapshot.isEmpty) {
-					Log.d("MessageMediator", "Empty results")
+				if (messages.isEmpty()) {
 					return MediatorResult.Success(endOfPaginationReached = true)
 				}
 
-
-				/*val firstSnapshot = messagesSnapshot.first()
-				repository.mapOfDocumentSnapshots[firstSnapshot.id] = firstSnapshot
-				val lastSnapshot = messagesSnapshot.last()
-				repository.mapOfDocumentSnapshots[lastSnapshot.id] = lastSnapshot*/
-				lastSnapshot = messagesSnapshot.last()
-
-				val messages = messagesSnapshot.toObjects(SimpleMessage::class.java)
-
 				for (message in messages) {
-					repository.firebaseUtility.usersMap[message.senderId]?.let {
+					repository.usersMap[message.senderId]?.let {
 						message.sender = it
 					}
 				}
 
-				return if (messagesSnapshot.size() < state.config.pageSize) {
+				return if (messages.size < state.config.pageSize) {
 					repository.insertMessages(externalImagesDir, externalDocumentsDir, messages, chatChannel)
 					MediatorResult.Success(endOfPaginationReached = true)
 				} else {
@@ -98,7 +84,7 @@ class MessagesRemoteMediator(
 				}
 
 			}
-			is Result.Error -> MediatorResult.Error(messagesSnapshotResult.exception)
+			is Result.Error -> MediatorResult.Error(messagesResult.exception)
 		}
 	}
 }

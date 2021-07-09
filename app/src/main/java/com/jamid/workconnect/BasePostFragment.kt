@@ -23,13 +23,14 @@ import kotlinx.coroutines.launch
 abstract class BasePostFragment(@LayoutRes layout: Int, tag: String, isPrimaryFragment: Boolean): SupportFragment(layout, tag, isPrimaryFragment) {
 
     val auth = Firebase.auth
+
+    private var behavior: BottomSheetBehavior<MaterialCardView>? = null
+    private var commentsAdapter: CommentsPagingAdapter? = null
     private lateinit var postItemClickListener: PostItemClickListener
     lateinit var bottomBinding: PostMetaLayoutBinding
     var post: Post? = null
     var postId: String? = null
-    var behavior: BottomSheetBehavior<MaterialCardView>? = null
     var job: Job? = null
-    var commentsAdapter: CommentsPagingAdapter? = null
 
     private fun getComments(commentChannelId: String) {
         job?.cancel()
@@ -59,7 +60,6 @@ abstract class BasePostFragment(@LayoutRes layout: Int, tag: String, isPrimaryFr
     }
 
     fun setPost() {
-
         val bottomCardView = activity.findViewById<MaterialCardView>(R.id.projectData) ?: activity.findViewById(R.id.blogData)
         behavior = BottomSheetBehavior.from(bottomCardView)
 
@@ -67,7 +67,7 @@ abstract class BasePostFragment(@LayoutRes layout: Int, tag: String, isPrimaryFr
         behavior?.state = BottomSheetBehavior.STATE_COLLAPSED
         behavior?.isHideable = false
 
-        bottomBinding.commentsHeader.text = "Comments"
+        bottomBinding.commentsHeader.text = getString(R.string.comments)
         bottomBinding.commentsHeader.visibility = View.INVISIBLE
 
         behavior?.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
@@ -143,8 +143,8 @@ abstract class BasePostFragment(@LayoutRes layout: Int, tag: String, isPrimaryFr
         }
     }
 
-    private fun setFollowButton() {
-        /*fun setFollowText(isUserFollowed: Boolean) {
+    /*private fun setFollowButton() {
+        fun setFollowText(isUserFollowed: Boolean) {
             if (isUserFollowed) {
                 bottomBinding.adminFollowBtn.text = getString(R.string.unfollow_text)
             } else {
@@ -168,8 +168,8 @@ abstract class BasePostFragment(@LayoutRes layout: Int, tag: String, isPrimaryFr
                     postItemClickListener.onNotSignedIn(post!!)
                 }
             }
-        }*/
-    }
+        }
+    }*/
 
     private fun setDislikeButton() {
         bottomBinding.postMetaDislikeBtn.isSelected = post!!.postLocalData.isDisliked

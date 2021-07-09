@@ -7,7 +7,6 @@ import android.util.Log
 import android.view.*
 import androidx.core.view.doOnLayout
 import androidx.core.widget.doAfterTextChanged
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
@@ -15,6 +14,9 @@ import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.firebase.ui.common.ChangeEventType.*
+import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import com.jamid.workconnect.*
 import com.jamid.workconnect.adapter.paging2.SimpleMessageAdapter
 import com.jamid.workconnect.databinding.FragmentChatBinding
@@ -50,24 +52,45 @@ class ChatFragment : SupportFragment(R.layout.fragment_chat, TAG, false) {
         }
 
         if (!initiateListeners) {
-            activity.setChannelContributorsListener(chatChannel)
-            activity.setChatChannelListeners(chatChannel)
-
-         /*   val externalDocumentsDir = activity.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)!!
-            val externalImagesDir = activity.getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
-            viewModel.setChannelMessagesListener(externalImagesDir, externalDocumentsDir, chatChannel)*/
+            viewModel.setChannelContributorsListener(chatChannel)
+            setChatChannelListeners(chatChannel)
             initiateListeners = true
         }
 
-        initAdapter(binding.messagesRecycler, viewModel)
+        initAdapter(binding.messagesRecycler)
 
         getMessages()
-
         setListeners()
     }
 
-    private fun initAdapter(recyclerView: RecyclerView, vm: ViewModel) {
-        simpleMessageAdapter = SimpleMessageAdapter(vm as MainViewModel)
+    private fun setChatChannelListeners(chatChannel: ChatChannel) {
+        val externalDocumentsDir = activity.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)!!
+        val externalImagesDir = activity.getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
+
+        if (!viewModel.channelMessagesListeners.containsKey(chatChannel.chatChannelId)) {
+            val lr = Firebase.firestore.collection(CHAT_CHANNELS).document(chatChannel.chatChannelId)
+                .collection(MESSAGES)
+                .orderBy(CREATED_AT, Query.Direction.DESCENDING)
+                .limit(30)
+                .addSnapshotListener { value, error ->
+                    if (error != null) {
+                        viewModel.setCurrentError(error)
+                        return@addSnapshotListener
+                    }
+
+                    if (value != null && !value.isEmpty) {
+                        val messages = value.toObjects(SimpleMessage::class.java)
+                        viewModel.insertMessagesWithFilter(messages, chatChannel, externalDocumentsDir, externalImagesDir)
+                    }
+                }
+
+            viewModel.channelMessagesListeners[chatChannel.chatChannelId] = lr
+        }
+    }
+
+
+    private fun initAdapter(recyclerView: RecyclerView) {
+        simpleMessageAdapter = SimpleMessageAdapter()
         val linearLayoutManager = LinearLayoutManager(recyclerView.context, LinearLayoutManager.VERTICAL, true)
         recyclerView.apply {
             itemAnimator = null

@@ -1,28 +1,26 @@
 package com.jamid.workconnect.adapter.paging2
 
 import android.annotation.SuppressLint
-import android.content.Context
-import android.content.Intent
 import android.os.Environment
-import android.util.Log
 import android.view.View
-import android.view.ViewGroup
-import android.widget.*
-import androidx.constraintlayout.widget.ConstraintLayout
+import android.widget.Button
+import android.widget.ImageView
+import android.widget.ProgressBar
+import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.view.ViewCompat
-import androidx.lifecycle.findViewTreeLifecycleOwner
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
+import com.facebook.drawee.backends.pipeline.Fresco
+import com.facebook.drawee.interfaces.DraweeController
 import com.facebook.drawee.view.SimpleDraweeView
+import com.facebook.imagepipeline.request.ImageRequest
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.jamid.workconnect.*
 import com.jamid.workconnect.interfaces.MessageItemClickListener
 import com.jamid.workconnect.model.SimpleMessage
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import com.jamid.workconnect.views.zoomable.ImageControllerListener
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -30,7 +28,6 @@ import java.util.*
 class SimpleMessageViewHolder(
 	val view: View,
 	val viewType: Int,
-	private val viewModel: MainViewModel,
 	private val isGrid: Boolean = false
 ) : RecyclerView.ViewHolder(view) {
 
@@ -361,7 +358,18 @@ class SimpleMessageViewHolder(
 			val file = File(it, message.metaData!!.originalFileName)
 
 			val uri = FileProvider.getUriForFile(view.context, "com.jamid.workconnect.fileprovider", file)
-			imageView.setImageURI(uri.toString())
+
+			val imageControllerListener = ImageControllerListener()
+
+			val imageRequest = ImageRequest.fromUri(uri)
+			val controller: DraweeController = Fresco.newDraweeControllerBuilder()
+				.setImageRequest(imageRequest)
+				.setControllerListener(imageControllerListener)
+				.build()
+
+			imageView.controller = controller
+
+			messageItemClickListener.onImageSet(message, imageControllerListener)
 		}
 
 		imageView.setOnClickListener {

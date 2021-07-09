@@ -96,6 +96,22 @@ class MainRepository(val scope: CoroutineScope, val db: WorkConnectDatabase) {
         setCurrentError(e)
     }
 
+    fun setChannelContributorsListener(chatChannel: ChatChannel) {
+        Firebase.firestore.collection(CHAT_CHANNELS).document(chatChannel.chatChannelId)
+            .collection(USERS).addSnapshotListener { v, e ->
+                if (e != null) {
+                    setCurrentError(e)
+                }
+
+                if (v != null && !v.isEmpty) {
+                    val contributors = v.toObjects(User::class.java)
+                    scope.launch (Dispatchers.IO) {
+                        insertChannelContributors(chatChannel, contributors)
+                    }
+                }
+            }
+    }
+
     @Suppress("SameParameterValue")
     fun setCurrentError(e: Exception?) {
         networkErrors.postValue(e)
@@ -1092,7 +1108,7 @@ class MainRepository(val scope: CoroutineScope, val db: WorkConnectDatabase) {
         }
     }
 
-    private val usersMap = mutableMapOf<String, User>()
+    val usersMap = mutableMapOf<String, User>()
     private val listOfUsers = mutableListOf<User>()
 
     suspend fun insertChannelContributors(chatChannel: ChatChannel, contributors: List<User>) {

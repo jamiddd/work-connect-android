@@ -4,7 +4,10 @@ import android.graphics.PointF
 import android.util.Log
 import android.view.GestureDetector
 import android.view.MotionEvent
+import android.view.ViewGroup
 import com.jamid.workconnect.BUG_TAG
+import com.jamid.workconnect.interfaces.OnScaleListener
+import com.jamid.workconnect.updateLayout
 
 class TapListener(zoomableDraweeView: ZoomableDraweeView):
 	GestureDetector.SimpleOnGestureListener() {
@@ -14,6 +17,7 @@ class TapListener(zoomableDraweeView: ZoomableDraweeView):
 	private val mDoubleTapImagePoint = PointF()
 	private var mDoubleTapScale = 1f
 	private var mDoubleTapScroll = false
+	private var mScaleListener: OnScaleListener? = null
 
 	override fun onSingleTapConfirmed(e: MotionEvent?): Boolean {
 		if (e != null) {
@@ -43,9 +47,11 @@ class TapListener(zoomableDraweeView: ZoomableDraweeView):
 	}
 
 	override fun onDoubleTapEvent(e: MotionEvent): Boolean {
+		mDraweeView.updateLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
 		val zc = mDraweeView.zoomableController as AbstractAnimatedZoomableController
 		val vp = PointF(e.x, e.y)
 		val ip = zc.mapViewToImage(vp)
+
 		when (e.actionMasked) {
 			MotionEvent.ACTION_DOWN -> {
 				mDoubleTapViewPoint.set(vp)

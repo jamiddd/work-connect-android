@@ -13,6 +13,7 @@ import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.firestore
@@ -41,6 +42,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     init {
         repo = MainRepository(viewModelScope, database)
     }
+
+    val channelMessagesListeners = mutableMapOf<String, ListenerRegistration>()
 
     val declineProjectResult: LiveData<Result<SimpleNotification>> = repo.declineProjectResult
     val acceptProjectResult: LiveData<Result<SimpleNotification>> = repo.acceptProjectResult
@@ -924,6 +927,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun insertChannelContributors(chatChannel: ChatChannel, contributors: List<User>) = viewModelScope.launch(Dispatchers.IO) {
         repo.insertChannelContributors(chatChannel, contributors)
+    }
+
+    fun setChannelContributorsListener(chatChannel: ChatChannel) = viewModelScope.launch(Dispatchers.IO) {
+        repo.setChannelContributorsListener(chatChannel)
     }
 
     fun clearMediaDownloadResult() {
