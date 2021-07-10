@@ -190,6 +190,15 @@ class MainRepository(val scope: CoroutineScope, val db: WorkConnectDatabase) {
         firebaseUtility.uploadPostImage(image, type)
     }
 
+    suspend fun uploadMultipleImages(images: List<Uri>): List<Uri> {
+        val currentUser = currentLocalUser.value
+        return if (currentUser != null) {
+            firebaseUtility.uploadMultipleProjectImages(currentUser, images)
+        } else {
+            emptyList()
+        }
+    }
+
     suspend fun updateUser(userMap: Map<String, Any?>) {
         val currentUser = currentLocalUser.value
         if (currentUser != null) {
@@ -430,8 +439,8 @@ class MainRepository(val scope: CoroutineScope, val db: WorkConnectDatabase) {
             firebaseUtility.acceptProjectRequest(currentUser, notification)
             val localSender = notification.sender
             localSender.userPrivate.chatChannels = listOf(notification.post?.chatChannelId ?: "")
-            val users = filterUsers(listOf(localSender))
-            userDao.insertItems(users)
+            val user = filterUser(localSender)
+            userDao.insert(user)
 
             notificationDao.deleteNotification(notification)
 
@@ -467,15 +476,6 @@ class MainRepository(val scope: CoroutineScope, val db: WorkConnectDatabase) {
             }
         }
     }
-
-    suspend fun getChannelContributors(channelId: String) : List<User> {
-        return userDao.getChannelContributors(channelId)
-    }
-
-    /*fun getSavedPosts(initialItemPosition: Int, finalItemPosition: Int) {
-        Log.d(BUG_TAG, "Getting saved posts ... RP")
-        firebaseUtility.getSavedPosts(initialItemPosition, finalItemPosition)
-    }*/
 
     suspend fun deleteLocalRequest(notificationId: String, postId: String, requestId: String, chatChannelId: String) {
         Log.d(BUG_TAG, "Delete local request")
@@ -532,7 +532,7 @@ class MainRepository(val scope: CoroutineScope, val db: WorkConnectDatabase) {
         requestDao.clearRequests()
     }
 
-    suspend fun increaseProjectWeightage(cachedPost: Post) {
+    /*suspend fun increaseProjectWeightage(cachedPost: Post) {
         val newWeightage = cachedPost.weightage + 0.1
         val newSearchRank = cachedPost.searchRank + 1
 
@@ -559,20 +559,24 @@ class MainRepository(val scope: CoroutineScope, val db: WorkConnectDatabase) {
         // TODO("If the user is followed or following the current user, change the weightage of the user
         //      both in fireStore and locally")
         //      both in fireStore and locally")
-    }
+    }*/
 
     suspend fun insertPosts(posts: List<Post>) = scope.launch (Dispatchers.IO) {
         val returnedPosts = filterPosts(posts)
         postDao.insertItems(returnedPosts)
     }
 
-    @Suppress("UNCHECKED_CAST")
     private suspend fun insertMessagesWithFilter(externalImagesDir: File, externalDocumentsDir: File, messages: List<SimpleMessage>, chatChannel: ChatChannel) {
 
         val lastMessage = messages.first()
         chatChannel.lastMessage = lastMessage
 
         for (message in messages) {
+            val sender = usersMap[message.senderId]
+            if (sender != null) {
+                message.sender = sender
+            }
+
             if (message.type == DOCUMENT) {
                 val f = File(externalDocumentsDir, message.metaData?.originalFileName!!)
                 message.isDownloaded = f.exists()
@@ -612,7 +616,7 @@ class MainRepository(val scope: CoroutineScope, val db: WorkConnectDatabase) {
     }
 
 
-    suspend fun getProjectContributors(post: Post): Result<QuerySnapshot> {
+    suspend fun getProjectContributors(post: Post): Result<List<User>> {
         return firebaseUtility.getProjectContributors(post)
     }
 
@@ -624,7 +628,7 @@ class MainRepository(val scope: CoroutineScope, val db: WorkConnectDatabase) {
         insertMessagesWithFilter(externalImagesDir, externalDocumentsDir, messages, chatChannel)
     }
 
-    suspend fun getMessages(chatChannelId: String, key: PageKey? = null, lim: Int): List<SimpleMessage> {
+    /*suspend fun getMessages(chatChannelId: String, key: PageKey? = null, lim: Int): List<SimpleMessage> {
         return if (key != null) {
             val startAfterId = key.startAfter?.id
             when {
@@ -642,28 +646,19 @@ class MainRepository(val scope: CoroutineScope, val db: WorkConnectDatabase) {
         } else {
             messageDao.getMessages(chatChannelId, lim)
         }
-    }
+    }*/
 
 	suspend fun clearUsers() {
         val currentUser = currentLocalUser.value
         if (currentUser != null) {
-            userDao.deleteOtherUsers(currentUser.id)
+            userDao.deleteOtherUsers()
         } else {
-            userDao.deleteAllUsers()
+            userDao.clearUsers()
         }
 	}
 
-    suspend fun insertUsers(users: List<User>, userSource: UserSource) {
-        val returnedUsers = filterUsers(users, userSource)
-        // TODO("There must be a better way without replace")
-        for (user in returnedUsers) {
-            val u = userDao.getUser(user.id)
-            if (u != null) {
-                userDao.updateItem(user)
-            } else {
-                userDao.insert(user)
-            }
-        }
+    private suspend fun filterUser(user: User): User {
+        return filterUsers(listOf(user))[0]
     }
 
     suspend fun filterUsers(users: List<User>, userSource: UserSource? = null): List<User> {
@@ -713,15 +708,18 @@ class MainRepository(val scope: CoroutineScope, val db: WorkConnectDatabase) {
         if (currentUser != null) {
             val userDetails = currentUser.userPrivate
             for (user in users) {
-                user.isUserFollowed = userDetails.followings.contains(user.id)
-                user.isUserFollowingMe = userDetails.followers.contains(user.id)
-                user.isCurrentUser = currentUser.id == user.id
+                val isCurrentUser = currentUser.id == user.id
+                user.isCurrentUser = isCurrentUser
+                if (!isCurrentUser) {
+                    user.isUserFollowed = userDetails.followings.contains(user.id)
+                    user.isUserFollowingMe = userDetails.followers.contains(user.id)
+                }
             }
         }
         return users
     }
 
-    suspend fun getUsers(userSource: UserSource, key: PageKey?, loadSize: Int): List<User> {
+    /*suspend fun getUsers(userSource: UserSource, key: PageKey?, loadSize: Int): List<User> {
         val userSourceTag = "UserSourceTag"
         Log.d(userSourceTag, "Starting to get users from local database .. ")
         val currentUser = currentLocalUser.value
@@ -895,7 +893,7 @@ class MainRepository(val scope: CoroutineScope, val db: WorkConnectDatabase) {
             }
             else -> userDao.getAllUsers()
         }
-    }
+    }*/
 
     suspend fun getTagsFromFirebase(user: User?): Result<List<String>> {
         return firebaseUtility.getTagsFromFirebase(user)
@@ -1018,9 +1016,6 @@ class MainRepository(val scope: CoroutineScope, val db: WorkConnectDatabase) {
         }
     }
 
-    fun getMessageSender(senderId: String): LiveData<User> {
-        return userDao.getMessageSender(senderId)
-    }
 
     suspend fun localMessages(type: String = IMAGE, chatChannelId: String, limit: Int = 0): List<SimpleMessage> {
         return if (limit == 0) {

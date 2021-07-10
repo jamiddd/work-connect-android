@@ -16,7 +16,7 @@ import com.jamid.workconnect.model.Result
 import com.jamid.workconnect.updateLayout
 import kotlinx.coroutines.launch
 
-class SavedPostsFragment : SupportFragment(R.layout.fragment_saved_posts, TAG, false) {
+class SavedPostsFragment : SupportFragment(R.layout.fragment_saved_posts) {
 
     private lateinit var binding: FragmentSavedPostsBinding
     private lateinit var savedPostsAdapter: GenericAdapter<Post>

@@ -32,7 +32,7 @@ import com.jamid.workconnect.model.User
 import com.jamid.workconnect.model.UserPrivate
 import kotlinx.coroutines.launch
 
-class ProfileFragment : SupportFragment(R.layout.fragment_profile, TAG, false) {
+class ProfileFragment : SupportFragment(R.layout.fragment_profile) {
 
     private lateinit var binding: FragmentProfileBinding
     private var otherUserLive = MutableLiveData<User>().apply { value = null}
@@ -366,6 +366,7 @@ class ProfileFragment : SupportFragment(R.layout.fragment_profile, TAG, false) {
         binding.userMeta.text = sp
         binding.userMeta.movementMethod = LinkMovementMethod.getInstance()
         binding.userMeta.highlightColor = Color.TRANSPARENT
+
     }
 
     override fun onDestroyView() {

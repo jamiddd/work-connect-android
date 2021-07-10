@@ -1,10 +1,7 @@
 package com.jamid.workconnect
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.core.widget.doAfterTextChanged
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -14,7 +11,7 @@ import com.jamid.workconnect.model.ChatChannel
 import com.jamid.workconnect.model.User
 import java.util.*
 
-class ContributorsFragment : SupportFragment(R.layout.fragment_contributors, "", false) {
+class ContributorsFragment : SupportFragment(R.layout.fragment_contributors) {
 
     private lateinit var binding: FragmentContributorsBinding
     private lateinit var contributorsAdapter: GenericAdapter<User>

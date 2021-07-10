@@ -11,7 +11,7 @@ import com.google.android.material.tabs.TabLayoutMediator
 import com.jamid.workconnect.databinding.FragmentNotificationBinding
 import com.jamid.workconnect.profile.ProfileFragment
 
-class NotificationFragment : SupportFragment(R.layout.fragment_notification, TAG, true) {
+class NotificationFragment : SupportFragment(R.layout.fragment_notification) {
 
     private lateinit var binding: FragmentNotificationBinding
 

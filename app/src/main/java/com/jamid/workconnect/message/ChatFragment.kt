@@ -27,7 +27,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.io.File
 
-class ChatFragment : SupportFragment(R.layout.fragment_chat, TAG, false) {
+class ChatFragment : SupportFragment(R.layout.fragment_chat) {
 
     private lateinit var binding: FragmentChatBinding
     private lateinit var simpleMessageAdapter: SimpleMessageAdapter

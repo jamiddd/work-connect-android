@@ -7,15 +7,12 @@ import androidx.fragment.app.FragmentActivity
 import androidx.paging.ExperimentalPagingApi
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import com.jamid.workconnect.CREATE_MENU
-import com.jamid.workconnect.GenericMenuFragment
 import com.jamid.workconnect.R
 import com.jamid.workconnect.SupportFragment
 import com.jamid.workconnect.databinding.FragmentHomeBinding
-import com.jamid.workconnect.model.GenericMenuItem
 
 @ExperimentalPagingApi
-class HomeFragment : SupportFragment(R.layout.fragment_home, TAG, true) {
+class HomeFragment : SupportFragment(R.layout.fragment_home) {
 
     private lateinit var binding: FragmentHomeBinding
 

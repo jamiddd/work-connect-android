@@ -28,7 +28,7 @@ data class Post(
     @Embedded(prefix = "location_")
     var location: SimpleLocation? = null,
     var content: String? = null,
-    var thumbnail: String? = null,
+    var images: List<String> = emptyList(),
     var createdAt: Long = System.currentTimeMillis(),
     var updatedAt: Long = System.currentTimeMillis(),
     var tags: List<String> = emptyList(),

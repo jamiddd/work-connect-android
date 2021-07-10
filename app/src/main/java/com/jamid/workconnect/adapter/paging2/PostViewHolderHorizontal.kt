@@ -14,6 +14,7 @@ import com.google.firebase.ktx.Firebase
 import com.jamid.workconnect.IMAGE
 import com.jamid.workconnect.PROJECT
 import com.jamid.workconnect.R
+import com.jamid.workconnect.getTextForTime
 import com.jamid.workconnect.interfaces.PostItemClickListener
 import com.jamid.workconnect.model.BlogItemConverter
 import com.jamid.workconnect.model.Post
@@ -72,14 +73,14 @@ class PostViewHolderHorizontal(val view: View): RecyclerView.ViewHolder(view) {
             userImage.setImageURI(post.admin.photo)
 
             val projectImage = view.findViewById<SimpleDraweeView>(R.id.micro_project_img)
-            projectImage.setImageURI(post.thumbnail)
+            projectImage.setImageURI(post.images[0])
 
-            val time = SimpleDateFormat("hh:mm a, dd MMM", Locale.UK).format(post.updatedAt)
+//            val time = SimpleDateFormat("hh:mm a, dd MMM", Locale.UK).format(post.updatedAt)
 
             val metaText = if (post.location?.place == null) {
-                time
+                getTextForTime(post.updatedAt)
             } else {
-                "$time • ${post.location!!.place}"
+                "${getTextForTime(post.updatedAt)} • ${post.location!!.place}"
             }
 
             dateLocationText.text = metaText

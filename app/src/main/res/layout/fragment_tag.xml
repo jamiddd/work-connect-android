@@ -19,40 +19,68 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />-->
 
-        <EditText
-            android:id="@+id/tagEditText"
-            style="@style/EditTextStyle"
+        <TextView
+            android:id="@+id/generic_menu_handle"
+            android:layout_width="40dp"
+            android:layout_height="8dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/textView"
+            android:background="@drawable/light_grey_rounded_rect"
+            android:backgroundTint="#919191" />
+
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tagEditTextLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
-            android:layout_marginBottom="16dp"
-            android:background="@drawable/grey_rounded_rect_edittext"
-            android:ems="10"
-            android:hint="Tag"
-            android:inputType="textPersonName"
-            android:minHeight="48dp"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
-            android:singleLine="true"
-            app:layout_constraintBottom_toTopOf="@+id/addTagBtn"
+            android:layout_marginBottom="8dp"
+            app:boxBackgroundColor="@color/grey"
+            app:layout_constraintBottom_toTopOf="@+id/addTagInfo"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView" />
+            app:layout_constraintTop_toBottomOf="@+id/textView"
+            app:prefixText="\#">
+
+            <EditText
+                android:id="@+id/tagEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:hint="Tag"
+                android:inputType="textPersonName"
+                android:minHeight="48dp"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:singleLine="true"
+                app:layout_constraintBottom_toTopOf="@+id/addTagBtn"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textView"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
 
         <TextView
             android:id="@+id/textView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
-            android:fontFamily="@font/title_font"
+            android:fontFamily="@font/roboto_medium"
             android:text="Add tag to project"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-            app:layout_constraintBottom_toTopOf="@+id/tagEditText"
-            app:layout_constraintEnd_toEndOf="@+id/tagEditText"
-            app:layout_constraintStart_toStartOf="@+id/tagEditText"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/tagEditTextLayout"
+            app:layout_constraintEnd_toEndOf="@+id/tagEditTextLayout"
+            app:layout_constraintStart_toStartOf="@+id/tagEditTextLayout"
+            app:layout_constraintTop_toBottomOf="@id/generic_menu_handle"
             app:layout_constraintVertical_chainStyle="packed" />
 
         <Button
@@ -64,8 +92,23 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Body2"
             app:cornerRadius="24dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@+id/tagEditText"
-            app:layout_constraintStart_toStartOf="@+id/tagEditText"
-            app:layout_constraintTop_toBottomOf="@+id/tagEditText" />
+            app:layout_constraintEnd_toEndOf="@+id/tagEditTextLayout"
+            app:layout_constraintStart_toStartOf="@+id/tagEditTextLayout"
+            app:layout_constraintTop_toBottomOf="@+id/addTagInfo" />
+
+        <TextView
+            android:id="@+id/addTagInfo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="32dp"
+            android:text="Tags can help your project by making it more discoverable.  Write a tag that is concise and clear.  Don't use hashtags because it is not part of the tag. A tag is a label that loosely describes your project. Dismiss"
+            android:textColor="#6A6A6A"
+            android:textSize="13sp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@+id/addTagBtn"
+            app:layout_constraintEnd_toEndOf="@+id/tagEditTextLayout"
+            app:layout_constraintStart_toStartOf="@+id/tagEditTextLayout"
+            app:layout_constraintTop_toBottomOf="@+id/tagEditTextLayout" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

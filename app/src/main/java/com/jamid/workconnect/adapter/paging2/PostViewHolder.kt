@@ -73,7 +73,7 @@ class PostViewHolder(
             blogImage.visibility = View.GONE
             content.text = post.content
             projectImage.visibility = View.VISIBLE
-            projectImage.setImageURI(post.thumbnail)
+            projectImage.setImageURI(post.images[0])
         } else {
             projectImage.visibility = View.GONE
             var hasImage = false

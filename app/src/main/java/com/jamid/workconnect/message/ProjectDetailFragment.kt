@@ -2,28 +2,21 @@ package com.jamid.workconnect.message
 
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.navOptions
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.appbar.AppBarLayout
-import com.google.firebase.firestore.Query
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
 import com.jamid.workconnect.*
 import com.jamid.workconnect.adapter.GenericAdapter
 import com.jamid.workconnect.adapter.paging2.MessageAdapter
-import com.jamid.workconnect.adapter.paging2.SimpleMessageAdapter
 import com.jamid.workconnect.databinding.FragmentProjectDetailBinding
 import com.jamid.workconnect.model.ChatChannel
-import com.jamid.workconnect.model.SimpleMessage
 import com.jamid.workconnect.model.User
 import kotlinx.coroutines.launch
 
-class ProjectDetailFragment : SupportFragment(R.layout.fragment_project_detail, TAG, false) {
+class ProjectDetailFragment : SupportFragment(R.layout.fragment_project_detail) {
 
     private lateinit var binding: FragmentProjectDetailBinding
 
@@ -35,18 +28,9 @@ class ProjectDetailFragment : SupportFragment(R.layout.fragment_project_detail, 
 
         binding.projectDetailFragmentToolbar.title = chatChannel.postTitle
 
-        val options = navOptions {
-            anim {
-                enter = R.anim.slide_in_right
-                exit = R.anim.slide_out_left
-                popEnter = R.anim.slide_in_left
-                popExit = R.anim.slide_out_right
-            }
-        }
-
         viewModel.getCachedPost(chatChannel.postId).observe(viewLifecycleOwner) {
             if (it != null) {
-                binding.projectDetailImg.setImageURI(it.thumbnail)
+                binding.projectDetailImg.setImageURI(it.images[0])
                 binding.projectDetailContent.pdContent.text = it.content
 
                 binding.projectDetailContent.guidelinesBtn.setOnClickListener { _ ->
@@ -54,20 +38,21 @@ class ProjectDetailFragment : SupportFragment(R.layout.fragment_project_detail, 
                         putParcelable(ProjectGuidelinesFragment.ARG_CHAT_CHANNEL, chatChannel)
                         putParcelable(ProjectGuidelinesFragment.ARG_POST, it)
                     }
-                    findNavController().navigate(R.id.projectGuidelinesFragment, bundle, options)
+                    findNavController().navigate(R.id.projectGuidelinesFragment, bundle, slideRightNavOptions())
                 }
 
                 if (it.guidelines.isNullOrBlank()) {
                     if (it.uid == viewModel.user.value?.id) {
-                        binding.projectDetailContent.guidelinesBtn.text = "Create Project Guidelines"
+                        binding.projectDetailContent.guidelinesBtn.text = getString(R.string.project_guidelines_info)
                         binding.projectDetailContent.guidelinesBtn.isEnabled = true
-                        binding.projectDetailContent.projectGuidelinesPreview.text = "Create guidelines for other contributors for the appropriate code of conduct for this purpose."
+                        binding.projectDetailContent.projectGuidelinesPreview.text = getString(R.string.project_guidelines_info_long)
                         binding.projectDetailContent.projectGuidelinesPreview.visibility = View.VISIBLE
                     } else {
                         binding.projectDetailContent.guidelinesBtn.isEnabled = false
                         binding.projectDetailContent.projectGuidelinesPreview.visibility = View.GONE
                     }
                 } else {
+                    binding.projectDetailContent.guidelinesBtn.isEnabled = true
                     binding.projectDetailContent.projectGuidelinesPreview.text = it.guidelines
                     binding.projectDetailContent.projectGuidelinesPreview.visibility = View.VISIBLE
                 }
@@ -77,18 +62,8 @@ class ProjectDetailFragment : SupportFragment(R.layout.fragment_project_detail, 
             }
         }
 
-
-        /*val contributorAdapter = UserHorizontalAdapter(activity)
-
-        binding.projectDetailContent.projectDetailContributorsList.apply {
-            adapter = contributorAdapter
-            layoutManager = LinearLayoutManager(activity, LinearLayoutManager.HORIZONTAL, false)
-        }*/
-
-//        OverScrollDecoratorHelper.setUpOverScroll(binding.projectDetailContent.projectDetailContributorsList, OverScrollDecoratorHelper.ORIENTATION_HORIZONTAL)
-
         binding.projectDetailContent.contributorsHorizontalHeader.setOnClickListener {
-            findNavController().navigate(R.id.contributorsFragment, Bundle().apply { putParcelable(ContributorsFragment.ARG_CHAT_CHANNEL, chatChannel)}, options)
+            findNavController().navigate(R.id.contributorsFragment, Bundle().apply { putParcelable(ContributorsFragment.ARG_CHAT_CHANNEL, chatChannel)}, slideRightNavOptions())
         }
 
         viewModel.channelContributorsLive(chatChannel.chatChannelId).observe(viewLifecycleOwner) {
@@ -101,57 +76,21 @@ class ProjectDetailFragment : SupportFragment(R.layout.fragment_project_detail, 
             findNavController().navigateUp()
         }
 
-
-        /*viewModel.projectContributors(chatChannel.chatChannelId).observe(viewLifecycleOwner) { contributors ->
-            if (contributors.isNotEmpty()) {
-                contributorAdapter.submitList(contributors)
-            } else {
-                *//*
-				TODO("Do something when there is no contributor, but it's not possible
-				 because the creator is also a contributor")
-				* *//*
-            }
-        }*/
-
-        /*val decorX = OverScrollDecoratorHelper.setUpOverScroll(binding.projectDetialScroller)
-
-        var prevState = IOverScrollState.STATE_IDLE
-
-        decorX.setOverScrollUpdateListener { decor, state, offset ->
-            if (state == IOverScrollState.STATE_DRAG_START_SIDE) {
-                prevState = state
-                binding.projectDetailImg.scaleX = 1 + offset/800
-                binding.projectDetailImg.scaleY = 1 + offset/800
-            }
-            if (state == IOverScrollState.STATE_BOUNCE_BACK && prevState == IOverScrollState.STATE_DRAG_START_SIDE) {
-                binding.projectDetailImg.scaleX = 1 + offset/800
-                binding.projectDetailImg.scaleY = 1 + offset/800
-            }
-            if (state == IOverScrollState.STATE_IDLE || state == IOverScrollState.STATE_DRAG_END_SIDE) {
-                prevState = state
-            }
-        }*/
-
-       /* Firebase.firestore.collection(CHAT_CHANNELS).document(chatChannel.chatChannelId)
-            .collection(MESSAGES)
-            .whereEqualTo(TYPE, IMAGE)
-            .orderBy(CREATED_AT, Query.Direction.DESCENDING)
-            .limit(6)
-            .get()
-            .addOnSuccessListener {
-                if (!it.isEmpty) {
-
-                }
-            }.addOnFailureListener {
-                Toast.makeText(activity, it.localizedMessage, Toast.LENGTH_LONG).show()
-            }*/
-
         initImageAdapter(chatChannel)
+
+        binding.projectDetailFragmentToolbar.setOnMenuItemClickListener {
+            when (it.itemId) {
+                R.id.refresh -> {
+                    viewModel.getPost(chatChannel.postId)
+                }
+            }
+            true
+        }
 
         binding.projectDetailImg.setColorFilter(ContextCompat.getColor(activity, R.color.light_black_overlay))
 
         binding.projectDetailContent.imageLinkDocBtn.setOnClickListener {
-            findNavController().navigate(R.id.mediaFragment, Bundle().apply { putParcelable(MediaFragment.ARG_CHAT_CHANNEL, chatChannel) }, options)
+            findNavController().navigate(R.id.mediaFragment, Bundle().apply { putParcelable(MediaFragment.ARG_CHAT_CHANNEL, chatChannel) }, slideRightNavOptions())
         }
 
         viewModel.windowInsets.observe(viewLifecycleOwner) { (top, bottom) ->
@@ -159,7 +98,7 @@ class ProjectDetailFragment : SupportFragment(R.layout.fragment_project_detail, 
             binding.projectDetailFragmentToolbar.updateLayout(marginTop = top)
         }
 
-        binding.projectFragmentAppBar.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { appBarLayout, verticalOffset ->
+        binding.projectFragmentAppBar.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { _, verticalOffset ->
             if (verticalOffset == 0) {
                 binding.projectDetailFragmentToolbar.setNavigationIconTint(ContextCompat.getColor(activity, R.color.white))
             } else {
@@ -203,7 +142,7 @@ class ProjectDetailFragment : SupportFragment(R.layout.fragment_project_detail, 
     companion object {
         const val TAG = "ProjectDetail"
         const val ARG_CHAT_CHANNEL = "ARG_CHAT_CHANNEL"
-        const val ARG_CONTRIBUTORS = "ARG_CONTRIBUTORS"
+        private const val ARG_CONTRIBUTORS = "ARG_CONTRIBUTORS"
 
         @JvmStatic
         fun newInstance(chatChannel: ChatChannel, contributors: ArrayList<User>) = ProjectDetailFragment().apply {

@@ -41,7 +41,7 @@ class ProjectDetailFragmentAlternate : DialogFragment() {
 
         viewModel.getCachedPost(chatChannel.postId).observe(viewLifecycleOwner) {
             if (it != null) {
-                binding.projectDetailImg.setImageURI(it.thumbnail)
+                binding.projectDetailImg.setImageURI(it.images[0])
                 binding.projectDetailContent.pdContent.text = it.content
 
                 binding.projectDetailContent.guidelinesBtn.setOnClickListener { _ ->

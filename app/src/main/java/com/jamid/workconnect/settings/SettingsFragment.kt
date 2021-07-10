@@ -2,7 +2,6 @@ package com.jamid.workconnect.settings
 
 import android.os.Bundle
 import android.view.View
-import androidx.core.view.marginTop
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.ktx.auth
@@ -12,9 +11,8 @@ import com.jamid.workconnect.SupportFragment
 import com.jamid.workconnect.convertDpToPx
 import com.jamid.workconnect.databinding.FragmentSettingsBinding
 import com.jamid.workconnect.updateLayout
-import me.everything.android.ui.overscroll.OverScrollDecoratorHelper
 
-class SettingsFragment : SupportFragment(R.layout.fragment_settings, TAG, false) {
+class SettingsFragment : SupportFragment(R.layout.fragment_settings) {
 
 	private lateinit var binding: FragmentSettingsBinding
 

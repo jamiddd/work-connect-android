@@ -66,6 +66,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="Lot of things that needs to be done"
+            android:textColor="#636363"
             app:layout_constraintBottom_toBottomOf="@+id/chatChannelImg"
             app:layout_constraintEnd_toEndOf="@+id/chatChannelName"
             app:layout_constraintStart_toStartOf="@+id/chatChannelName"

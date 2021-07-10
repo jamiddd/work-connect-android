@@ -30,7 +30,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.util.*
 
-class InterestFragment : SupportFragment(R.layout.fragment_interest, TAG, false) {
+class InterestFragment : SupportFragment(R.layout.fragment_interest) {
 
     // TODO("While selecting any interest, also increase searchRank")
 

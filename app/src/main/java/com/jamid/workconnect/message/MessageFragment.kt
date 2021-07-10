@@ -10,7 +10,7 @@ import com.jamid.workconnect.R
 import com.jamid.workconnect.SupportFragment
 import com.jamid.workconnect.databinding.FragmentMessageBinding
 
-class MessageFragment : SupportFragment(R.layout.fragment_message, TAG, true) {
+class MessageFragment : SupportFragment(R.layout.fragment_message) {
 
     private lateinit var binding: FragmentMessageBinding
 

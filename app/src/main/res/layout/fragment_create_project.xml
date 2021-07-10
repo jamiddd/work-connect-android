@@ -144,48 +144,108 @@
                 android:layout_height="match_parent"
                 android:orientation="vertical">
 
-                <LinearLayout
-                    android:id="@+id/admin_info_layout"
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
+                    android:layout_height="wrap_content">
 
                     <com.facebook.drawee.view.SimpleDraweeView
                         android:id="@+id/adminImg"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:layout_marginStart="12dp"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="8dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/adminInfo"
+                        app:layout_constraintHorizontal_bias="0.0"
+                        app:layout_constraintHorizontal_chainStyle="packed"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
                         app:placeholderImage="@drawable/ic_user"
                         app:roundAsCircle="true"
                         tools:ignore="ImageContrastCheck" />
 
                     <TextView
                         android:id="@+id/adminInfo"
-                        android:layout_width="match_parent"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:layout_marginEnd="8dp"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginEnd="16dp"
                         android:ellipsize="end"
+                        android:fontFamily="@font/roboto_medium"
                         android:maxLines="1"
-                        tools:text="Jamid Deka • 1:24 pm • Gumoria Pathar" />
+                        android:textSize="16sp"
+                        app:layout_constraintBottom_toTopOf="@+id/timeText"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.5"
+                        app:layout_constraintStart_toEndOf="@+id/adminImg"
+                        app:layout_constraintTop_toTopOf="@+id/adminImg"
+                        app:layout_constraintVertical_bias="0.0"
+                        app:layout_constraintVertical_chainStyle="packed"
+                        tools:text="Jamid Deka" />
 
-                </LinearLayout>
+                    <TextView
+                        android:id="@+id/timeText"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/sample_time_and_date_text"
+                        android:textColor="#807E7E"
+                        app:layout_constraintBottom_toBottomOf="@+id/adminImg"
+                        app:layout_constraintEnd_toEndOf="@+id/adminInfo"
+                        app:layout_constraintStart_toStartOf="@+id/adminInfo"
+                        app:layout_constraintTop_toBottomOf="@+id/adminInfo" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
-                <ImageView
-                    android:id="@+id/projectImg"
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/imagesContainer"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:adjustViewBounds="true"
-                    android:background="@color/darkestGrey"
-                    android:clickable="true"
-                    android:contentDescription="@string/add_project_image"
-                    android:focusable="true"
-                    android:longClickable="true"
-                    android:minHeight="250dp"
-                    android:visibility="gone" />
+                    android:visibility="gone">
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/projectImages"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:itemCount="1"
+                        tools:listitem="@layout/image_layout">
+
+                    </androidx.recyclerview.widget.RecyclerView>
+
+                    <com.google.android.material.tabs.TabLayout
+                        android:id="@+id/imagesTabLayout"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@color/transparent"
+                        android:visibility="gone"
+                        app:layout_constraintBottom_toBottomOf="@+id/projectImages"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="@+id/projectImages"
+                        app:layout_constraintTop_toTopOf="@+id/projectImages"
+                        app:layout_constraintVertical_bias="1.0"
+                        app:tabBackground="@drawable/image_tab_selector"
+                        app:tabGravity="center"
+                        app:tabIndicatorHeight="0dp"
+                        app:tabPaddingEnd="6dp"
+                        app:tabPaddingStart="6dp"
+                        app:tabRippleColor="@color/nearTransparent">
+
+                        <com.google.android.material.tabs.TabItem
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                        <com.google.android.material.tabs.TabItem
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                        <com.google.android.material.tabs.TabItem
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                    </com.google.android.material.tabs.TabLayout>
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <EditText
                     android:id="@+id/projectContentText"
@@ -199,10 +259,10 @@
                     android:inputType="textMultiLine|text"
                     android:minHeight="100dp"
                     android:paddingStart="12dp"
-                    android:paddingTop="8dp"
+                    android:paddingTop="16dp"
                     android:paddingEnd="12dp"
-                    android:paddingBottom="8dp"
-                    android:textColorHint="#78909C" />
+                    android:paddingBottom="16dp"
+                    android:textColorHint="#898A8A" />
 
                 <View
                     android:id="@+id/divider18"
@@ -227,7 +287,7 @@
                     android:drawablePadding="8dp"
                     android:ellipsize="end"
                     android:focusable="true"
-                    android:fontFamily="@font/roboto_medium"
+                    android:fontFamily="@font/title_semi"
                     android:gravity="center_vertical"
                     android:maxLines="1"
                     android:minHeight="48dp"
@@ -249,9 +309,10 @@
             android:id="@+id/bottomActions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
             app:cardElevation="20dp"
             app:cardMaxElevation="20dp"
-            android:layout_gravity="bottom">
+            tools:visibility="gone">
 
             <!--<com.fivehundredpx.android.blur.BlurringView
                 android:id="@+id/bottomCardBlur"

@@ -404,8 +404,9 @@ class BlogFragment : BasePostFragment(R.layout.fragment_blog, TAG, false) {
         val img = SimpleDraweeView(context)
         img.layoutParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
-            convertDpToPx(300)
+            LinearLayout.LayoutParams.WRAP_CONTENT
         )
+        img.minimumHeight = convertDpToPx(300)
         img.setBackgroundColor(ContextCompat.getColor(context, R.color.grey))
         img.isLongClickable = true
         img.isClickable = true
@@ -427,13 +428,13 @@ class BlogFragment : BasePostFragment(R.layout.fragment_blog, TAG, false) {
         return img
     }
 
-    override fun onDestroy() {
+    /*override fun onDestroy() {
         super.onDestroy()
         time = System.currentTimeMillis() - time
         if (time > IS_INTERESTED_DURATION) {
             viewModel.increaseProjectWeight(post!!)
         }
-    }
+    }*/
 
     companion object {
 

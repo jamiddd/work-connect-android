@@ -52,7 +52,7 @@ class RecentSearchViewHolder(parent: ViewGroup, @LayoutRes layout: Int): Generic
                     searchTextResult.text = post.title
                     if (post.type == PROJECT) {
                         searchImg.visibility = View.VISIBLE
-                        searchImg.setImageURI(post.thumbnail)
+                        searchImg.setImageURI(post.images[0])
                     } else {
                         searchImg.visibility = View.INVISIBLE
                     }

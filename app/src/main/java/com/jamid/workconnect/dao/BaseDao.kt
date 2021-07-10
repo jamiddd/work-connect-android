@@ -8,7 +8,7 @@ import androidx.room.Update
 @Dao
 abstract class BaseDao<T> {
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun insert(item : T)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

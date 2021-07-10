@@ -530,19 +530,35 @@ class FirebaseUtilityImpl : FirebaseUtility {
             post.chatChannelId = chatChannelRefId
             post.commentChannelId = commentChannelId
 
-            val chatChannel = ChatChannel(
-                chatChannelRefId,
-                postId,
-                post.title,
-                post.thumbnail,
-                1,
-                listOf(currentUser.id),
-                listOf(currentUser.id),
-                userDetail.registrationTokens,
-                now,
-                now,
-                null
-            )
+            val chatChannel = if (post.images.isNotEmpty()) {
+                ChatChannel(
+                    chatChannelRefId,
+                    postId,
+                    post.title,
+                    post.images[0],
+                    1,
+                    listOf(currentUser.id),
+                    listOf(currentUser.id),
+                    userDetail.registrationTokens,
+                    now,
+                    now,
+                    null
+                )
+            } else {
+                ChatChannel(
+                    chatChannelRefId,
+                    postId,
+                    post.title,
+                    "null",
+                    1,
+                    listOf(currentUser.id),
+                    listOf(currentUser.id),
+                    userDetail.registrationTokens,
+                    now,
+                    now,
+                    null
+                )
+            }
 
             val subStrings = mutableListOf<String>()
             subStrings.addAll(getAllSubStrings(post.title))
@@ -821,7 +837,11 @@ class FirebaseUtilityImpl : FirebaseUtility {
             val currentUserRef = db.collection(USERS).document(currentUser.id)
             val currentUserPrivateRef = currentUserRef.collection(PRIVATE).document(currentUser.id)
 
-            val microPost = MicroPost(post.id, post.title, post.thumbnail, post.chatChannelId)
+            val microPost = if (post.images.isNotEmpty()) {
+                MicroPost(post.id, post.title, post.images[0], post.chatChannelId)
+            } else {
+                MicroPost(post.id, post.title, "null", post.chatChannelId)
+            }
 
             val existingList = currentUser.userPrivate.requestIds.toMutableList()
             existingList.add(requestId)
@@ -889,6 +909,27 @@ class FirebaseUtilityImpl : FirebaseUtility {
             requestSent.postValue(Result.Error(e))
             null
         }
+    }
+
+    suspend fun uploadMultipleProjectImages(currentUser: User, images: List<Uri>) : List<Uri> {
+        val storageReference = storage.reference
+        val imagesLocation = mutableListOf<Uri>()
+
+        for (image in images) {
+            try {
+                val randomName = "Image_" + SimpleDateFormat("yyyyMMdd_HHmmss", Locale.UK).format(Date())
+                val imageRef = storageReference.child("${currentUser.id}/images/$PROJECT/$randomName.jpg")
+                val task = imageRef.putFile(image)
+                task.await()
+                val downloadUrlTask = imageRef.downloadUrl
+                val downloadUrl = downloadUrlTask.await()
+                imagesLocation.add(downloadUrl)
+            } catch (e: Exception) {
+                networkErrors.postValue(e)
+            }
+        }
+
+        return imagesLocation
     }
 
     override fun uploadPostImage(image: Uri, type: String) {
@@ -1572,16 +1613,13 @@ class FirebaseUtilityImpl : FirebaseUtility {
         }
     }
 
-    suspend fun getProjectContributors(post: Post): Result<QuerySnapshot> {
+    suspend fun getProjectContributors(post: Post): Result<List<User>> {
         return if (post.chatChannelId != null) {
-            try {
-                val task = db.collection(CHAT_CHANNELS).document(post.chatChannelId!!).collection(
-                    USERS
-                ).limit(10).get()
-                Result.Success(task.await())
-            } catch (e: Exception) {
-                Result.Error(e)
-            }
+            val contributorsCollectionRef = db.collection(CHAT_CHANNELS).document(post.chatChannelId!!).collection(
+                USERS
+            ).limit(10)
+
+            getObjectsSecurely(contributorsCollectionRef)
         } else {
             Result.Error(Exception("Post is not a project."))
         }

@@ -25,7 +25,7 @@ import com.jamid.workconnect.model.GenericMenuItem
 import com.jamid.workconnect.model.Result
 
 
-class EditFragment : SupportFragment(R.layout.fragment_edit, TAG, false) {
+class EditFragment : SupportFragment(R.layout.fragment_edit) {
 
     private lateinit var binding: FragmentEditBinding
     private var imageUri: String? = null

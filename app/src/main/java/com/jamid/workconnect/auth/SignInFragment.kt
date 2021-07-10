@@ -18,7 +18,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
-class SignInFragment : SupportFragment(R.layout.fragment_sign_in, TAG, false) {
+class SignInFragment : SupportFragment(R.layout.fragment_sign_in) {
 
     private lateinit var binding: FragmentSignInBinding
     private var job: Job? = null

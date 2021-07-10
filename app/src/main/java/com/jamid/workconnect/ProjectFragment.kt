@@ -143,7 +143,7 @@ class ProjectFragment : BasePostFragment(R.layout.fragment_project, TAG, false) 
             viewModel.joinProject(post)
         }
 
-        binding.projectImg.setImageURI(post.thumbnail)
+        binding.projectImg.setImageURI(post.images[0])
         binding.projectImg.setColorFilter(ContextCompat.getColor(activity, R.color.light_black_overlay))
 
         val name = post.admin.name
@@ -269,7 +269,7 @@ class ProjectFragment : BasePostFragment(R.layout.fragment_project, TAG, false) 
         viewLifecycleOwner.lifecycleScope.launchWhenCreated {
             when(val contributorsResult = viewModel.getProjectContributors(post!!)) {
                 is Result.Success -> {
-                    val contributors = viewModel.filterUsers(contributorsResult.data.toObjects(User::class.java))
+                    val contributors = viewModel.filterUsers(contributorsResult.data)
                     if (contributors.isNotEmpty()) {
                         binding.projectContent.projectContributorsHeader.visibility = View.VISIBLE
                         binding.projectContent.projectContributorsList.visibility = View.VISIBLE
@@ -309,10 +309,10 @@ class ProjectFragment : BasePostFragment(R.layout.fragment_project, TAG, false) 
 
     override fun onDestroy() {
         super.onDestroy()
-        time = System.currentTimeMillis() - time
+       /* time = System.currentTimeMillis() - time
         if (time > IS_INTERESTED_DURATION) {
             viewModel.increaseProjectWeight(post)
-        }
+        }*/
         viewModel.clearProjectFragmentResults()
     }
 

@@ -50,4 +50,6 @@
     <string name="random">Random</string>
     <string name="sent_request">Sent Request</string>
     <string name="comments">Comments</string>
+    <string name="project_guidelines_info">Create Project Guidelines</string>
+    <string name="project_guidelines_info_long">Create guidelines for other contributors for the appropriate code of conduct for this purpose.</string>
 </resources>

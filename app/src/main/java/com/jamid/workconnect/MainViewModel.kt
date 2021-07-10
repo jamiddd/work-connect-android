@@ -3,6 +3,7 @@ package com.jamid.workconnect
 import android.annotation.SuppressLint
 import android.app.Application
 import android.net.Uri
+import android.util.Log
 import android.util.Patterns
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -11,7 +12,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.*
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
@@ -50,8 +50,52 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val undoProjectResult: LiveData<Result<SimpleRequest>> = repo.undoProjectResult
     val mediaUploadResult: LiveData<Result<SimpleMessage>> = repo.mediaUploadResult
 
+    private val _projectImages = MutableLiveData<List<Uri>>().apply { value = emptyList() }
+    val projectImages: LiveData<List<Uri>> = _projectImages
+
+    private val _projectImagesToBeUploaded = MutableLiveData<List<String>>().apply { value = emptyList() }
+    val projectImagesToBeUploaded: LiveData<List<String>> = _projectImagesToBeUploaded
+
     private val _currentImageUri = MutableLiveData<Uri>()
     val currentImageUri: LiveData<Uri> = _currentImageUri
+
+    fun addProjectImages(vararg image: Uri) {
+        val previousProjectImages = projectImages.value
+        if (previousProjectImages != null) {
+
+            Log.d(TAG, image.toString())
+
+            if (previousProjectImages.isEmpty()) {
+                _projectImages.postValue(image.toList())
+            } else {
+                val newProjectImages = previousProjectImages.toMutableList()
+                newProjectImages.addAll(image)
+
+                _projectImages.postValue(newProjectImages)
+            }
+        }
+    }
+
+    fun removeProjectImage(pos: Int) {
+        val previousProjectImages = projectImages.value
+        if (!previousProjectImages.isNullOrEmpty()) {
+            val newProjectImages = previousProjectImages.toMutableList()
+            newProjectImages.removeAt(pos)
+
+            _projectImages.postValue(newProjectImages)
+        }
+    }
+
+    fun removeProjectImage(elem: Uri) {
+        val previousProjectImages = projectImages.value
+        if (!previousProjectImages.isNullOrEmpty()) {
+            val newProjectImages = previousProjectImages.toMutableList()
+            newProjectImages.remove(elem)
+
+            _projectImages.postValue(newProjectImages)
+        }
+    }
+
 
     private val _currentDocUri = MutableLiveData<Uri>()
     val currentDocUri: LiveData<Uri> = _currentDocUri
@@ -68,6 +112,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         _primaryBottomSheetState.postValue(sheetState)
     }
 
+    fun setProjectImages(images: List<Uri>) {
+        _projectImages.postValue(images)
+    }
 
     val networkErrors: LiveData<Exception> = repo.networkErrors
 
@@ -255,6 +302,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         _currentImageUri.postValue(null)
         _currentPlace.postValue(null)
         _tag.postValue(null)
+        _projectImages.postValue(emptyList())
+        _projectImagesToBeUploaded.postValue(emptyList())
     }
 
     val postPhotoUploadResult: LiveData<Result<Uri>> = repo.postPhotoUpload
@@ -441,31 +490,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun getPost(postId: String) = viewModelScope.launch(Dispatchers.IO) {
         repo.getPost(postId)
     }
-
-    /*fun initialSetupAfterAuthentication(user: User) {
-
-        // 1. get the chat channels
-        val chatChannelIds = user.chatChannels
-        for (channel in chatChannelIds) {
-            db.collection(CHAT_CHANNELS).document(channel).collection(CONTRIBUTORS)
-                .get()
-                .addOnSuccessListener {
-                    if (it != null && !it.isEmpty) {
-                        val contributors = it.toObjects(ChatChannelContributor::class.java)
-                        for (contributor in contributors) {
-                            val channelIdObject = ChannelIds(chatChannelId = channel, userId = contributor.id)
-                            val existingList = contributor.channelIds.toMutableList()
-                            existingList.add(channelIdObject)
-                            contributor.channelIds = existingList
-                        }
-                        insertContributors(contributors)
-                    }
-                }
-        }
-
-
-        // 2. get the contributors for each chat channel
-    }*/
 
     fun chatChannelMessages(
         chatChannel: ChatChannel,
@@ -676,11 +700,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         repo.getNotifications()
     }
 
-    fun increaseProjectWeight(cachedPost: Post?) = viewModelScope.launch(Dispatchers.Default) {
+    /*fun increaseProjectWeight(cachedPost: Post?) = viewModelScope.launch(Dispatchers.Default) {
         if (cachedPost != null && Firebase.auth.currentUser != null) {
             repo.increaseProjectWeightage(cachedPost)
         }
-    }
+    }*/
 
     suspend fun getTags(user: User?) = repo.getTagsFromFirebase(user)
 
@@ -760,7 +784,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }.flow
     }
 
-    suspend fun getProjectContributors(post: Post): Result<QuerySnapshot> {
+    suspend fun getProjectContributors(post: Post): Result<List<User>> {
         return repo.getProjectContributors(post)
     }
 
@@ -925,10 +949,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         repo.insertMessages(externalImagesDir, externalDocumentsDir, messages, chatChannel)
     }
 
-    fun insertChannelContributors(chatChannel: ChatChannel, contributors: List<User>) = viewModelScope.launch(Dispatchers.IO) {
-        repo.insertChannelContributors(chatChannel, contributors)
-    }
-
     fun setChannelContributorsListener(chatChannel: ChatChannel) = viewModelScope.launch(Dispatchers.IO) {
         repo.setChannelContributorsListener(chatChannel)
     }
@@ -941,8 +961,43 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         repo.clearMediaUploadResult()
     }
 
+    suspend fun uploadProjectImages(imageUris: List<Uri>) : List<Uri> {
+        return repo.uploadMultipleImages(imageUris)
+    }
+
     companion object {
         const val TAG = "MainViewModel"
     }
 
 }
+
+/*fun initialSetupAfterAuthentication(user: User) {
+
+       // 1. get the chat channels
+       val chatChannelIds = user.chatChannels
+       for (channel in chatChannelIds) {
+           db.collection(CHAT_CHANNELS).document(channel).collection(CONTRIBUTORS)
+               .get()
+               .addOnSuccessListener {
+                   if (it != null && !it.isEmpty) {
+                       val contributors = it.toObjects(ChatChannelContributor::class.java)
+                       for (contributor in contributors) {
+                           val channelIdObject = ChannelIds(chatChannelId = channel, userId = contributor.id)
+                           val existingList = contributor.channelIds.toMutableList()
+                           existingList.add(channelIdObject)
+                           contributor.channelIds = existingList
+                       }
+                       insertContributors(contributors)
+                   }
+               }
+       }
+
+
+       // 2. get the contributors for each chat channel
+   }
+
+  fun insertChannelContributors(chatChannel: ChatChannel, contributors: List<User>) = viewModelScope.launch(Dispatchers.IO) {
+        repo.insertChannelContributors(chatChannel, contributors)
+    }
+
+   */

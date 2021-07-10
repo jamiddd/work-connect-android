@@ -14,10 +14,9 @@ import com.jamid.workconnect.DOCUMENT
 import com.jamid.workconnect.IMAGE
 import com.jamid.workconnect.R
 import com.jamid.workconnect.adapter.GenericViewHolder
+import com.jamid.workconnect.getTextForTime
 import com.jamid.workconnect.interfaces.ChatChannelClickListener
 import com.jamid.workconnect.model.ChatChannel
-import java.text.SimpleDateFormat
-import java.util.*
 
 class ChatChannelViewHolder(parent: ViewGroup, @LayoutRes layout: Int): GenericViewHolder<ChatChannel>(parent, layout) {
 
@@ -42,7 +41,7 @@ class ChatChannelViewHolder(parent: ViewGroup, @LayoutRes layout: Int): GenericV
 
         name.text = item.postTitle
         lastUpdated.text =
-            SimpleDateFormat("hh:mm a", Locale.UK).format(item.updatedAt)
+            getTextForTime(item.updatedAt)
 
         itemView.setOnClickListener {
             chatChannelClickListener.onChatChannelClick(item)

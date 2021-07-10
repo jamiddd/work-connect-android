@@ -45,7 +45,7 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
-class EditorFragment : SupportFragment(R.layout.fragment_editor, TAG, false) {
+class EditorFragment : SupportFragment(R.layout.fragment_editor) {
 
     private var currentImagePosition = 0
     private lateinit var binding: FragmentEditorBinding
@@ -412,7 +412,7 @@ class EditorFragment : SupportFragment(R.layout.fragment_editor, TAG, false) {
     }
 
     private fun openImageSelectMenu() {
-        val tag = SELECT_IMAGE_MENU_POST
+        val tag = SELECT_IMAGE_MENU_BLOG
         val item1 = GenericMenuItem(
             tag,
             "Select from gallery",

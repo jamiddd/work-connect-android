@@ -12,6 +12,7 @@ import android.graphics.Color
 import android.location.Geocoder
 import android.location.Location
 import android.location.LocationManager
+import android.net.Uri
 import android.os.*
 import android.util.Log
 import android.view.*
@@ -669,10 +670,30 @@ class MainActivity : AppCompatActivity(),
 
     private val selectImageLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         if (it.resultCode == Activity.RESULT_OK) {
-            val image = it.data?.data
-            viewModel.setCurrentImage(image)
-            val fragment = ImageCropFragment.newInstance(currentCropConfig)
-            showBottomSheet(fragment, ImageCropFragment.TAG)
+
+            val clipData = it.data?.clipData
+
+            if (clipData != null) {
+                val count = clipData.itemCount
+
+                val images = mutableListOf<Uri>()
+
+                for (i in 0 until count) {
+                    val uri = clipData.getItemAt(i)?.uri
+                    uri?.let { image ->
+                        images.add(image)
+                    }
+                }
+
+                viewModel.setProjectImages(images)
+
+            } else {
+                val image = it.data?.data
+                viewModel.setCurrentImage(image)
+                val fragment = ImageCropFragment.newInstance(currentCropConfig)
+                showBottomSheet(fragment, ImageCropFragment.TAG)
+            }
+
             currentCropConfig = null
         }
     }
@@ -689,6 +710,16 @@ class MainActivity : AppCompatActivity(),
 
         val intent = Intent().apply {
             type = "image/*"
+            action = Intent.ACTION_GET_CONTENT
+        }
+        selectImageLauncher.launch(intent)
+    }
+
+    private fun selectMultipleImages(extras: Bundle?) {
+        currentCropConfig = extras
+        val intent = Intent().apply {
+            type = "image/*"
+            putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
             action = Intent.ACTION_GET_CONTENT
         }
         selectImageLauncher.launch(intent)
@@ -1536,7 +1567,7 @@ class MainActivity : AppCompatActivity(),
                     }
                 }
             }
-            SELECT_IMAGE_MENU_USER, SELECT_IMAGE_MENU_POST -> {
+            SELECT_IMAGE_MENU_USER, SELECT_IMAGE_MENU_BLOG -> {
                 when (item.id) {
                     0 -> {
                         selectImage(bundle)
@@ -1546,6 +1577,19 @@ class MainActivity : AppCompatActivity(),
                     }
                     2 -> {
                         viewModel.setCurrentCroppedImageUri(null)
+                    }
+                }
+            }
+            SELECT_IMAGE_MENU_PROJECT -> {
+                when (item.id) {
+                    0 -> {
+                        selectMultipleImages(bundle)
+                    }
+                    1 -> {
+                        Toast.makeText(this, "Not implemented yet.", Toast.LENGTH_SHORT).show()
+                    }
+                    2 -> {
+                        viewModel.setProjectImages(emptyList())
                     }
                 }
             }

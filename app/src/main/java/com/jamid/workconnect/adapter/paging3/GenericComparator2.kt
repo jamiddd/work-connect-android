@@ -1,5 +1,6 @@
 package com.jamid.workconnect.adapter.paging3
 
+import android.net.Uri
 import androidx.recyclerview.widget.DiffUtil
 import com.jamid.workconnect.model.*
 
@@ -36,6 +37,11 @@ class GenericComparator2<T: Any>(private val clazz: Class<T>): DiffUtil.ItemCall
 
 				return oldChannel.chatChannelId == newChatChannel.chatChannelId
 			}
+			Uri::class.java -> {
+				val oldUri = oldItem as Uri
+				val newUri = newItem as Uri
+				return oldUri == newUri
+			}
 			else -> true
 		}
 	}
@@ -71,6 +77,11 @@ class GenericComparator2<T: Any>(private val clazz: Class<T>): DiffUtil.ItemCall
 				val newChatChannel = newItem as ChatChannel
 
 				return oldChannel == newChatChannel
+			}
+			Uri::class.java -> {
+				val oldUri = oldItem as Uri
+				val newUri = newItem as Uri
+				return oldUri == newUri
 			}
 			else -> true
 		}

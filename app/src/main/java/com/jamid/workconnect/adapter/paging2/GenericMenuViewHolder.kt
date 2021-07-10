@@ -31,7 +31,7 @@ class GenericMenuViewHolder(parent: ViewGroup, @LayoutRes layout: Int, private v
 
         textView.setOnClickListener {
             when (item.menuTag) {
-                SELECT_IMAGE_MENU_USER, SELECT_IMAGE_MENU_POST -> {
+                SELECT_IMAGE_MENU_USER, SELECT_IMAGE_MENU_BLOG -> {
                     if (baseItem != null) {
                         Log.d(TAG, "Base item is not null")
                         if (baseItem is CropImageOptions) {

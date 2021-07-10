@@ -17,14 +17,13 @@ import com.google.firebase.ktx.Firebase
 import com.jamid.workconnect.IS_MINIMIZED
 import com.jamid.workconnect.R
 import com.jamid.workconnect.convertDpToPx
+import com.jamid.workconnect.getTextForTime
 import com.jamid.workconnect.interfaces.CommentClickListener
 import com.jamid.workconnect.model.Post
 import com.jamid.workconnect.model.SimpleComment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.*
 
 class CommentViewHolder(private val parent: ViewGroup, layout: Int, val post: Post? = null, private val isMinimized: Boolean = true): GenericViewHolder<SimpleComment>(parent, layout){
 
@@ -85,7 +84,7 @@ class CommentViewHolder(private val parent: ViewGroup, layout: Int, val post: Po
             params.setMargins(0, 0, convertDpToPx(8, itemView.context), convertDpToPx(8, itemView.context))
             comment.layoutParams = params
         } else {
-            val metaText = SimpleDateFormat("hh:mm a", Locale.UK).format(item.postedAt) + " • ${item.likes} Likes • ${item.repliesCount} Replies"
+            val metaText = getTextForTime(item.postedAt) + " • ${item.likes} Likes • ${item.repliesCount} Replies"
             time.text = metaText
             time.visibility = View.VISIBLE
             likeBtn.visibility = View.VISIBLE

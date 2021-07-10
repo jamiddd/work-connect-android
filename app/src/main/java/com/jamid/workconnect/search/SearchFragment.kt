@@ -11,7 +11,7 @@ import com.google.android.material.tabs.TabLayoutMediator
 import com.jamid.workconnect.*
 import com.jamid.workconnect.databinding.FragmentSearchBinding
 
-class SearchFragment : SupportFragment(R.layout.fragment_search, TAG, false) {
+class SearchFragment : SupportFragment(R.layout.fragment_search) {
 
     private lateinit var binding: FragmentSearchBinding
 

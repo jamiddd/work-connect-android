@@ -7,6 +7,7 @@ import android.content.res.Resources
 import android.graphics.Typeface
 import android.os.Build
 import android.text.Spannable
+import android.text.format.DateUtils
 import android.text.style.CharacterStyle
 import android.text.style.StrikethroughSpan
 import android.text.style.StyleSpan
@@ -24,6 +25,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.NavOptions
 import androidx.navigation.navOptions
 import com.google.android.material.appbar.AppBarLayout
+import java.util.*
 
 const val START_TO_START = ""
 const val START_TO_END = ""
@@ -37,6 +39,10 @@ const val BOTTOM_TO_TOP = ""
 fun getWindowHeight() = Resources.getSystem().displayMetrics.heightPixels
 
 fun getWindowWidth() = Resources.getSystem().displayMetrics.widthPixels
+
+fun getTextForTime(time: Long): String {
+    return DateUtils.getRelativeTimeSpanString(time, Calendar.getInstance().timeInMillis, DateUtils.MINUTE_IN_MILLIS).toString()
+}
 
 fun Activity.getFullScreenHeight(): Int {
     return if (Build.VERSION.SDK_INT > 29) {

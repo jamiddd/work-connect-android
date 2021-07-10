@@ -20,7 +20,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-abstract class BasePostFragment(@LayoutRes layout: Int, tag: String, isPrimaryFragment: Boolean): SupportFragment(layout, tag, isPrimaryFragment) {
+abstract class BasePostFragment(@LayoutRes layout: Int, tag: String, isPrimaryFragment: Boolean): SupportFragment(
+    layout
+) {
 
     val auth = Firebase.auth
 

@@ -13,16 +13,16 @@
         <ImageView
             android:id="@+id/image"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="300dp"
             android:adjustViewBounds="true"
-            android:background="@color/darkestGrey"
+            android:background="@color/grey"
             android:clickable="true"
             android:contentDescription="@string/image_layout_image"
             android:focusable="true"
             android:longClickable="true"
+            android:scaleType="centerCrop"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHeight_min="230dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -57,6 +57,37 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/fullscreenBtn"
+            style="@style/Theme.Button.IconOnly"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:icon="@drawable/ic_round_fullscreen_24"
+            app:iconTint="@color/white"
+            app:layout_constraintBottom_toBottomOf="@+id/image"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="@+id/image"
+            app:layout_constraintTop_toTopOf="@+id/image"
+            app:layout_constraintVertical_bias="1.0"
+            tools:ignore="SpeakableTextPresentCheck"
+            tools:visibility="visible" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/cropButton"
+            style="@style/Theme.Button.IconOnly"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:icon="@drawable/ic_round_crop_24"
+            app:iconTint="@color/white"
+            app:layout_constraintBottom_toBottomOf="@+id/fullscreenBtn"
+            app:layout_constraintEnd_toStartOf="@+id/fullscreenBtn"
+            app:layout_constraintTop_toTopOf="@+id/fullscreenBtn"
+            tools:ignore="SpeakableTextPresentCheck"
+            tools:visibility="visible" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

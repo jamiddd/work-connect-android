@@ -7,7 +7,7 @@ import com.jamid.workconnect.SupportFragment
 import com.jamid.workconnect.databinding.PostFragTestBinding
 import com.jamid.workconnect.model.Post
 
-class PostFragmentTest: SupportFragment(R.layout.post_frag_test, TITLE, false){
+class PostFragmentTest: SupportFragment(R.layout.post_frag_test){
 
 	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 		super.onViewCreated(view, savedInstanceState)

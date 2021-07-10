@@ -58,7 +58,7 @@ class SearchItemViewHolder(val view: View, val context: Context): RecyclerView.V
 						searchTextResult.text = post.title
 						if (post.type == PROJECT) {
 							searchImg.visibility = View.VISIBLE
-							searchImg.setImageURI(post.thumbnail)
+							searchImg.setImageURI(post.images[0])
 						} else {
 							searchImg.visibility = View.INVISIBLE
 						}
@@ -94,7 +94,7 @@ class SearchItemViewHolder(val view: View, val context: Context): RecyclerView.V
 								searchTextResult.text = post.title
 								if (post.type == PROJECT) {
 									searchImg.visibility = View.VISIBLE
-									searchImg.setImageURI(post.thumbnail)
+									searchImg.setImageURI(post.images[0])
 								} else {
 									searchImg.visibility = View.INVISIBLE
 								}

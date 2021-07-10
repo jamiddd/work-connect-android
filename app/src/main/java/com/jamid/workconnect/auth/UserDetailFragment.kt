@@ -6,7 +6,6 @@ import android.view.View
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.widget.doAfterTextChanged
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -14,10 +13,8 @@ import com.jamid.workconnect.*
 import com.jamid.workconnect.databinding.FragmentUserDetailBinding
 import com.jamid.workconnect.model.GenericMenuItem
 import com.jamid.workconnect.model.Result
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
-class UserDetailFragment : SupportFragment(R.layout.fragment_user_detail, TAG, false) {
+class UserDetailFragment : SupportFragment(R.layout.fragment_user_detail) {
 
     private lateinit var binding: FragmentUserDetailBinding
     private var imageUrl: Uri? = null

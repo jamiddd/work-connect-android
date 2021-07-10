@@ -19,7 +19,7 @@ import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
-class TagPostsFragment : SupportFragment(R.layout.fragment_tag_posts, TAG, false) {
+class TagPostsFragment : SupportFragment(R.layout.fragment_tag_posts) {
 
     private lateinit var binding: FragmentTagPostsBinding
     private lateinit var postAdapter: PostAdapter

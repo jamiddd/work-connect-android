@@ -10,7 +10,7 @@ import com.jamid.workconnect.R
 import com.jamid.workconnect.SupportFragment
 import com.jamid.workconnect.databinding.FragmentExploreBinding
 
-class ExploreFragment : SupportFragment(R.layout.fragment_explore, TAG, true) {
+class ExploreFragment : SupportFragment(R.layout.fragment_explore) {
 
     private lateinit var binding: FragmentExploreBinding
 

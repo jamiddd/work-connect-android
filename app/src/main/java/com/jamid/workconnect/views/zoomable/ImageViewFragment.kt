@@ -24,7 +24,7 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
-class ImageViewFragment : SupportFragment(R.layout.fragment_image_view, TAG, false), OnScaleListener {
+class ImageViewFragment : SupportFragment(R.layout.fragment_image_view), OnScaleListener {
 
     private lateinit var binding: FragmentImageViewBinding
     private var mImageView: ZoomableDraweeView? = null
@@ -81,7 +81,7 @@ class ImageViewFragment : SupportFragment(R.layout.fragment_image_view, TAG, fal
             setIsLongpressEnabled(false)
             setTapListener(TapListener(mImageView!!))
 
-            val imageRequest = if (message != null) {
+            val imageRequest = if (message != null && message!!.isNotEmpty()) {
                 val senderText = "Sent by " + message!!.sender.name
                 binding.sentByText.text = senderText
 
@@ -102,7 +102,7 @@ class ImageViewFragment : SupportFragment(R.layout.fragment_image_view, TAG, fal
                     }
                 }
 
-                val timeText =SimpleDateFormat("hh:mm a E, dd MMM", Locale.US).format(message!!.createdAt) + " • " + sizeText
+                val timeText = SimpleDateFormat("hh:mm a E, dd MMM", Locale.US).format(message!!.createdAt) + " • " + sizeText
                 binding.timeAndSizeText.text = timeText
 
                 binding.imageViewFragmentToolbar.title = message!!.sender.name
@@ -131,7 +131,7 @@ class ImageViewFragment : SupportFragment(R.layout.fragment_image_view, TAG, fal
         binding.fullscreenImage.setScaleListener(this)
 
         binding.fullscreenImage.setOnClickListener {
-            if (message != null) {
+            if (message != null && message!!.isNotEmpty()) {
                 if (binding.imageDetailBottom.translationY == 0f) {
                     hideTopAndBottomActions(binding.imageViewFragmentAppBar, binding.imageDetailBottom)
                 } else {

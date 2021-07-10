@@ -28,4 +28,9 @@ data class SimpleMessage(
     var isDownloaded: Boolean = false
 ): Parcelable {
     constructor(): this("", "", "", "", "")
+
+    fun isEmpty() = messageId.isBlank() || messageId.isEmpty()
+
+    fun isNotEmpty() = messageId.isNotEmpty() || messageId.isNotBlank()
+
 }

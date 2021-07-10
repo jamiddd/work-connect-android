@@ -15,7 +15,7 @@ import com.jamid.workconnect.databinding.FragmentMediaBinding
 import com.jamid.workconnect.model.ChatChannel
 import com.jamid.workconnect.updateLayout
 
-class MediaFragment : SupportFragment(R.layout.fragment_media, TAG, false) {
+class MediaFragment : SupportFragment(R.layout.fragment_media) {
 
     private lateinit var binding: FragmentMediaBinding
 

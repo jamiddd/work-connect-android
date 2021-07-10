@@ -40,6 +40,7 @@
                 app:contentScrim="@color/white"
                 app:expandedTitleTextAppearance="@style/WhiteToolbarText"
                 app:layout_scrollFlags="scroll|exitUntilCollapsed|snap|snapMargins"
+                app:collapsedTitleGravity="center"
                 app:titleEnabled="true">
 
                 <com.facebook.drawee.view.SimpleDraweeView
@@ -53,8 +54,8 @@
                     android:id="@+id/projectDetailFragmentToolbar"
                     android:layout_width="match_parent"
                     android:layout_height="?actionBarSize"
-                    app:contentInsetStartWithNavigation="0dp"
                     app:layout_collapseMode="pin"
+                    app:menu="@menu/project_detail_menu"
                     app:navigationIcon="@drawable/ic_round_arrow_back_24"
                     app:navigationIconTint="@color/white"
                     app:subtitleTextColor="@color/white"

@@ -13,17 +13,14 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.core.view.setPadding
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.jamid.workconnect.*
 import com.jamid.workconnect.databinding.FragmentProjectGuidelinesBinding
 import com.jamid.workconnect.model.ChatChannel
 import com.jamid.workconnect.model.Post
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
-class ProjectGuidelinesFragment : SupportFragment(R.layout.fragment_project_guidelines, TAG, false) {
+class ProjectGuidelinesFragment : SupportFragment(R.layout.fragment_project_guidelines) {
 
     private lateinit var binding: FragmentProjectGuidelinesBinding
     private var positionFromBottom = 0

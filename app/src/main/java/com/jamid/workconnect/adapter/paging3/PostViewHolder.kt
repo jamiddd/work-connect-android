@@ -14,10 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.facebook.drawee.view.SimpleDraweeView
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
-import com.jamid.workconnect.IMAGE
-import com.jamid.workconnect.POST
-import com.jamid.workconnect.PROJECT
-import com.jamid.workconnect.R
+import com.jamid.workconnect.*
 import com.jamid.workconnect.adapter.GenericAdapter
 import com.jamid.workconnect.adapter.GenericViewHolder
 import com.jamid.workconnect.interfaces.PostItemClickListener
@@ -25,8 +22,6 @@ import com.jamid.workconnect.model.BlogItemConverter
 import com.jamid.workconnect.model.Post
 import com.jamid.workconnect.model.SimpleComment
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.*
 
 class PostViewHolder(
 	val parent: ViewGroup,
@@ -64,12 +59,12 @@ class PostViewHolder(
 		userName.text = post.admin.name
 		userImage.setImageURI(post.admin.photo)
 
-		val time = SimpleDateFormat("hh:mm a, dd MMM", Locale.UK).format(post.updatedAt)
+//		val time = SimpleDateFormat("hh:mm a, dd MMM", Locale.UK).format(post.updatedAt)
 
 		val metaText = if (post.location?.place == null) {
-			time
+			getTextForTime(post.updatedAt)
 		} else {
-			"$time • ${post.location!!.place}"
+			"${getTextForTime(post.updatedAt)} • ${post.location!!.place}"
 		}
 
 		dateLocationText.text = metaText
@@ -81,7 +76,7 @@ class PostViewHolder(
 			blogImage.visibility = View.GONE
 			content.text = post.content
 			projectImage.visibility = View.VISIBLE
-			projectImage.setImageURI(post.thumbnail)
+			projectImage.setImageURI(post.images[0])
 		} else {
 			projectImage.visibility = View.GONE
 			var hasImage = false

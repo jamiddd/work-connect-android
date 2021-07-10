@@ -54,14 +54,13 @@
             style="@style/ChatBalloonLeftTail"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:rotation="-14"
             app:layout_constraintBottom_toBottomOf="@+id/tailAnchor"
             app:layout_constraintEnd_toEndOf="@+id/tailAnchor"
-            app:layout_constraintHorizontal_bias="0.70"
+            app:layout_constraintHorizontal_bias="0.91"
             app:layout_constraintStart_toStartOf="@+id/tailAnchor"
             app:layout_constraintTop_toTopOf="@+id/otherUserMessage"
             app:layout_constraintVertical_bias="1.0"
-            app:srcCompat="@drawable/ic_chat_tail" />
+            app:srcCompat="@drawable/ic_updated_tail" />
 
         <TextView
             android:id="@+id/otherUserMessage"
